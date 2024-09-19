@@ -1,6 +1,18 @@
 {
   "dependencies": {
-    "electron": "^32.1.1",
     "sqlite3": "^5.1.7"
-  }
+  },
+  "name": "hostelmanager",
+  "version": "1.0.0",
+  "description": "Real time monitoring companion to simplify the work of a hostel custodian",
+  "main": "main.js",
+  "devDependencies": {
+    "electron": "^32.1.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "author": "Edgar Isingoma",
+  "license": "MIT"
 }
