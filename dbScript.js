@@ -33,7 +33,9 @@ let db = new sqlite3.Database('./hostelMgr.db', (err) => {
       levelNumber INTEGER NOT NULL,
       semCostSingle INTEGER,
       monthlyCostSingle INTEGER,
+      recessCostSingle INTEGER,
       semCostDouble INTEGER,
+      recessCostDouble INTEGER,
       monthlyCostDouble INTEGER,
       roomName TEXT NOT NULL,
       deleted BOOLEAN NOT NULL DEFAULT 0,
@@ -46,7 +48,7 @@ let db = new sqlite3.Database('./hostelMgr.db', (err) => {
       roomId INTEGER NOT NULL,
       demandNoticeDate TEXT,
       leaseType TEXT NOT NULL CHECK(leaseType IN ('single', 'double')),
-      periodType TEXT NOT NULL CHECK(periodType IN ('semester', 'monthly')),
+      periodType TEXT NOT NULL CHECK(periodType IN ('semester', 'monthly', 'recess')),
       startingDate TEXT NOT NULL, -- Use TEXT to store dates in SQLite
       numOfPeriods INTEGER NOT NULL DEFAULT 1,
       FOREIGN KEY (tenantId) REFERENCES Tenant(tenantId),
@@ -111,13 +113,15 @@ function createAccount(username, password, role) {
 }
 
 function createRoom(room) {
-  const query = `INSERT INTO Room (levelNumber, semCostSingle, monthlyCostSingle, semCostDouble, monthlyCostDouble, roomName, maxUsers) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+  const query = `INSERT INTO Room (levelNumber, semCostSingle, monthlyCostSingle, recessCostSingle, semCostDouble, monthlyCostDouble, recessCostDouble, roomName, maxUsers) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
   const params = [
     room.levelNumber,
     room.semCostSingle,
     room.monthlyCostSingle,
+    room.recessCostSingle,
     room.semCostDouble,
     room.monthlyCostDouble,
+    room.recessCostDouble,
     room.roomName,
     room.maxUsers
   ];
@@ -323,8 +327,10 @@ function getCurrentTenantsByLevel(levelNumber) {
                    (l.periodType = 'monthly' AND DATE(l.startingDate, '+' || l.numOfPeriods || ' months') >= ?)
                    OR
                    (l.periodType = 'semester' AND DATE(l.startingDate, '+' || (l.numOfPeriods * 18) || ' weeks') >= ?)
+                   OR
+                   (l.periodType = 'recess' AND DATE(L.startingDate, '+' || (l.numOfPeriods * 9) || ' weeks') >= ?)
                  )`;
-  return executeSelect(query, [levelNumber, currentDate, currentDate]);
+  return executeSelect(query, [levelNumber, currentDate, currentDate, currentDate]);
 }
 
 function getCurrentTenantsByRoom(roomId) {
@@ -335,8 +341,10 @@ function getCurrentTenantsByRoom(roomId) {
                    (l.periodType = 'monthly' AND DATE(l.startingDate, '+' || l.numOfPeriods || ' months') >= ?)
                    OR
                    (l.periodType = 'semester' AND DATE(l.startingDate, '+' || (l.numOfPeriods * 18) || ' weeks') >= ?)
+                   OR
+                   (l.periodType = 'recess' AND DATE(L.startingDate, '+' || (l.numOfPeriods * 9) || ' weeks') >= ?)
                  )`;
-  return executeSelect(query, [roomId, currentDate, currentDate]);
+  return executeSelect(query, [roomId, currentDate, currentDate, currentDate]);
 }
 
 function getPreviousTenantsByRoom(roomId) {
@@ -347,8 +355,10 @@ function getPreviousTenantsByRoom(roomId) {
                    (l.periodType = 'monthly' AND DATE(l.startingDate, '+' || l.numOfPeriods || ' months') < ?)
                    OR
                    (l.periodType = 'semester' AND DATE(l.startingDate, '+' || (l.numOfPeriods * 18) || ' weeks') < ?)
+                   OR
+                   (l.periodType = 'recess' AND DATE(L.startingDate, '+' || (l.numOfPeriods * 9) || ' weeks') < ?)
                  )`;
-  return executeSelect(query, [roomId, currentDate, currentDate]);
+  return executeSelect(query, [roomId, currentDate, currentDate, currentDate]);
 }
 
 function getAllTenants() {
@@ -364,8 +374,10 @@ function getAllCurrentTenants() {
                    (l.periodType = 'monthly' AND DATE(l.startingDate, '+' || l.numOfPeriods || ' months') >= ?)
                    OR
                    (l.periodType = 'semester' AND DATE(l.startingDate, '+' || (l.numOfPeriods * 18) || ' weeks') >= ?)
+                   OR
+                   (l.periodType = 'recess' AND DATE(L.startingDate, '+' || (l.numOfPeriods * 9) || ' weeks') >= ?)
                  )`;
-  return executeSelect(query, [currentDate, currentDate]);
+  return executeSelect(query, [currentDate, currentDate, currentDate]);
 }
 
 function getAllPreviousTenants() {
@@ -376,8 +388,10 @@ function getAllPreviousTenants() {
                    (l.periodType = 'monthly' AND DATE(l.startingDate, '+' || l.numOfPeriods || ' months') < ?)
                    OR
                    (l.periodType = 'semester' AND DATE(l.startingDate, '+' || (l.numOfPeriods * 18) || ' weeks') < ?)
+                    OR
+                   (l.periodType = 'recess' AND DATE(L.startingDate, '+' || (l.numOfPeriods * 9) || ' weeks') < ?)
                  )`;
-  return executeSelect(query, [currentDate, currentDate]);
+  return executeSelect(query, [currentDate, currentDate, currentDate]);
 }
 
 function getTenantCurrentLease(tenantId) {
@@ -386,8 +400,10 @@ function getTenantCurrentLease(tenantId) {
                    (l.periodType = 'monthly' AND DATE(l.startingDate, '+' || l.numOfPeriods || ' months') >= ?)
                    OR
                    (l.periodType = 'semester' AND DATE(l.startingDate, '+' || (l.numOfPeriods * 18) || ' weeks') >= ?)
+                   OR
+                   (l.periodType = 'recess' AND DATE(L.startingDate, '+' || (l.numOfPeriods * 9) || ' weeks') >= ?)
                  ) LIMIT 1`;
-  return executeSelect(query, [tenantId, currentDate, currentDate]);
+  return executeSelect(query, [tenantId, currentDate, currentDate, currentDate]);
 }
 
 function getTenantAllLeases(tenantId) {
@@ -410,6 +426,11 @@ function getTransactionById(transactionId) {
   return executeSelect(query, [transactionId]);
 }
 
+function getTransactionsByLease(leaseId) {
+  const query = `SELECT * FROM Transaction WHERE leaseId = ? AND deleted = 0`;
+  return executeSelect(query, [transactionId]);
+}
+
 function getAccountById(accountId) {
   const query = `SELECT * FROM Account WHERE accountId = ? AND deleted = 0`;
   return executeSelect(query, [accountId]);
@@ -425,340 +446,136 @@ function getLeaseById(leaseId) {
   return executeSelect(query, [leaseId]);
 }
 
-
-function changeTenantsRoomdef(tenantId, newRoomId) {
-  //if attached leaseid has 1 as value of numofperiods, just update that lease
-  //or, reduce that numofperiods by 1 and create a new lease with the newroomid, and check if the transactions belonging to the old lease sum up to a value greater than the appropriate room fee multiplied by the numofperiods value. if so, then get the amount by which it is being exceeded and compare it with the most recent transaction for that lease. If it is greater than the most recent transaction amount, change the leaseId field of that transaction amount to the new leaseId and then lessen the excess money by the amount of the changed transaction and compare again as before. iteratively. if it is less than the next most recent transaction amount but is not zero, create a new transaction record of that amount and allocate it to the new leaseid and date being the same as that of the "next most recent transaction" and then reduce the amount in the "next most recent transaction" by that of the newly created transaction record.
+function getLeasesByTenant(tenantId) {
+  const query = `SELECT * FROM Lease WHERE tenantId = ? AND deleted = 0`;
+  return executeSelect(query, [leaseId]);
 }
 
-async function changeTenantsRoom(tenantId, newRoomId) {
-
-  const lease = await getTenantCurrentLease(tenantId);
-  
-  if (lease.length) {
-    const leaseId = lease.leaseId;
-    const numOfPeriods = lease.numOfPeriods;
-    const roomId = lease.roomId;
-
-    const oldRoom = await getRoomById(roomId);
-    if (!oldRoom.length) {
-      throw new Error('Old room not found');
-    }
-    let feeField = ''
-    if (lease.periodType == 'monthly') {
-      feeField += 'monthly'
-    } else {
-      feeField += 'sem'
-    }
-    if (lease.leaseType == 'single') {
-      feeField += 'CostSingle'
-    } else {
-      feeField += 'CostDouble'
-    }
-
-    const oldRoomFee = oldRoom[feeField]
-
-    const transactions = await getTenantAllLeases(tenantId);
-    const totalTransactionAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
-
-    if (numOfPeriods === 1) {
-      // Update the lease with new room ID if numOfPeriods is 1
-      const updateQuery = `UPDATE Lease SET roomId = ? WHERE leaseId = ?`;
-      await executeQuery(updateQuery, [newRoomId, leaseId]);
-    } else {
-      // Decrease numOfPeriods by 1 and create a new lease
-      const updatedNumOfPeriods = numOfPeriods - 1;
-      const newLeaseId = await createLease({numOfPeriods: updatedNumOfPeriods}, newRoomId, tenantId);
-
-      // Handle excess transaction amounts
-      let excessAmount = totalTransactionAmount - (oldRoomFee * updatedNumOfPeriods);
-      let mostRecentTransaction = await getMostRecentTransaction(leaseId);
-
-      while (excessAmount > 0 && mostRecentTransaction.msg === 'success') {
-        const recentTransactionAmount = mostRecentTransaction.data.amount;
-
-        if (excessAmount > recentTransactionAmount) {
-          // Move the recent transaction to the new lease
-          const updateTransactionQuery = `UPDATE Transaction SET leaseId = ? WHERE transactionId = ?`;
-          await executeQuery(updateTransactionQuery, [newLeaseId, mostRecentTransaction.data.transactionId]);
-          excessAmount -= recentTransactionAmount;
-        } else {
-          // Create a new transaction for the excess amount
-          const newTransactionQuery = `INSERT INTO Transaction (leaseId, amount, date) VALUES (?, ?, ?)`;
-          await executeQuery(newTransactionQuery, [newLeaseId, excessAmount, mostRecentTransaction.data.date]);
-          const updateRecentTransactionQuery = `UPDATE Transaction SET amount = ? WHERE transactionId = ?`;
-          await executeQuery(updateRecentTransactionQuery, [recentTransactionAmount - excessAmount, mostRecentTransaction.data.transactionId]);
-          excessAmount = 0; // Exit the loop
-        }
-
-        // Get the next most recent transaction if there are still excess amounts
-        mostRecentTransaction = await getMostRecentTransaction(leaseId);
-      }
-    }
-
-    return { status: 'success' };
+function getRoomFeeField(periodType, leaseType) {
+  let feeField = ''
+  if (periodType == 'monthly') {
+    feeField += 'monthly'
+  } else if (periodType == 'recess') {
+    feeField += 'recess'
   } else {
-    return { status: 'error', message: 'Tenant lease not found' };
+    feeField += 'sem'
   }
-}
-
-// Assuming this is how you create a new lease
-// async function createNewLease(tenantId, roomId, numOfPeriods) {
-//   const query = `INSERT INTO Lease (tenantId, roomId, numOfPeriods) VALUES (?, ?, ?)`;
-//   const params = [tenantId, roomId, numOfPeriods];
-//   return await executeQuery(query, params);
-// }
-
-
-// function changeTenantsRoom(tenantId, newRoomId) {
-//   try {
-//     const currentLease = await getTenantCurrentLease(tenantId);
-    
-
-//     const roomRecord = getRoomById(currentLease.data.roomId)
-
-//     const currentRoomFee = roomRecord.data[feeField]
-
-//     // If numOfPeriods is 1, update the current lease with the new roomId
-//     if (currentLease.numOfPeriods === 1) {
-//       await updateLeaseRoom(currentLease.leaseId, newRoomId);
-//       return { msg: 'Lease updated with new room' };
-//     }
-
-//     // Otherwise, reduce the numOfPeriods by 1 and update the current lease
-//     await updateLeaseNumOfPeriods(currentLease.leaseId, currentLease.numOfPeriods - 1);
-
-//     // Create a new lease for the new room
-//     const newLeaseId = await createNewLease(tenantId, newRoomId, currentLease.leaseType, currentLease.periodType);
-
-//     // Get the sum of transactions for the old lease
-//     const totalPaid = await getTransactionSum(currentLease.leaseId);
-
-//     // Check if the transactions sum up to more than the current room fee * numOfPeriods
-//     const expectedAmount = currentRoomFee * currentLease.numOfPeriods;
-//     if (totalPaid <= expectedAmount) {
-//       return { msg: 'Tenant moved to new room, no excess payment to transfer' };
-//     }
-
-//     // Calculate excess amount paid
-//     let excessAmount = totalPaid - expectedAmount;
-
-//     // Get transactions in descending order of date (most recent first)
-//     const transactions = await getTransactions(currentLease.leaseId);
-
-//     // Iteratively move excess amount to the new lease
-//     for (const transaction of transactions) {
-//       if (excessAmount <= 0) break; // If no more excess to move, stop
-
-//       if (excessAmount >= transaction.amount) {
-//         // Move entire transaction to the new lease
-//         await updateTransactionLeaseId(transaction.transactionId, newLeaseId);
-//         excessAmount -= transaction.amount; // Subtract transaction amount from excess
-//       } else {
-//         // Create a new transaction for the new lease with the remaining excess
-//         await createTransaction(newLeaseId, excessAmount, transaction.date);
-//         // Reduce the amount in the original transaction
-//         await updateTransactionAmount(transaction.transactionId, transaction.amount - excessAmount);
-//         excessAmount = 0; // No more excess to move
-//       }
-//     }
-//     return { msg: 'Tenant moved to new room, excess payment transferred if applicable' };
-
-//   } catch (error) {
-//     return { msg: 'error', error: error.message };
-//   }
-// }
-
-// Function to get current tenants with room and transaction data
-// Parameters: callback (function)
-function getTenantsCurrentWithRoomAndTransactions(callback) {
-  const query = `
-    SELECT Tenant.name, Room.roomName, Lease.leaseType, Transactions.amount, Transactions.date
-    FROM Tenant
-    JOIN Lease ON Tenant.tenantId = Lease.tenantId
-    JOIN Room ON Lease.roomId = Room.roomId
-    LEFT JOIN Transactions ON Lease.leaseId = Transactions.leaseId
-    WHERE Tenant.deleted = 0 AND date(Lease.startingDate, '+' || Lease.numOfPeriods || ' ' || Lease.periodType) >= date('now')`;
-
-  db.all(query, [], (err, rows) => {
-    if (err) {
-      return { msg: 'error', error: err.message }
-    }
-    callback(rows);
-  });
-}
-
-// Function to get tenant history with room and transaction data
-// Parameters: callback (function)
-function getTenantsHistoryWithRoomAndTransactions(callback) {
-  const query = `
-    SELECT Tenant.name, Room.roomName, Lease.leaseType, Transactions.amount, Transactions.date
-    FROM Tenant
-    JOIN Lease ON Tenant.tenantId = Lease.tenantId
-    JOIN Room ON Lease.roomId = Room.roomId
-    LEFT JOIN Transactions ON Lease.leaseId = Transactions.leaseId
-    WHERE Tenant.deleted = 0`;
-
-  db.all(query, [], (err, rows) => {
-    if (err) {
-      return { msg: 'error', error: err.message }
-    }
-    callback(rows);
-  });
-}
-
-db.close((err) => {
-  if (err) {
-    return { msg: 'error', error: err.message }
+  if (leaseType == 'single') {
+    feeField += 'CostSingle'
+  } else {
+    feeField += 'CostDouble'
   }
-  console.log('Closed the database connection.');
-});
-
-// Function to get transactions and the responsible tenant's payment percentage of their lease
-// Parameters: callback (function)
-function getTransactionRecordsWithPaymentPercentage(callback) {
-  const query = `
-    SELECT Tenant.name, Transactions.amount, Transactions.date, Room.roomName, Room.semCostSingle, Room.semCostDouble, Room.monthlyCostSingle, Room.monthlyCostDouble,
-           Lease.leaseType, Lease.periodType, 
-           CASE 
-             WHEN Lease.leaseType = 'single' AND Lease.periodType = 'semester' THEN Room.semCostSingle
-             WHEN Lease.leaseType = 'single' AND Lease.periodType = 'monthly' THEN Room.monthlyCostSingle
-             WHEN Lease.leaseType = 'double' AND Lease.periodType = 'semester' THEN Room.semCostDouble
-             WHEN Lease.leaseType = 'double' AND Lease.periodType = 'monthly' THEN Room.monthlyCostDouble
-           END AS totalLeaseCost,
-           (SUM(Transactions.amount) * 100.0 / 
-           CASE 
-             WHEN Lease.leaseType = 'single' AND Lease.periodType = 'semester' THEN Room.semCostSingle
-             WHEN Lease.leaseType = 'single' AND Lease.periodType = 'monthly' THEN Room.monthlyCostSingle
-             WHEN Lease.leaseType = 'double' AND Lease.periodType = 'semester' THEN Room.semCostDouble
-             WHEN Lease.leaseType = 'double' AND Lease.periodType = 'monthly' THEN Room.monthlyCostDouble
-           END) AS paymentPercentage
-    FROM Tenant
-    JOIN Lease ON Tenant.tenantId = Lease.tenantId
-    JOIN Room ON Lease.roomId = Room.roomId
-    LEFT JOIN Transactions ON Lease.leaseId = Transactions.leaseId
-    WHERE Tenant.deleted = 0 AND Transactions.deleted = 0
-    GROUP BY Tenant.tenantId, Lease.leaseId`;
-
-  db.all(query, [], (err, rows) => {
-    if (err) {
-      return { msg: 'error', error: err.message }
-    }
-    callback(rows);
-  });
+  return feeField
 }
 
-// Function to get tenants and their room, transaction history, and lease data
-// Parameters: callback (function)
-function getTenantsRoomTransactionAndLeaseHistory(callback) {
-  const query = `
-    SELECT Tenant.name, Room.roomName, Lease.leaseType, Lease.periodType, Lease.startingDate, Lease.numOfPeriods, 
-           Transactions.amount, Transactions.date, Transactions.leaseId
-    FROM Tenant
-    JOIN Lease ON Tenant.tenantId = Lease.tenantId
-    JOIN Room ON Lease.roomId = Room.roomId
-    LEFT JOIN Transactions ON Lease.leaseId = Transactions.leaseId
-    WHERE Tenant.deleted = 0
-    ORDER BY Tenant.name, Transactions.date ASC`;
-
-  db.all(query, [], (err, rows) => {
-    if (err) {
-      return { msg: 'error', error: err.message }
-    }
-    callback(rows);
-  });
+async function getTenantsAndOutstandingBalanceByRoom(roomId) {
+  const fullRoom = await getRoomById(roomId)
+  const tenantsInRoom = await getCurrentTenantsByRoom(roomId)
+  tenantsInRoom.forEach(async tenant => {
+    const lease = await getTenantCurrentLease(tenant.tenantId)
+    const transactions = await getTransactionsByLease(lease[0].leaseId)
+    let totalPaid = 0
+    transactions.forEach(tran => {
+      totalPaid += tran.amount
+    })
+    const totalPayable = fullRoom[0][getRoomFeeField(lease[0].periodType, lease[0].leaseType)]
+    tenant = {...tenant, totalPaid: totalPaid, totalPayable: totalPayable}
+  })
+  return tenantsInRoom  
 }
 
-// Function to get tenants with monthly leases about to expire in 1 month or less
-// Parameters: callback (function)
-function getTenantsWithExpiringMonthlyLeases(callback) {
-  const query = `
-    SELECT Tenant.name, Lease.startingDate, Lease.numOfPeriods, Lease.periodType, Room.roomName,
-           date(Lease.startingDate, '+' || Lease.numOfPeriods || ' months') AS leaseEndDate
-    FROM Tenant
-    JOIN Lease ON Tenant.tenantId = Lease.tenantId
-    JOIN Room ON Lease.roomId = Room.roomId
-    WHERE Lease.periodType = 'monthly' 
-      AND date(Lease.startingDate, '+' || Lease.numOfPeriods || ' months') <= date('now', '+1 month')
-      AND Tenant.deleted = 0`;
-
-  db.all(query, [], (err, rows) => {
-    if (err) {
-      return { msg: 'error', error: err.message }
-    }
-    callback(rows);
-  });
+async function getTenantsAndOutstandingBalanceAll() {
+  const tenantsAll = await getAllCurrentTenants()
+  tenantsAll.forEach(async tenant => {
+    const lease = await getTenantCurrentLease(tenant.tenantId)
+    const transactions = await getTransactionsByLease(lease[0].leaseId)
+    const room = await getRoomById(lease[0].roomId)
+    let totalPaid = 0
+    transactions.forEach(tran => {
+      totalPaid += tran.amount
+    })
+    const totalPayable = room[0][getRoomFeeField(lease[0].periodType, lease[0].leaseType)]
+    tenant = {...tenant, totalPaid: totalPaid, totalPayable: totalPayable}
+  })
+  return tenantsAll
 }
 
-// Function to get rooms and who is currently occupying them with their payment percentage
-// Parameters: callback (function)
-function getRoomsWithCurrentOccupantsAndPaymentPercentage(callback) {
-  const query = `
-    SELECT Room.roomName, Tenant.name, Lease.leaseType, Lease.periodType,
-           CASE 
-             WHEN Lease.leaseType = 'single' AND Lease.periodType = 'semester' THEN Room.semCostSingle
-             WHEN Lease.leaseType = 'single' AND Lease.periodType = 'monthly' THEN Room.monthlyCostSingle
-             WHEN Lease.leaseType = 'double' AND Lease.periodType = 'semester' THEN Room.semCostDouble
-             WHEN Lease.leaseType = 'double' AND Lease.periodType = 'monthly' THEN Room.monthlyCostDouble
-           END AS totalLeaseCost,
-           (SUM(Transactions.amount) * 100.0 / 
-           CASE 
-             WHEN Lease.leaseType = 'single' AND Lease.periodType = 'semester' THEN Room.semCostSingle
-             WHEN Lease.leaseType = 'single' AND Lease.periodType = 'monthly' THEN Room.monthlyCostSingle
-             WHEN Lease.leaseType = 'double' AND Lease.periodType = 'semester' THEN Room.semCostDouble
-             WHEN Lease.leaseType = 'double' AND Lease.periodType = 'monthly' THEN Room.monthlyCostDouble
-           END) AS paymentPercentage
-    FROM Room
-    JOIN Lease ON Room.roomId = Lease.roomId
-    JOIN Tenant ON Lease.tenantId = Tenant.tenantId
-    LEFT JOIN Transactions ON Lease.leaseId = Transactions.leaseId
-    WHERE Tenant.deleted = 0 AND Transactions.deleted = 0
-    GROUP BY Room.roomId, Tenant.tenantId`;
-
-  db.all(query, [], (err, rows) => {
-    if (err) {
-      return { msg: 'error', error: err.message }
+async function getTenantsAndOutstandingBalanceOnly() {
+  const tenantsAll = await getAllCurrentTenants()
+  tenantsAll.forEach(async tenant => {
+    const lease = await getTenantCurrentLease(tenant.tenantId)
+    const transactions = await getTransactionsByLease(lease[0].leaseId)
+    const room = await getRoomById(lease[0].roomId)
+    let totalPaid = 0
+    transactions.forEach(tran => {
+      totalPaid += tran.amount
+    })
+    const totalPayable = room[0][getRoomFeeField(lease[0].periodType, lease[0].leaseType)]
+    tenant = {...tenant, totalPaid: totalPaid, totalPayable: totalPayable}
+  })
+  for (let i=tenantsAll.length-1;i>=0;i--) {
+    if (tenantsAll[i].totalPaid == tenantsAll[i].totalPayable) {
+      tenantsAll.splice(i, 1)
     }
-    callback(rows);
-  });
+  }
+  return tenantsAll
+}
+
+async function getFullTenantProfile(tenantId) {
+  const fullTenant = await getTenantById(tenantId)
+  const leases = await getLeasesByTenant(tenantId)
+  leases.forEach(async lease => {
+    const transactions = await getTransactionsByLease(lease.leaseId)
+    const room = await getRoomById(lease.roomId)
+    lease = {...lease, ...room[0], transactions: transactions}
+  })
+  fullTenant[0] = {...fullTenant[0], leases: leases}
+  return fullTenant
+}
+
+async function getTransactionsByDatewithMetaData(startDate, endDate=null) {
+  const transactions = await getTransactionsByDate(startDate, endDate)
+  transactions.forEach(async tran => {
+    const lease = await getLeaseById(tran.leaseId)
+    const room = await getRoomById(lease[0].roomId)
+    const tenant = await getTenantById(lease[0].tenantId)
+    tran = {...tran, ...lease[0], ...room[0], ...tenant[0]}
+  })
+}
+
+async function getTenantsWhoseLeaseEndedRecently() {
+  const currentDate = new Date().toISOString().split('T')[0];
+  const date = new Date();
+  date.setMonth(date.getMonth() - 3);
+  const oldDate = date.toISOString().split('T')[0]; 
+
+  const query = `
+    SELECT Tenant.*, Room.*, Lease.*, Transaction.* 
+    FROM Lease
+    JOIN Tenant ON Tenant.tenantId = Lease.tenantId
+    JOIN Room ON Room.roomId = Lease.roomId
+    LEFT JOIN Transaction ON Transaction.leaseId = Lease.leaseId
+    WHERE Lease.deleted = 0 
+      AND Tenant.deleted = 0
+      AND Room.deleted = 0
+      AND (
+        (Lease.periodType = 'monthly' AND DATE(Lease.startingDate, '+' || Lease.numOfPeriods || ' months') <= ?)
+        OR
+        (Lease.periodType = 'semester' AND DATE(Lease.startingDate, '+' || (Lease.numOfPeriods * 18) || ' weeks') <= ?)
+        OR
+        (Lease.periodType = 'recess' AND DATE(Lease.startingDate, '+' || (Lease.numOfPeriods * 9) || ' weeks') <= ?)
+      )
+      AND (
+        (Lease.periodType = 'monthly' AND DATE(Lease.startingDate, '+' || Lease.numOfPeriods || ' months') >= ?)
+        OR
+        (Lease.periodType = 'semester' AND DATE(Lease.startingDate, '+' || (Lease.numOfPeriods * 18) || ' weeks') >= ?)
+        OR
+        (Lease.periodType = 'recess' AND DATE(Lease.startingDate, '+' || (Lease.numOfPeriods * 9) || ' weeks') >= ?)
+      )
+    ORDER BY Lease.leaseId, Transaction.transactionId
+  `;
+
+  return executeSelect(query, [currentDate, currentDate, currentDate, oldDate, oldDate, oldDate]);
 }
 
 
-// Function to get current tenants with their transactions for a specific level
-// Parameters: levelNumber (integer), callback (function)
-function getRoomsCurrentWithTenantsAndTransactions(levelNumber, callback) {
-  const query = `
-    SELECT Tenant.name, Room.roomName, Lease.leaseType, Transactions.amount, Transactions.date
-    FROM Tenant
-    JOIN Lease ON Tenant.tenantId = Lease.tenantId
-    JOIN Room ON Lease.roomId = Room.roomId
-    LEFT JOIN Transactions ON Lease.leaseId = Transactions.leaseId
-    WHERE Room.levelNumber = ? AND Lease.deleted = 0 AND 
-    date(Lease.startingDate, '+' || Lease.numOfPeriods || ' ' || Lease.periodType) >= date('now')`;
-
-  db.all(query, [levelNumber], (err, rows) => {
-    if (err) {
-      return { msg: 'error', error: err.message }
-    }
-    callback(rows);
-  });
-}
-
-// Function to get room history with tenants and transactions (including past tenants)
-// Parameters: levelNumber (integer), callback (function)
-function getRoomsHistoryWithTenantsAndTransactions(levelNumber, callback) {
-  const query = `
-    SELECT Tenant.name, Room.roomName, Lease.leaseType, Transactions.amount, Transactions.date
-    FROM Tenant
-    JOIN Lease ON Tenant.tenantId = Lease.tenantId
-    JOIN Room ON Lease.roomId = Room.roomId
-    LEFT JOIN Transactions ON Lease.leaseId = Transactions.leaseId
-    WHERE Room.levelNumber = ? AND Lease.deleted = 0`;
-
-  db.all(query, [levelNumber], (err, rows) => {
-    if (err) {
-      return { msg: 'error', error: err.message }
-    }
-    callback(rows);
-  });
-}
