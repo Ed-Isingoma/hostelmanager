@@ -61,7 +61,7 @@ let db = new sqlite3.Database('./hostelMgr.db', (err) => {
       date TEXT NOT NULL, -- Store date as TEXT in SQLite
       amount INTEGER NOT NULL,
       deleted BOOLEAN NOT NULL DEFAULT 0,
-      FOREIGN KEY (leaseId) REFERENCES Lease(leaseId),
+      FOREIGN KEY (leaseId) REFERENCES Lease(leaseId)
     )`);
 
     db.run(`CREATE TABLE IF NOT EXISTS MiscExpense (
