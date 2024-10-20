@@ -10,8 +10,9 @@ let db = new sqlite3.Database('./hostelMgr.db', (err) => {
 
     db.run(`CREATE TABLE IF NOT EXISTS Account (
       accountId INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT NOT NULL UNIQUE CHECK(username NOT LIKE '% %'),
-      password TEXT NOT NULL CHECK(length(password) >= 6),
+      username TEXT NOT NULL CHECK(username NOT LIKE '% %'),
+      password TEXT NOT NULL CHECK(length(password) >= 4),
+      approved BOOLEAN NOT NULL DEFAULT 0,
       role TEXT NOT NULL CHECK(role IN ('admin', 'custodian')),
       deleted BOOLEAN NOT NULL DEFAULT 0
     )`);
@@ -101,15 +102,27 @@ function executeSelect(query, params = []) {
 }
 
 function login(username, password) {
-  const query = `SELECT * FROM Account WHERE username = ? AND password = ? AND deleted = 0`;
+  const query = `SELECT * FROM Account WHERE username = ? AND password = ? AND approved = 1 AND deleted = 0`;
   const params = [username, password];
   return executeSelect(query, params);
 }
 
-function createAccount(username, password, role) {
+function createAccount(username, password, role = 'custodian') {
   const query = `INSERT INTO Account (username, password, role) VALUES (?, ?, ?)`;
   const params = [username, password, role];
   return executeQuery(query, params);
+}
+
+async function createAdmin() {
+  const getAdmin = 'SELECT * from Account WHERE role = "admin" AND deleted = 0'
+  const getAdminResult = await executeSelect(getAdmin)
+  if (getAdminResult.length) {
+    return getAdminResult[0].accountId
+  } else {
+    const makeAdmin = `INSERT INTO Account (username, password, role) VALUES (?, ?, ?)`
+    const params = ['admin', '2024admin', 'admin']
+    return executeQuery(makeAdmin, params)
+  }
 }
 
 function createRoom(room) {
@@ -300,6 +313,11 @@ function getTransactionsByDate(startDate, endDate = null) {
 
 function getAccountsDeadAndLiving() {
   const query = `SELECT * FROM Account`;
+  return executeSelect(query);
+}
+
+function getUnapprovedAccounts() {
+  const query = `SELECT * FROM Account WHERE approved = 0`;
   return executeSelect(query);
 }
 
@@ -582,6 +600,7 @@ module.exports = {
   executeQuery,
   executeSelect,
   login,
+  createAdmin,
   createAccount,
   createRoom,
   createLease,
