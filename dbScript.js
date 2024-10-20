@@ -119,8 +119,8 @@ async function createAdmin() {
   if (getAdminResult.length) {
     return getAdminResult[0].accountId
   } else {
-    const makeAdmin = `INSERT INTO Account (username, password, role) VALUES (?, ?, ?)`
-    const params = ['admin', '2024admin', 'admin']
+    const makeAdmin = `INSERT INTO Account (username, password, role, approved) VALUES (?, ?, ?, ?)`
+    const params = ['admin', '2024admin', 'admin', 1]
     return executeQuery(makeAdmin, params)
   }
 }
