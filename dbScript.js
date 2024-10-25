@@ -359,7 +359,7 @@ async function getRoomsByLevelAndOccupancy(levelNumber) {
     } else if (leases.length === 2) {
       room.occupancyStatus = '100%';
     } else {
-      room.occupancyStatus = '0%'; 
+      room.occupancyStatus = '0%';
     }
   }
 
@@ -552,9 +552,9 @@ async function getTenantsAndOutstandingBalanceByRoom(roomId) {
       totalPaid += tran.amount
     })
     const totalPayable = fullRoom[0][getRoomFeeField(lease[0].periodType, lease[0].leaseType)]
-    tenant = {...tenant, totalPaid: totalPaid, totalPayable: totalPayable}
+    tenant = { ...tenant, totalPaid: totalPaid, totalPayable: totalPayable }
   })
-  return tenantsInRoom  
+  return tenantsInRoom
 }
 
 async function getTenantsAndOutstandingBalanceAll() {
@@ -568,7 +568,7 @@ async function getTenantsAndOutstandingBalanceAll() {
       totalPaid += tran.amount
     })
     const totalPayable = room[0][getRoomFeeField(lease[0].periodType, lease[0].leaseType)]
-    tenant = {...tenant, totalPaid: totalPaid, totalPayable: totalPayable}
+    tenant = { ...tenant, totalPaid: totalPaid, totalPayable: totalPayable }
   })
   return tenantsAll
 }
@@ -584,9 +584,9 @@ async function getTenantsAndOutstandingBalanceOnly() {
       totalPaid += tran.amount
     })
     const totalPayable = room[0][getRoomFeeField(lease[0].periodType, lease[0].leaseType)]
-    tenant = {...tenant, totalPaid: totalPaid, totalPayable: totalPayable}
+    tenant = { ...tenant, totalPaid: totalPaid, totalPayable: totalPayable }
   })
-  for (let i=tenantsAll.length-1;i>=0;i--) {
+  for (let i = tenantsAll.length - 1; i >= 0; i--) {
     if (tenantsAll[i].totalPaid == tenantsAll[i].totalPayable) {
       tenantsAll.splice(i, 1)
     }
@@ -600,9 +600,9 @@ async function getFullTenantProfile(tenantId) {
   leases.forEach(async lease => {
     const transactions = await getTransactionsByLease(lease.leaseId)
     const room = await getRoomById(lease.roomId)
-    lease = {...lease, ...room[0], transactions: transactions}
+    lease = { ...lease, ...room[0], transactions: transactions }
   })
-  fullTenant[0] = {...fullTenant[0], leases: leases}
+  fullTenant[0] = { ...fullTenant[0], leases: leases }
   return fullTenant
 }
 
@@ -626,13 +626,13 @@ function searchTenantByName(name) {
 }
 
 
-async function getTransactionsByDatewithMetaData(startDate, endDate=null) {
+async function getTransactionsByDatewithMetaData(startDate, endDate = null) {
   const transactions = await getTransactionsByDate(startDate, endDate)
   transactions.forEach(async tran => {
     const lease = await getLeaseById(tran.leaseId)
     const room = await getRoomById(lease[0].roomId)
     const tenant = await getTenantById(lease[0].tenantId)
-    tran = {...tran, ...lease[0], ...room[0], ...tenant[0]}
+    tran = { ...tran, ...lease[0], ...room[0], ...tenant[0] }
   })
 }
 
@@ -640,7 +640,7 @@ async function getTenantsWhoseLeaseEndedRecently() {
   const currentDate = new Date().toISOString().split('T')[0];
   const date = new Date();
   date.setMonth(date.getMonth() - 3);
-  const oldDate = date.toISOString().split('T')[0]; 
+  const oldDate = date.toISOString().split('T')[0];
 
   const query = `
     SELECT Tenant.*, Room.*, Lease.*, Transaction.* 
