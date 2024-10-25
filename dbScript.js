@@ -331,9 +331,39 @@ function getAllRooms() {
   return executeSelect(query);
 }
 
-function getRoomsByLevel(levelNumber) {
+async function getRoomsByLevelAndOccupancy(levelNumber) {
   const query = `SELECT * FROM Room WHERE deleted = 0 AND levelNumber = ?`;
-  return executeSelect(query, [levelNumber]);
+  const rooms = await executeSelect(query, [levelNumber]);
+
+  const currentDate = new Date().toISOString().split('T')[0];
+
+  for (let room of rooms) {
+    const leaseQuery = `
+      SELECT leaseType FROM Lease
+      WHERE roomId = ? 
+        AND (
+          (periodType = 'monthly' AND DATE(startingDate, '+' || numOfPeriods || ' months') >= ?)
+          OR (periodType = 'semester' AND DATE(startingDate, '+' || (numOfPeriods * 18) || ' weeks') >= ?)
+          OR (periodType = 'recess' AND DATE(startingDate, '+' || (numOfPeriods * 9) || ' weeks') >= ?)
+        )
+    `;
+
+    const leases = await executeSelect(leaseQuery, [room.roomId, currentDate, currentDate, currentDate]);
+
+    if (leases.length === 0) {
+      room.occupancyStatus = '0%';
+    } else if (leases.length === 1 && leases[0].leaseType === 'single') {
+      room.occupancyStatus = '100%';
+    } else if (leases.length === 1 && leases[0].leaseType === 'double') {
+      room.occupancyStatus = '50%';
+    } else if (leases.length === 2) {
+      room.occupancyStatus = '100%';
+    } else {
+      room.occupancyStatus = '0%'; 
+    }
+  }
+
+  return rooms;
 }
 
 function getCurrentTenantsByLevel(levelNumber) {
@@ -351,18 +381,43 @@ function getCurrentTenantsByLevel(levelNumber) {
   return executeSelect(query, [levelNumber, currentDate, currentDate, currentDate]);
 }
 
-function getCurrentTenantsByRoom(roomId) {
+async function getCurrentTenantsByRoomAndOwingAmt(roomId) {
   const currentDate = new Date().toISOString().split('T')[0];
-  const query = `SELECT t.* FROM Tenant t
-                 JOIN Lease l ON t.tenantId = l.tenantId
-                 WHERE l.roomId = ? AND t.deleted = 0 AND (
-                   (l.periodType = 'monthly' AND DATE(l.startingDate, '+' || l.numOfPeriods || ' months') >= ?)
-                   OR
-                   (l.periodType = 'semester' AND DATE(l.startingDate, '+' || (l.numOfPeriods * 18) || ' weeks') >= ?)
-                   OR
-                   (l.periodType = 'recess' AND DATE(L.startingDate, '+' || (l.numOfPeriods * 9) || ' weeks') >= ?)
-                 )`;
-  return executeSelect(query, [roomId, currentDate, currentDate, currentDate]);
+  const query = `
+    SELECT t.*, l.leaseId, l.leaseType, l.periodType, l.numOfPeriods 
+    FROM Tenant t
+    JOIN Lease l ON t.tenantId = l.tenantId
+    WHERE l.roomId = ? AND t.deleted = 0 AND (
+      (l.periodType = 'monthly' AND DATE(l.startingDate, '+' || l.numOfPeriods || ' months') >= ?)
+      OR (l.periodType = 'semester' AND DATE(l.startingDate, '+' || (l.numOfPeriods * 18) || ' weeks') >= ?)
+      OR (l.periodType = 'recess' AND DATE(l.startingDate, '+' || (l.numOfPeriods * 9) || ' weeks') >= ?)
+    )
+  `;
+  const tenants = await executeSelect(query, [roomId, currentDate, currentDate, currentDate]);
+
+  const costs = {
+    single: { semester: 1300000, monthly: 400000, recess: 700000 },
+    double: { semester: 650000, monthly: 200000, recess: 350000 }
+  };
+
+  for (let tenant of tenants) {
+    const leaseType = tenant.leaseType;
+    const periodType = tenant.periodType;
+    const numOfPeriods = tenant.numOfPeriods;
+    const costPerPeriod = costs[leaseType][periodType];
+    const totalAmountDue = costPerPeriod * numOfPeriods;
+
+    const transactionQuery = `
+      SELECT SUM(amount) AS totalPaid FROM Transaction 
+      WHERE leaseId = ? AND deleted = 0
+    `;
+    const transactions = await executeSelect(transactionQuery, [tenant.leaseId]);
+    const totalPaid = transactions[0].totalPaid || 0;
+
+    tenant.amountOwed = totalAmountDue - totalPaid;
+  }
+
+  return tenants;
 }
 
 function getPreviousTenantsByRoom(roomId) {
@@ -551,6 +606,26 @@ async function getFullTenantProfile(tenantId) {
   return fullTenant
 }
 
+function searchTenantByName(name) {
+  const currentDate = new Date().toISOString().split('T')[0];
+  const query = `
+    SELECT t.*, r.roomName, r.levelNumber
+    FROM Tenant t
+    JOIN Lease l ON t.tenantId = l.tenantId
+    JOIN Room r ON l.roomId = r.roomId
+    WHERE t.deleted = 0 
+      AND LOWER(t.name) LIKE ?
+      AND (
+        (l.periodType = 'monthly' AND DATE(l.startingDate, '+' || l.numOfPeriods || ' months') >= ?)
+        OR (l.periodType = 'semester' AND DATE(l.startingDate, '+' || (l.numOfPeriods * 18) || ' weeks') >= ?)
+        OR (l.periodType = 'recess' AND DATE(l.startingDate, '+' || (l.numOfPeriods * 9) || ' weeks') >= ?)
+      )
+  `;
+  const params = [`%${name.toLowerCase()}%`, currentDate, currentDate, currentDate];
+  return executeSelect(query, params);
+}
+
+
 async function getTransactionsByDatewithMetaData(startDate, endDate=null) {
   const transactions = await getTransactionsByDate(startDate, endDate)
   transactions.forEach(async tran => {
@@ -596,6 +671,53 @@ async function getTenantsWhoseLeaseEndedRecently() {
   return executeSelect(query, [currentDate, currentDate, currentDate, oldDate, oldDate, oldDate]);
 }
 
+function generateRandomRoomName() {
+  const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+  const number = Math.floor(100 + Math.random() * 900);
+  return `${letter}${number}`;
+}
+
+async function createDefaultRooms() {
+  const maxUsers = 2;
+  const semCostSingle = 1300000;
+  const monthlyCostSingle = 400000;
+  const recessCostSingle = 700000;
+  const semCostDouble = 650000;
+  const recessCostDouble = 350000;
+  const monthlyCostDouble = 200000;
+
+  for (let level = 1; level <= 5; level++) {
+    for (let i = 0; i < 40; i++) {
+      const roomName = generateRandomRoomName();
+      const query = `
+        INSERT INTO Room (levelNumber, semCostSingle, monthlyCostSingle, recessCostSingle, 
+                          semCostDouble, recessCostDouble, monthlyCostDouble, roomName, maxUsers) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+      const params = [
+        level,
+        semCostSingle,
+        monthlyCostSingle,
+        recessCostSingle,
+        semCostDouble,
+        recessCostDouble,
+        monthlyCostDouble,
+        roomName,
+        maxUsers
+      ];
+
+      try {
+        await executeQuery(query, params);
+        console.log(`Room ${roomName} on level ${level} created successfully.`);
+      } catch (error) {
+        console.error(`Error creating room ${roomName} on level ${level}: ${error}`);
+      }
+    }
+  }
+}
+
+
+
 module.exports = {
   executeQuery,
   executeSelect,
@@ -620,11 +742,14 @@ module.exports = {
   getAccountsDeadAndLiving,
   getLevels,
   getAllRooms,
-  getRoomsByLevel,
+  getRoomsByLevelAndOccupancy,
+  getUnapprovedAccounts,
+  createDefaultRooms,
   getCurrentTenantsByLevel,
-  getCurrentTenantsByRoom,
+  getCurrentTenantsByRoomAndOwingAmt,
   getPreviousTenantsByRoom,
   getAllTenants,
+  searchTenantByName,
   getAllCurrentTenants,
   getAllPreviousTenants,
   getTenantCurrentLease,
@@ -638,5 +763,10 @@ module.exports = {
   getLeaseById,
   getLeasesByTenant,
   getRoomFeeField,
-  getTenantsAndOutstandingBalanceByRoom
+  getTenantsAndOutstandingBalanceByRoom,
+  getTenantsAndOutstandingBalanceAll,
+  getTenantsAndOutstandingBalanceOnly,
+  getFullTenantProfile,
+  getTransactionsByDatewithMetaData,
+  getTenantsWhoseLeaseEndedRecently
 };
