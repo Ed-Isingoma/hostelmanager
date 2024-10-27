@@ -1,0 +1,132 @@
+/* Reset basic styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    /* Prevent body overflow */
+}
+
+.form-container {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+}
+
+.form-box {
+    background-color: white;
+    border-radius: 10px;
+    padding: 40px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+    max-height: 90vh;
+    /* Ensures the form stays within the viewport */
+    overflow-y: auto;
+    /* Enables scrolling for the form */
+}
+
+.form-box:hover {
+    transform: scale(1.03);
+    /* Slight zoom on hover */
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 14px;
+}
+
+label i {
+    margin-right: 5px;
+    /* Space between icon and text */
+}
+
+input[type="text"],
+input[type="tel"],
+input[type="date"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="tel"]:focus,
+input[type="date"]:focus,
+select:focus {
+    border-color: #07b045;
+}
+
+.btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #07b045;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn i {
+    margin-right: 5px;
+    /* Space between icon and text */
+}
+
+.btn:hover {
+    background-color: #059336;
+}
+
+/* Scrollbar styling */
+.form-box::-webkit-scrollbar {
+    width: 5px;
+}
+
+.form-box::-webkit-scrollbar-thumb {
+    background-color: #07b045;
+    border-radius: 10px;
+}
+
+.form-box::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* Mobile-friendly design */
+@media (max-width: 600px) {
+    .form-box {
+        padding: 20px;
+        max-height: 85vh;
+        /* Reduce height on mobile to fit better */
+        overflow-y: auto;
+        /* Ensure scroll works on mobile screens */
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+}
