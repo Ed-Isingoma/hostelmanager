@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KANN Hostel Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="tenant.css">
+</head>
+<body>
+    <div class="form-container">
+        <div class="form-box">
+            <h2>Add Tenant</h2>
+            <form>
+                <div class="input-group">
+                    <label for="tenant-name"><i class="fas fa-user"></i> Tenant Name</label>
+                    <input type="text" id="tenant-name" required>
+                </div>
+                <div class="input-group">
+                    <label for="gender"><i class="fas fa-venus-mars"></i> Gender</label>
+                    <select id="gender" required>
+                        <option value="" disabled selected>Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="gender"><i class="fas fa-building"></i>Level</label>
+                    <select id="gender" required>
+                        <option value="" disabled selected>Select Level</option>
+                        <option value="level1">Level 1</option>
+                        <option value="level2">Level 2</option>
+                        <option value="level3">Level 3</option>
+                        <option value="level4">Level 4</option>
+                        <option value="level5">Level 5</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="gender"><i class="fas fa-door-closed"></i>Room</label>
+                    <select id="gender" required>
+                        <option value="" disabled selected>Select Room</option>
+                        <option value="s1">S1</option>
+                        <option value="s2">S2</option>
+                        <option value="s3">S3</option>
+                        <option value="s4">S4</option>
+                        <option value="s5">S5</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="gender"><i class="fas fa-door-closed"></i>Room Type</label>
+                    <select id="gender" required>
+                        <option value="" disabled selected>Select Room Type</option>
+                        <option value="single">Single</option>
+                        <option value="double">Double</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="gender"><i class="fas fa-clock"></i>Period</label>
+                    <select id="gender" required>
+                        <option value="" disabled selected>Select Period</option>
+                        <option value="semester">Semester</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="recess">Recess</option>
+                    </select>
+                </div>
+
+
+
+                <div class="input-group">
+                    <label for="dob"><i class="fas fa-calendar-alt"></i> Date of Birth</label>
+                    <input type="date" id="dob" required>
+                </div>
+                <div class="input-group">
+                    <label for="course"><i class="fas fa-book"></i> Course</label>
+                    <input type="text" id="course" required>
+                </div>
+                <div class="input-group">
+                    <label for="contact"><i class="fas fa-phone"></i> Contact</label>
+                    <input type="tel" id="contact" required>
+                </div>
+                <div class="input-group">
+                    <label for="next-of-kin"><i class="fas fa-user-friends"></i> Next of Kin</label>
+                    <input type="text" id="next-of-kin" required>
+                </div>
+                <div class="input-group">
+                    <label for="next-of-kin-contact"><i class="fas fa-phone-square-alt"></i> Next of Kin Contact</label>
+                    <input type="tel" id="next-of-kin-contact" required>
+                </div>
+                <button type="submit" class="btn"><i class="fas fa-plus-circle"></i> Add Tenant</button>
+            </form>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

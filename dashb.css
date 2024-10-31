@@ -1,0 +1,125 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+
+}
+
+header {
+    text-align: center;
+    padding: 20px;
+    background-color: #07b045;
+    color: white;
+    margin-bottom: 30px;
+}
+
+header nav {
+    margin-top: 10px;
+}
+
+header nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 16px;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+header nav a:hover {
+    color: #2d2dd8;
+}
+
+#search-bar {
+    margin-left: 20px;
+    padding: 5px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+.search-icon {
+    position: relative;
+    left: -35px;
+    color: #ccc;
+    cursor: pointer;
+}
+
+main {
+    flex: 1;
+    /* Allows main content to grow and push the footer to the bottom */
+}
+
+section.dashboard {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: 20px;
+}
+
+.card {
+    background-color: #07b045;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(6, 6, 6, 0.1);
+    padding: 15px;
+    text-align: left;
+    width: 23%;
+    min-width: 200px;
+    margin: 15px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card .card-header {
+    display: flex;
+    align-items: center;
+}
+
+.card i {
+    font-size: 24px;
+    color: #fff;
+    margin-right: 10px;
+}
+
+.card h2 {
+    font-size: 28px;
+    color: #fff;
+    margin: 0;
+}
+
+.card p {
+    font-size: 16px;
+    color: #fff;
+    margin-top: 10px;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Sticky Footer */
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    padding: 15px;
+    background-color: #07b045;
+    color: white;
+    font-size: 14px;
+}
+
+
+
