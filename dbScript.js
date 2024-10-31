@@ -32,37 +32,41 @@ let db = new sqlite3.Database('./hostelMgr.db', (err) => {
     db.run(`CREATE TABLE IF NOT EXISTS Room (
       roomId INTEGER PRIMARY KEY AUTOINCREMENT,
       levelNumber INTEGER NOT NULL,
-      semCostSingle INTEGER,
-      monthlyCostSingle INTEGER,
-      recessCostSingle INTEGER,
-      semCostDouble INTEGER,
-      recessCostDouble INTEGER,
-      monthlyCostDouble INTEGER,
       roomName TEXT NOT NULL,
-      deleted BOOLEAN NOT NULL DEFAULT 0,
-      maxUsers INTEGER NOT NULL
+      deleted BOOLEAN NOT NULL DEFAULT 0
     )`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS Lease (
-      leaseId INTEGER PRIMARY KEY AUTOINCREMENT,
+    db.run(`CREATE TABLE IF NOT EXISTS BillingPeriodName (
+      periodNameId INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      startingDate TEXT NOT NULL, -- Use TEXT to store dates in SQLite
+      endDate TEXT NOT NULL,
+      costSingle INTEGER,
+      costDouble INTEGER,
+      deleted BOOLEAN NOT NULL DEFAULT 0
+      )`)
+
+    db.run(`CREATE TABLE IF NOT EXISTS BillingPeriod (
+      periodId INTEGER PRIMARY KEY AUTOINCREMENT,
+      periodNameId INTEGER NOT NULL,
       tenantId INTEGER NOT NULL,
       roomId INTEGER NOT NULL,
       demandNoticeDate TEXT,
-      leaseType TEXT NOT NULL CHECK(leaseType IN ('single', 'double')),
-      periodType TEXT NOT NULL CHECK(periodType IN ('semester', 'monthly', 'recess')),
-      startingDate TEXT NOT NULL, -- Use TEXT to store dates in SQLite
-      numOfPeriods INTEGER NOT NULL DEFAULT 1,
+      agreedPrice INTEGER NOT NULL,
+      deleted BOOLEAN NOT NULL DEFAULT 0,
+      periodType TEXT NOT NULL CHECK(periodType IN ('single', 'double')),
       FOREIGN KEY (tenantId) REFERENCES Tenant(tenantId),
-      FOREIGN KEY (roomId) REFERENCES Room(roomId)
+      FOREIGN KEY (roomId) REFERENCES Room(roomId),
+      FOREIGN KEY (periodNameId) REFERENCES BillingPeriodName(periodNameId)
     )`);
 
     db.run(`CREATE TABLE IF NOT EXISTS Transaction (
       transactionId INTEGER PRIMARY KEY AUTOINCREMENT,
-      leaseId INTEGER NOT NULL,
+      periodId INTEGER NOT NULL,
       date TEXT NOT NULL, -- Store date as TEXT in SQLite
       amount INTEGER NOT NULL,
       deleted BOOLEAN NOT NULL DEFAULT 0,
-      FOREIGN KEY (leaseId) REFERENCES Lease(leaseId)
+      FOREIGN KEY (periodId) REFERENCES BillingPeriod(periodId)
     )`);
 
     db.run(`CREATE TABLE IF NOT EXISTS MiscExpense (
@@ -624,7 +628,6 @@ function searchTenantByName(name) {
   const params = [`%${name.toLowerCase()}%`, currentDate, currentDate, currentDate];
   return executeSelect(query, params);
 }
-
 
 async function getTransactionsByDatewithMetaData(startDate, endDate = null) {
   const transactions = await getTransactionsByDate(startDate, endDate)
