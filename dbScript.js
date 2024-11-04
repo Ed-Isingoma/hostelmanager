@@ -2,86 +2,101 @@ const sqlite3 = require('sqlite3').verbose();
 
 let db = new sqlite3.Database('./hostelMgr.db', (err) => {
   if (err) {
-    return { msg: 'error', error: err.message }
+    console.error('Database connection error:', err.message);
+    return;
   }
   console.log('Connected to the SQLite database.');
-
-  db.serialize(() => {
-
-    db.run(`CREATE TABLE IF NOT EXISTS Account (
-      accountId INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT NOT NULL CHECK(username NOT LIKE '% %'),
-      password TEXT NOT NULL CHECK(length(password) >= 4),
-      approved BOOLEAN NOT NULL DEFAULT 0,
-      role TEXT NOT NULL CHECK(role IN ('admin', 'custodian')),
-      deleted BOOLEAN NOT NULL DEFAULT 0
-    )`);
-
-    db.run(`CREATE TABLE IF NOT EXISTS Tenant (
-      tenantId INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      gender TEXT CHECK(gender IN ('male', 'female')),
-      age INTEGER,
-      course TEXT,
-      ownContact TEXT,
-      nextOfKin TEXT,
-      kinContact TEXT,
-      deleted BOOLEAN NOT NULL DEFAULT 0
-    )`);
-
-    db.run(`CREATE TABLE IF NOT EXISTS Room (
-      roomId INTEGER PRIMARY KEY AUTOINCREMENT,
-      levelNumber INTEGER NOT NULL,
-      roomName TEXT NOT NULL,
-      deleted BOOLEAN NOT NULL DEFAULT 0
-    )`);
-
-    db.run(`CREATE TABLE IF NOT EXISTS BillingPeriodName (
-      periodNameId INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      startingDate TEXT NOT NULL, -- Use TEXT to store dates in SQLite
-      endDate TEXT NOT NULL,
-      costSingle INTEGER,
-      costDouble INTEGER,
-      deleted BOOLEAN NOT NULL DEFAULT 0
-      )`)
-
-    db.run(`CREATE TABLE IF NOT EXISTS BillingPeriod (
-      periodId INTEGER PRIMARY KEY AUTOINCREMENT,
-      periodNameId INTEGER NOT NULL,
-      tenantId INTEGER NOT NULL,
-      roomId INTEGER NOT NULL,
-      demandNoticeDate TEXT,
-      agreedPrice INTEGER NOT NULL,
-      deleted BOOLEAN NOT NULL DEFAULT 0,
-      periodType TEXT NOT NULL CHECK(periodType IN ('single', 'double')),
-      FOREIGN KEY (tenantId) REFERENCES Tenant(tenantId),
-      FOREIGN KEY (roomId) REFERENCES Room(roomId),
-      FOREIGN KEY (periodNameId) REFERENCES BillingPeriodName(periodNameId)
-    )`);
-
-    db.run(`CREATE TABLE IF NOT EXISTS Transaction (
-      transactionId INTEGER PRIMARY KEY AUTOINCREMENT,
-      periodId INTEGER NOT NULL,
-      date TEXT NOT NULL, -- Store date as TEXT in SQLite
-      amount INTEGER NOT NULL,
-      deleted BOOLEAN NOT NULL DEFAULT 0,
-      FOREIGN KEY (periodId) REFERENCES BillingPeriod(periodId)
-    )`);
-
-    db.run(`CREATE TABLE IF NOT EXISTS MiscExpense (
-      expenseId INTEGER PRIMARY KEY AUTOINCREMENT,
-      description TEXT NOT NULL,
-      quantity INTEGER NOT NULL DEFAULT 1,
-      amount INTEGER NOT NULL,
-      operator INTEGER NOT NULL, -- Account ID (foreign key)
-      deleted BOOLEAN NOT NULL DEFAULT 0,
-      date TEXT NOT NULL, -- Store date as TEXT in SQLite
-      FOREIGN KEY (operator) REFERENCES Account(accountId)
-    )`);
-
-  });
 });
+
+function initDb() {
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      db.run(`CREATE TABLE IF NOT EXISTS Account (
+        accountId INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL CHECK(username NOT LIKE '% %'),
+        password TEXT NOT NULL CHECK(length(password) >= 4),
+        approved BOOLEAN NOT NULL DEFAULT 0,
+        role TEXT NOT NULL CHECK(role IN ('admin', 'custodian')),
+        deleted BOOLEAN NOT NULL DEFAULT 0
+      )`, errorHandler);
+
+      db.run(`CREATE TABLE IF NOT EXISTS Tenant (
+        tenantId INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        gender TEXT CHECK(gender IN ('male', 'female')),
+        age INTEGER,
+        course TEXT,
+        ownContact TEXT,
+        nextOfKin TEXT,
+        kinContact TEXT,
+        deleted BOOLEAN NOT NULL DEFAULT 0
+      )`, errorHandler);
+
+      db.run(`CREATE TABLE IF NOT EXISTS Room (
+        roomId INTEGER PRIMARY KEY AUTOINCREMENT,
+        levelNumber INTEGER NOT NULL,
+        roomName TEXT NOT NULL,
+        deleted BOOLEAN NOT NULL DEFAULT 0
+      )`, errorHandler);
+
+      db.run(`CREATE TABLE IF NOT EXISTS BillingPeriodName (
+        periodNameId INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        startingDate TEXT NOT NULL,
+        endDate TEXT NOT NULL,
+        costSingle INTEGER,
+        costDouble INTEGER,
+        deleted BOOLEAN NOT NULL DEFAULT 0
+      )`, errorHandler);
+
+      db.run(`CREATE TABLE IF NOT EXISTS BillingPeriod (
+        periodId INTEGER PRIMARY KEY AUTOINCREMENT,
+        periodNameId INTEGER NOT NULL,
+        tenantId INTEGER NOT NULL,
+        roomId INTEGER NOT NULL,
+        demandNoticeDate TEXT,
+        agreedPrice INTEGER NOT NULL,
+        deleted BOOLEAN NOT NULL DEFAULT 0,
+        periodType TEXT NOT NULL CHECK(periodType IN ('single', 'double')),
+        FOREIGN KEY (tenantId) REFERENCES Tenant(tenantId),
+        FOREIGN KEY (roomId) REFERENCES Room(roomId),
+        FOREIGN KEY (periodNameId) REFERENCES BillingPeriodName(periodNameId)
+      )`, errorHandler);
+
+      db.run(`CREATE TABLE IF NOT EXISTS Transactionn (
+        transactionId INTEGER PRIMARY KEY AUTOINCREMENT,
+        periodId INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        amount INTEGER NOT NULL,
+        deleted BOOLEAN NOT NULL DEFAULT 0,
+        FOREIGN KEY (periodId) REFERENCES BillingPeriod(periodId)
+      )`, errorHandler);
+
+      db.run(`CREATE TABLE IF NOT EXISTS MiscExpense (
+        expenseId INTEGER PRIMARY KEY AUTOINCREMENT,
+        description TEXT NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        amount INTEGER NOT NULL,
+        operator INTEGER NOT NULL,
+        deleted BOOLEAN NOT NULL DEFAULT 0,
+        date TEXT NOT NULL,
+        FOREIGN KEY (operator) REFERENCES Account(accountId)
+      )`, errorHandler);
+
+      // Ensure all table creation commands complete before resolving
+      db.run('SELECT 1', (err) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
+  });
+}
+
+function errorHandler(err) {
+  if (err) {
+    console.error('Table creation error:', err.message);
+  }
+}
 
 function executeQuery(query, params = []) {
   return new Promise((resolve, reject) => {
@@ -111,10 +126,10 @@ function login(username, password) {
   return executeSelect(query, params);
 }
 
-function createAccount(username, password, role = 'custodian') {
+async function createAccount(username, password, role = 'custodian') {
   const query = `INSERT INTO Account (username, password, role) VALUES (?, ?, ?)`;
   const params = [username, password, role];
-  return executeQuery(query, params);
+  return await executeQuery(query, params);
 }
 
 async function createAdmin() {
@@ -125,11 +140,11 @@ async function createAdmin() {
   } else {
     const makeAdmin = `INSERT INTO Account (username, password, role, approved) VALUES (?, ?, ?, ?)`
     const params = ['admin', '2024admin', 'admin', 1]
-    return executeQuery(makeAdmin, params)
+    return await executeQuery(makeAdmin, params)
   }
 }
 
-function createRoom(room) {
+async function createRoom(room) {
   const query = `INSERT INTO Room (levelNumber, semCostSingle, monthlyCostSingle, recessCostSingle, semCostDouble, monthlyCostDouble, recessCostDouble, roomName, maxUsers) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
   const params = [
     room.levelNumber,
@@ -142,10 +157,10 @@ function createRoom(room) {
     room.roomName,
     room.maxUsers
   ];
-  return executeQuery(query, params);
+  return await executeQuery(query, params);
 }
 
-function createBillingPeriodName(periodName) {
+async function createBillingPeriodName(periodName) {
   const query = `INSERT INTO BillingPeriodName (name, startingDate, endDate, costSingle, costDouble) VALUES (?, ?, ?, ?, ?)`;
   const params = [
     periodName.name,
@@ -154,10 +169,10 @@ function createBillingPeriodName(periodName) {
     periodName.costSingle,
     periodName.costDouble
   ];
-  return executeQuery(query, params);
+  return await executeQuery(query, params);
 }
 
-function createBillingPeriod(billingPeriod, periodNameId, roomId, tenantId) {
+async function createBillingPeriod(billingPeriod, periodNameId, roomId, tenantId) {
   const query = `INSERT INTO BillingPeriod (periodNameId, tenantId, roomId, demandNoticeDate, agreedPrice, periodType) VALUES (?, ?, ?, ?, ?, ?)`;
   const params = [
     periodNameId,
@@ -167,10 +182,10 @@ function createBillingPeriod(billingPeriod, periodNameId, roomId, tenantId) {
     billingPeriod.agreedPrice,
     billingPeriod.periodType
   ];
-  return executeQuery(query, params);
+  return await executeQuery(query, params);
 }
 
-function createTenant(tenant) {
+async function createTenant(tenant) {
   const query = `INSERT INTO Tenant (name, gender, age, course, ownContact, nextOfKin, kinContact) VALUES (?, ?, ?, ?, ?, ?, ?)`;
   const params = [
     tenant.name,
@@ -181,10 +196,10 @@ function createTenant(tenant) {
     tenant.nextOfKin,
     tenant.kinContact
   ];
-  return executeQuery(query, params);
+  return await executeQuery(query, params);
 }
 
-function createMiscExpense(expense, operator) {
+async function createMiscExpense(expense, operator) {
   const query = `INSERT INTO MiscExpense (description, quantity, amount, operator, date) VALUES (?, ?, ?, ?, ?)`;
   const params = [
     expense.description,
@@ -193,16 +208,16 @@ function createMiscExpense(expense, operator) {
     operator,
     expense.date
   ];
-  return executeQuery(query, params);
+  return await executeQuery(query, params);
 }
 
-function createTransaction(transaction, periodId) {
-  const query = `INSERT INTO Transaction (periodId, date, amount) VALUES (?, ?, ?)`;
+async function createTransaction(transaction, periodId) {
+  const query = `INSERT INTO Transactionn (periodId, date, amount) VALUES (?, ?, ?)`;
   const params = [periodId, transaction.date, transaction.amount];
-  return executeQuery(query, params);
+  return await executeQuery(query, params);
 }
 
-function updateRoom(roomId, updatedFields) {
+async function updateRoom(roomId, updatedFields) {
   let query = 'UPDATE Room SET ';
   const values = [];
 
@@ -214,11 +229,11 @@ function updateRoom(roomId, updatedFields) {
   query += 'WHERE roomId = ?';
   values.push(roomId);
 
-  return executeQuery(query, values);
+  return await executeQuery(query, values);
 }
 
-function updateTransaction(transactionId, updatedFields) {
-  let query = 'UPDATE Transaction SET ';
+async function updateTransaction(transactionId, updatedFields) {
+  let query = 'UPDATE Transactionn SET ';
   const values = [];
 
   Object.keys(updatedFields).forEach((field, index) => {
@@ -229,10 +244,10 @@ function updateTransaction(transactionId, updatedFields) {
   query += 'WHERE transactionId = ?';
   values.push(transactionId);
 
-  return executeQuery(query, values);
+  return await executeQuery(query, values);
 }
 
-function updateBillingPeriod(periodId, updatedFields) {
+async function updateBillingPeriod(periodId, updatedFields) {
   let query = 'UPDATE BillingPeriod SET ';
   const values = [];
 
@@ -244,10 +259,10 @@ function updateBillingPeriod(periodId, updatedFields) {
   query += 'WHERE periodId = ?';
   values.push(periodId);
 
-  return executeQuery(query, values);
+  return await executeQuery(query, values);
 }
 
-function updateAccount(accountId, updatedFields) {
+async function updateAccount(accountId, updatedFields) {
   let query = 'UPDATE Account SET ';
   const values = [];
 
@@ -259,10 +274,10 @@ function updateAccount(accountId, updatedFields) {
   query += 'WHERE accountId = ?';
   values.push(accountId);
 
-  return executeQuery(query, values);
+  return await executeQuery(query, values);
 }
 
-function updateTenant(tenantId, updatedFields) {
+async function updateTenant(tenantId, updatedFields) {
   let query = 'UPDATE Tenant SET ';
   const values = [];
 
@@ -274,10 +289,10 @@ function updateTenant(tenantId, updatedFields) {
   query += 'WHERE tenantId = ?';
   values.push(tenantId);
 
-  return executeQuery(query, values);
+  return await executeQuery(query, values);
 }
 
-function updateMiscExpense(expenseId, updatedFields) {
+async function updateMiscExpense(expenseId, updatedFields) {
   let query = 'UPDATE MiscExpense SET ';
   const values = [];
 
@@ -289,7 +304,7 @@ function updateMiscExpense(expenseId, updatedFields) {
   query += 'WHERE expenseId = ?';
   values.push(expenseId);
 
-  return executeQuery(query, values);
+  return await executeQuery(query, values);
 }
 
 //getters
@@ -306,17 +321,17 @@ function getMiscExpensesByDate(startDate, endDate = null) {
 }
 
 function getMostRecentTransaction(periodId) {
-  const query = `SELECT * FROM Transaction WHERE periodId = ? AND deleted = 0 ORDER BY date DESC LIMIT 1`;
+  const query = `SELECT * FROM Transactionn WHERE periodId = ? AND deleted = 0 ORDER BY date DESC LIMIT 1`;
   return executeSelect(query, [periodId]);
 }
 
 function getTransactions(periodId) {
-  const query = `SELECT * FROM Transaction WHERE periodId = ? AND deleted = 0 ORDER BY date DESC`;
+  const query = `SELECT * FROM Transactionn WHERE periodId = ? AND deleted = 0 ORDER BY date DESC`;
   return executeSelect(query, [periodId]);
 }
 
 function getTransactionsByDate(startDate, endDate = null) {
-  let query = 'SELECT * FROM Transaction WHERE date >= ? AND deleted = 0';
+  let query = 'SELECT * FROM Transactionn WHERE date >= ? AND deleted = 0';
   const params = [startDate];
 
   if (endDate) {
@@ -397,10 +412,10 @@ function getTenantsByLevel(levelNumber, periodNameId) {
 async function getTenantsByRoomAndOwingAmt(roomId, periodNameId) {
   const query = `
     SELECT Tenant.*,
-      BillingPeriod.agreedPrice - IFNULL(SUM(Transaction.amount), 0) AS owingAmount
+      BillingPeriod.agreedPrice - IFNULL(SUM(Transactionn.amount), 0) AS owingAmount
     FROM Tenant
     JOIN BillingPeriod ON Tenant.tenantId = BillingPeriod.tenantId
-    LEFT JOIN Transaction ON BillingPeriod.periodId = Transaction.periodId AND Transaction.deleted = 0
+    LEFT JOIN Transactionn ON BillingPeriod.periodId = Transactionn.periodId AND Transactionn.deleted = 0
     WHERE BillingPeriod.roomId = ? 
       AND BillingPeriod.periodNameId = ?
       AND Tenant.deleted = 0 
@@ -459,12 +474,12 @@ function getMiscExpenseById(miscExpenseId) {
 }
 
 function getTransactionById(transactionId) {
-  const query = `SELECT * FROM Transaction WHERE transactionId = ? AND deleted = 0`;
+  const query = `SELECT * FROM Transactionn WHERE transactionId = ? AND deleted = 0`;
   return executeSelect(query, [transactionId]);
 }
 
 function getTransactionsByBillingPeriod(periodId) {
-  const query = `SELECT * FROM Transaction WHERE periodId = ? AND deleted = 0`;
+  const query = `SELECT * FROM Transactionn WHERE periodId = ? AND deleted = 0`;
   return executeSelect(query, [periodId]);
 }
 
@@ -486,10 +501,10 @@ function getBillingPeriodById(periodId) {
 function getOnlyTenantsWithOwingAmt(periodNameId) {
   const query = `
     SELECT Tenant.*, 
-      BillingPeriod.agreedPrice - IFNULL(SUM(Transaction.amount), 0) AS owingAmount
+      BillingPeriod.agreedPrice - IFNULL(SUM(Transactionn.amount), 0) AS owingAmount
     FROM Tenant
     JOIN BillingPeriod ON Tenant.tenantId = BillingPeriod.tenantId
-    LEFT JOIN Transaction ON BillingPeriod.periodId = Transaction.periodId AND Transaction.deleted = 0
+    LEFT JOIN Transactionn ON BillingPeriod.periodId = Transactionn.periodId AND Transactionn.deleted = 0
     WHERE BillingPeriod.periodNameId = ? 
       AND Tenant.deleted = 0 
       AND BillingPeriod.deleted = 0
@@ -503,10 +518,10 @@ function getOnlyTenantsWithOwingAmt(periodNameId) {
 function getTenantsPlusOutstandingBalanceAll(periodNameId) {
   const query = `
     SELECT Tenant.*, 
-      BillingPeriod.agreedPrice - IFNULL(SUM(Transaction.amount), 0) AS owingAmount
+      BillingPeriod.agreedPrice - IFNULL(SUM(Transactionn.amount), 0) AS owingAmount
     FROM Tenant
     JOIN BillingPeriod ON Tenant.tenantId = BillingPeriod.tenantId
-    LEFT JOIN Transaction ON BillingPeriod.periodId = Transaction.periodId AND Transaction.deleted = 0
+    LEFT JOIN Transactionn ON BillingPeriod.periodId = Transactionn.periodId AND Transactionn.deleted = 0
     WHERE BillingPeriod.periodNameId = ? 
       AND Tenant.deleted = 0 
       AND BillingPeriod.deleted = 0
@@ -638,6 +653,7 @@ module.exports = {
   getTransactionsByDate,
   getTransactionsByDatewithMetaData,
   getUnapprovedAccounts,
+  initDb,
   login,
   searchTenantByName,
   updateAccount,
