@@ -1,5 +1,6 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('node:path')
+const dbScript = require('./dbScript');
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -12,7 +13,7 @@ const createWindow = () => {
 
   win.loadFile('index.html')
 }
-// ...
+
 
 app.whenReady().then(() => {
   createWindow()
@@ -25,3 +26,17 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
+
+ipcMain.handle("call", async (event, funcName, params) => {
+  try {
+    if (typeof dbScript[funcName] === "function") {
+      const resp = await dbScript[funcName].apply(null, params);
+      return { success: true, data: resp };
+    } else {
+      throw new Error("Function not found");
+    }
+  } catch (error) {
+    console.error("Error in function call:", error);
+    return { success: false, error: error.message };
+  }
+});

@@ -83,7 +83,6 @@ function initDb() {
         FOREIGN KEY (operator) REFERENCES Account(accountId)
       )`, errorHandler);
 
-      // Ensure all table creation commands complete before resolving
       db.run('SELECT 1', (err) => {
         if (err) return reject(err);
         resolve();
@@ -120,6 +119,29 @@ function executeSelect(query, params = []) {
   });
 }
 
+async function initializeTrigger() {
+  await initDb()
+  const checkQuery = `SELECT COUNT(*) AS count FROM Account`;
+  try {
+    const rows = await executeSelect(checkQuery);
+    const isEmpty = rows[0].count === 0;
+    if (isEmpty) {
+      const makeAdmin = `INSERT INTO Account (username, password, role, approved) VALUES (?, ?, ?, ?)`
+      const params = ['admin', '2024admin', 'admin', 1]
+      const adminId = await executeQuery(makeAdmin, params);
+      console.log(`Admin account added with ID ${adminId}`);
+      await insertDefaultBillingPeriodNames();
+      await createDefaultRooms()
+    } else {
+      console.log("InitTrigger already has records. No insertion needed.");
+    }
+  } catch (error) {
+    console.error("Error initializing InitTrigger:", error);
+  }
+}
+
+initializeTrigger()
+
 function login(username, password) {
   const query = `SELECT * FROM Account WHERE username = ? AND password = ? AND approved = 1 AND deleted = 0`;
   const params = [username, password];
@@ -132,15 +154,37 @@ async function createAccount(username, password, role = 'custodian') {
   return await executeQuery(query, params);
 }
 
-async function createAdmin() {
-  const getAdmin = 'SELECT * from Account WHERE role = "admin" AND deleted = 0'
-  const getAdminResult = await executeSelect(getAdmin)
-  if (getAdminResult.length) {
-    return getAdminResult[0].accountId
-  } else {
-    const makeAdmin = `INSERT INTO Account (username, password, role, approved) VALUES (?, ?, ?, ?)`
-    const params = ['admin', '2024admin', 'admin', 1]
-    return await executeQuery(makeAdmin, params)
+async function insertDefaultBillingPeriodNames() {
+  const billingPeriodNames = [
+    {
+      name: "Semester 1 2024/2025",
+      startingDate: "2024-08-03",
+      endDate: "2024-12-08",
+      costSingle: 1300000,
+      costDouble: 650000
+    },
+    {
+      name: "Semester 2 2024/2025",
+      startingDate: "2025-01-18",
+      endDate: "2025-06-15",
+      costSingle: 1300000,
+      costDouble: 650000
+    },
+    {
+      name: "Recess 2024/2025",
+      startingDate: "2025-06-22",
+      endDate: "2025-08-24",
+      costSingle: 1300000,
+      costDouble: 650000
+    }
+  ];
+  try {
+    for (const period of billingPeriodNames) {
+      const periodId = await createBillingPeriodName(period);
+      console.log(`Billing period '${period.name}' inserted with ID: ${periodId}`);
+    }
+  } catch (error) {
+    console.error("Error inserting billing periods:", error);
   }
 }
 
@@ -614,7 +658,6 @@ async function createDefaultRooms() {
 
 module.exports = {
   createAccount,
-  createAdmin,
   createBillingPeriod,
   createBillingPeriodName,
   createDefaultRooms,
