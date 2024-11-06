@@ -8,6 +8,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
   height: 100vh;
   background-color: #f0f0f0;
   font-family: Arial, sans-serif;
@@ -20,6 +21,89 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.menu-item {
+  padding: 10px 15px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.dashboard-head {
+  margin: 20px 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.menu-item:hover {
+  background-color: #2980b9;
+}
+
+.search-field {
+  padding: 5px;
+  flex: 1;
+  margin-right: 10px;
+}
+
+.semester-dropdown {
+  padding: 5px;
+}
+
+.navbar {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  width: 100%;
+  max-width: 800px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+
+.modal-form {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  padding: 20px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+  width: 300px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.modal-form h2 {
+  margin-top: 0;
+}
+
+.modal-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-form button {
+  padding: 5px 10px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .welcome-message {
@@ -82,6 +166,55 @@ body {
   color: #2ecc71;
 }
 
+footer {
+  margin-top: auto;
+  padding: 20px;
+  background-color: #f4f4f4;
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
+}
+
+.dash-card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  max-width: 1000px;
+  width: 100%;
+  padding: 20px;
+}
+
+.dash-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #e8f5e9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  text-align: center;
+}
+
+.dash-card-icon {
+  margin-bottom: 10px;
+}
+
+.dash-card-number {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #388e3c;
+}
+
+.dash-card-title {
+  font-size: 1em;
+  color: #555;
+}
+
+
+
+
+
 @keyframes fadeOut {
   0% { opacity: 1; }
   100% { opacity: 0; display: none; }
@@ -99,15 +232,12 @@ body {
   .input-field, .btn {
     font-size: 0.9em;
   }
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .dash-card-container {
+    grid-template-columns: 1fr;
+  }
 }
 
-.dashboard-placeholder {
-  color: green;
-  font-size: 24px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh; 
-  text-align: center;
-}

@@ -48,7 +48,7 @@ async function showLoginPrompt() {
         if (response.success && response.data.length > 0) {
           showToast("Login successful");
           loginContainer.remove();
-          showDashboard()
+          showDashboard(response.data[0])
         } else {
           showToast("Invalid username or password.");
         }
