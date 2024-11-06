@@ -212,6 +212,65 @@ footer {
 }
 
 
+/* Container for accounts list */
+.accounts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.account-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.account-name,
+.approval-status {
+  font-weight: bold;
+  color: #333;
+}
+
+.edit-button, .approve-button, .delete-button {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.edit-button {
+  background-color: #4CAF50;
+  color: #fff;
+}
+
+.approve-button {
+  background-color: #007BFF;
+  color: #fff;
+}
+
+.delete-button {
+  background-color: #FF4136;
+  color: #fff;
+}
+
+.approve-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+
 
 
 
@@ -238,6 +297,18 @@ footer {
   }
   .dash-card-container {
     grid-template-columns: 1fr;
+  }
+  .accounts-list {
+    padding: 0.5rem;
+  }
+  
+  .account-item {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .edit-button, .approve-button, .delete-button {
+    width: 100%;
   }
 }
 

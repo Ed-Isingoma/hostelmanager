@@ -36,7 +36,6 @@ export default function openForm(title) {
 async function showUserAccounts(formContent) {
   try {
     const accounts = await window.electron.call('getAccountsDeadAndLiving');
-    console.log('these are the accounts:', accounts);
 
     const accountsListContainer = document.createElement('div');
     accountsListContainer.className = 'accounts-list';
