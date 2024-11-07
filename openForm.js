@@ -17,9 +17,9 @@ export default function openForm(title) {
   // Form content based on title
   const formContent = document.createElement("form");
 
-  if (title === "Add Tenant") {
+  if (title === "Add New Tenant") {
     addTenantFormFields(formContent)
-  } else if (title === "Add Payment") {
+  } else if (title === "Record Money Received") {
     addPaymentFormFields(formContent)
   }
   if (title === 'Users') {
@@ -169,6 +169,8 @@ async function addTenantFormFields(formContent) {
     roomDropdown.name = "room";
     formContent.appendChild(roomDropdown);
 
+    addPaymentFormFields(formContent)
+
     const updateRoomOptions = async () => {
       const selectedGender = formContent.querySelector("select[name='gender']").value;
       const selectedLevel = levelDropdown.value;
@@ -232,6 +234,12 @@ async function addTenantFormFields(formContent) {
     submitButton.className = "add-tenant-submit";
     submitButton.textContent = "Submit";
 
+    const cancelBtn = document.createElement("button");
+    cancelBtn.className = "add-tenant-submit";
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.onclick = closeForm
+
+    formContent.appendChild(cancelBtn);
     formContent.appendChild(submitButton);
   } catch (e) {
     showToast(e)
@@ -241,8 +249,8 @@ async function addTenantFormFields(formContent) {
 
 function addPaymentFormFields(formContent) {
   const fields = [
-    { label: "Date", type: "date", name: "date" },
-    { label: "Amount", type: "number", name: "amount", placeholder: "Enter amount" }
+    { label: "Add Transaction Date", type: "date", name: "date" },
+    { label: "Received Amount", type: "number", name: "amount", placeholder: "Enter amount" }
   ];
 
   fields.forEach(field => {

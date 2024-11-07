@@ -11,7 +11,7 @@ export default async function showDashboard(user) {
   const navbar = document.createElement("nav");
   navbar.className = "navbar";
 
-  const menuItems = ["Log Out", "Add Tenant", "Add Payment", "Update Tenant"];
+  const menuItems = ["Log Out", "Add New Tenant", "Record Money Received", "Update Tenant"];
   if (user.role == 'admin') menuItems.unshift('Users')
   menuItems.forEach(item => {
     const menuOption = document.createElement("button");
