@@ -1,3 +1,6 @@
+import { showLoginPrompt } from './logins.js';
+import showToast from './showToast.js'
+
 export default function openForm(title) {
   const overlay = document.createElement("div");
   overlay.className = "overlay";
@@ -22,15 +25,16 @@ export default function openForm(title) {
   if (title === 'Users') {
     showUserAccounts(formContent)
   }
-  const closeButton = document.createElement("button");
-  closeButton.type = "button";
-  closeButton.textContent = "Close";
-  closeButton.onclick = closeForm;
-  formContent.appendChild(closeButton);
 
   form.appendChild(formContent);
-  document.body.appendChild(overlay);
-  document.body.appendChild(form);
+
+  if (title === 'Log Out') {
+    document.body.innerHTML = ''
+    showLoginPrompt()
+  } else {
+    document.body.appendChild(overlay);
+    document.body.appendChild(form);
+  }
 }
 
 async function showUserAccounts(formContent) {
@@ -40,6 +44,7 @@ async function showUserAccounts(formContent) {
     const accountsListContainer = document.createElement('div');
     accountsListContainer.className = 'accounts-list';
     accounts.data.forEach(account => {
+      if (account.role == 'admin') return
       const accountItem = document.createElement('div');
       accountItem.className = 'account-item';
 
@@ -51,25 +56,19 @@ async function showUserAccounts(formContent) {
       approvalStatus.className = 'approval-status';
       approvalStatus.textContent = `Approved: ${account.approved ? 'Yes' : 'No'}`;
 
-      const editButton = document.createElement('button');
-      editButton.className = 'edit-button';
-      editButton.textContent = 'Edit';
-      editButton.onclick = () => editAccount(account.accountId);
-
       const approveButton = document.createElement('button');
       approveButton.className = 'approve-button';
       approveButton.textContent = 'Approve';
       approveButton.disabled = account.approved; 
-      approveButton.onclick = () => approveAccount(account.accountId);
+      approveButton.onclick = async (event) => await approveAccount(account.accountId, event, approveButton);
 
       const deleteButton = document.createElement('button');
       deleteButton.className = 'delete-button';
       deleteButton.textContent = 'Delete';
-      deleteButton.onclick = () => deleteAccount(account.accountId);
+      deleteButton.onclick = async (event) => await deleteAccount(account.accountId, event, accountItem);
 
       accountItem.appendChild(accountName);
       accountItem.appendChild(approvalStatus);
-      accountItem.appendChild(editButton);
       accountItem.appendChild(approveButton);
       accountItem.appendChild(deleteButton);
 
@@ -80,19 +79,33 @@ async function showUserAccounts(formContent) {
     formContent.appendChild(accountsListContainer);
   } catch (e) {
     console.log('Error fetching accounts:', e);
+    showToast(e)
   }
 }
 
-function editAccount(accountId) {
-  console.log(`Editing account with ID: ${accountId}`);
+async function approveAccount(accountId, e, approveButton) {  
+  e.preventDefault()
+  try {
+    await window.electron.call('updateAccount', [accountId, {approved: 1}])
+    showToast('Account approved')
+    approveButton.disabled = true
+  } catch (e) {
+    console.log(e)
+    showToast(e)
+  }
 }
 
-function approveAccount(accountId) {
-  console.log(`Approving account with ID: ${accountId}`);
-}
-
-function deleteAccount(accountId) {
-  console.log(`Deleting account with ID: ${accountId}`);
+async function deleteAccount(accountId, e, accountItem) {
+  e.preventDefault()
+  try {
+    await window.electron.call('updateAccount', [accountId, {deleted: 1}])
+    showToast('Account deleted')
+    accountItem.remove()
+    
+  } catch (e) {
+    console.log(e)
+    showToast(e)
+  }
 }
 
 function addTenantFormFields(formContent) {

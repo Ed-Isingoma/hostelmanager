@@ -386,7 +386,7 @@ function getTransactionsByDate(startDate, endDate = null) {
 }
 
 function getAccountsDeadAndLiving() {
-  const query = `SELECT * FROM Account`;
+  const query = `SELECT * FROM Account WHERE deleted = 0`;
   return executeSelect(query);
 }
 

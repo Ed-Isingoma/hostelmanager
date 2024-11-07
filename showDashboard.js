@@ -1,7 +1,7 @@
 import showCards from "./showCards.js";
 import openForm from "./openForm.js";
 
-export default function showDashboard(user) {
+export default async function showDashboard(user) {
   // console.log('the user', user)
   const header = document.createElement("h1");
   header.className = 'dashboard-head'
@@ -11,7 +11,7 @@ export default function showDashboard(user) {
   const navbar = document.createElement("nav");
   navbar.className = "navbar";
 
-  const menuItems = ["Add Tenant", "Add Payment", "Update Tenant"];
+  const menuItems = ["Log Out", "Add Tenant", "Add Payment", "Update Tenant"];
   if (user.role == 'admin') menuItems.unshift('Users')
   menuItems.forEach(item => {
     const menuOption = document.createElement("button");
@@ -27,7 +27,7 @@ export default function showDashboard(user) {
   searchField.className = "search-field";
   navbar.appendChild(searchField);
 
-  showSemesters(navbar)
+  await showSemesters(navbar)
 
   document.body.appendChild(navbar);
 
