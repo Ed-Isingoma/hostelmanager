@@ -45,20 +45,30 @@ export default async function showDashboard(user) {
 
 async function showSemesters(navbar) {
   try {
-    const periodNames = await window.electron.call('getBillingPeriodNames')
-    const currentPeriodName = await window.electron.call('getCurrentBillingPeriodName')
-
+    const periodNames = await window.electron.call('getBillingPeriodNames');
+    const currentPeriodName = await window.electron.call('getCurrentBillingPeriodName');
     const semesterDropdown = document.createElement("select");
     semesterDropdown.className = "semester-dropdown";
+    
     periodNames.data.forEach(semester => {
       const option = document.createElement("option");
       option.value = semester.id;
       option.textContent = semester.name;
       semesterDropdown.appendChild(option);
     });
-    if (currentPeriodName.data.length) semesterDropdown.value = currentPeriodName.data[0].id
+    
+    if (currentPeriodName.data.length) {
+      semesterDropdown.value = currentPeriodName.data[0].id;
+      window.selectedPeriodNameId = currentPeriodName.data[0].id
+    }
+
+    semesterDropdown.addEventListener("change", () => {
+      window.selectedPeriodNameId = semesterDropdown.value;
+      console.log("Selected Period Name ID:", window.selectedPeriodNameId)
+    });
+
     navbar.appendChild(semesterDropdown);
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
 }

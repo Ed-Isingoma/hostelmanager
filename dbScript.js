@@ -353,6 +353,31 @@ async function updateMiscExpense(expenseId, updatedFields) {
 
 //getters
 
+async function getPotentialTenantRoomsByGender(gender, levelNumber, periodNameId) {
+  const query = `
+  SELECT r.roomId, r.roomName
+  FROM Room r
+  LEFT JOIN BillingPeriod bp ON r.roomId = bp.roomId AND bp.periodNameId = ?
+  LEFT JOIN Tenant t ON bp.tenantId = t.tenantId
+  WHERE r.levelNumber = ?
+    AND r.deleted = 0
+    AND (
+      bp.periodId IS NULL  -- Room is not occupied for the specified period
+      OR (
+        bp.periodId IS NOT NULL 
+        AND bp.periodType = 'double'
+        AND t.gender = ? -- Occupant is of the matching gender
+      )
+    )
+  GROUP BY r.roomId
+  HAVING COUNT(t.tenantId) <= 1;  -- Room has zero or one occupants
+`;
+
+  const params = [periodNameId, levelNumber, gender];
+  return await executeSelect(query, params)
+
+}
+
 function getMiscExpensesByDate(startDate, endDate = null) {
   let query = 'SELECT * FROM MiscExpense WHERE date >= ? AND deleted = 0';
   const params = [startDate];
@@ -681,6 +706,7 @@ module.exports = {
   getMiscExpensesByDate,
   getMostRecentTransaction,
   getOnlyTenantsWithOwingAmt,
+  getPotentialTenantRoomsByGender,
   getRoomById,
   getRoomsAndOccupancyByLevel,
   getTenantAllBillingPeriods,

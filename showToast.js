@@ -9,8 +9,8 @@ export default function showToast(message) {
   toast.style.top = '50%';
   toast.style.left = '50%';
   toast.style.transform = 'translate(-50%, -50%)';
-  toast.style.borderRadius = '12px';
-  toast.style.zIndex = '1000';
+  toast.style.borderRadius = '15px';
+  toast.style.zIndex = '7';
   toast.style.fontSize = '16px';
   toast.style.maxWidth = '80%';
   toast.style.textAlign = 'center';
