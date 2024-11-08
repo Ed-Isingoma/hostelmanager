@@ -379,7 +379,14 @@ async function getPotentialTenantRoomsByGender(gender, levelNumber, periodNameId
 }
 
 function getMiscExpensesByDate(startDate, endDate = null) {
-  let query = 'SELECT * FROM MiscExpense WHERE date >= ? AND deleted = 0';
+  let query = `
+  SELECT MiscExpense.*, Account.username AS operatorName
+  FROM MiscExpense
+  JOIN Account ON MiscExpense.operator = Account.accountId
+  WHERE MiscExpense.date >= ? 
+    AND MiscExpense.deleted = 0
+    AND Account.deleted = 0
+`;
   const params = [startDate];
 
   if (endDate) {
@@ -415,7 +422,7 @@ function getAccountsDeadAndLiving() {
   return executeSelect(query);
 }
 
-function getUnapprovedAccounts() {
+function getUnapprovedAccounts() {// seems to be useless
   const query = `SELECT * FROM Account WHERE approved = 0`;
   return executeSelect(query);
 }

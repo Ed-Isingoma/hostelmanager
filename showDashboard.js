@@ -1,12 +1,11 @@
-import showCards from "./showCards.js";
+import {showCards} from "./showCards.js";
 import openForm from "./openForm.js";
 
-export default async function showDashboard(user) {
-  // console.log('the user', user)
+export default async function showDashboard() {
   const header = document.createElement("h1");
   header.className = 'dashboard-head'
   header.textContent = "Kann Hostel Management";
-  document.body.appendChild(header);
+  dashboardContainer.appendChild(header);
 
   const navbar = document.createElement("nav");
   navbar.className = "navbar";
@@ -29,13 +28,13 @@ export default async function showDashboard(user) {
 
   await showSemesters(navbar)
 
-  document.body.appendChild(navbar);
+  dashboardContainer.appendChild(navbar);
 
   showCards()
 
   const footer = document.createElement("footer");
   footer.textContent = "(c) 2024 Kann Hostel. All Rights Reserved";
-  document.body.appendChild(footer);
+  dashboardContainer.appendChild(footer);
 
   window.closeForm = function () {
     document.querySelector(".overlay")?.remove();

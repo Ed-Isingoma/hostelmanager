@@ -1,10 +1,14 @@
-export default function showCards(cardsParent) {
+import openForm from "./openForm.js";
+import showDashboard from "./showDashboard.js";
+import showToast from "./showToast.js";
+
+function showCards() {
   const cardData = [
-    { title: "Number of Tenants", icon: "people", number: 12456 },
+    { title: "Number of Tenants", icon: "people", number: 12456, func: numOfTenants },
     { title: "Free Space", icon: "spaceship", number: 3042 },
     { title: "Payments in last 30 days", icon: "payment", number: 55000 },
     { title: "Outstanding Amount", icon: "balance", number: 75230 },
-    { title: "Misc. Expenses", icon: "expenses", number: 13330 },
+    { title: "Misc. Expenses", icon: "expenses", number: 13330, func: miscExpenses },
     { title: "Past Tenants", icon: "past-tenants", number: 2890 },
   ];
 
@@ -14,6 +18,7 @@ export default function showCards(cardsParent) {
   cardData.forEach(data => {
     const card = document.createElement("div");
     card.className = "dash-card";
+    card.onclick = data.func
 
     const icon = document.createElement("div");
     icon.className = "dash-card-icon";
@@ -33,7 +38,140 @@ export default function showCards(cardsParent) {
     cardContainer.appendChild(card);
   });
 
-  document.body.appendChild(cardContainer);
+  dashboardContainer.appendChild(cardContainer);
+}
+
+async function numOfTenants() {
+  try {
+    const tenants = await window.electron.call('getTenantsPlusOutstandingBalanceAll');
+    if (tenants.success) {
+      displayTenants(tenants.data);
+    }
+  } catch (e) {
+    console.log(e);
+    showToast(e);
+  }
+}
+
+function displayTenants(tenantsData) {
+  window.dashboardContainer.innerHTML = '';
+
+  const table = document.createElement('table');
+  table.className = 'modal-show-table';
+
+  const headerRow = document.createElement('tr');
+  headerRow.innerHTML = `
+    <th>Name</th>
+    <th>Gender</th>
+    <th>Course</th>
+    <th>Own Contact</th>
+    <th>Owing Amount</th>
+  `;
+  table.appendChild(headerRow);
+
+  if (tenantsData.length === 0) {
+    const noDataRow = document.createElement('tr');
+    noDataRow.innerHTML = `<td colspan="5">No tenants available</td>`;
+    table.appendChild(noDataRow);
+  } else {
+    tenantsData.forEach(tenant => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${tenant.name}</td>
+        <td>${tenant.gender}</td>
+        <td>${tenant.course}</td>
+        <td>${tenant.ownContact}</td>
+        <td>${tenant.owingAmount}</td>
+      `;
+      table.appendChild(row);
+    });
+  }
+
+  const backButton = document.createElement('button');
+  backButton.className = 'modal-show-back';
+  backButton.innerText = 'Back';
+  backButton.onclick = () => {
+    dashboardContainer.innerHTML = '';
+    showDashboard()
+  };
+
+  const addButton = document.createElement("button");
+  addButton.className = "menu-item";
+  addButton.textContent = 'Add New Tenant';
+  addButton.onclick = () => openForm('Add New Tenant')
+
+  dashboardContainer.appendChild(table);
+  dashboardContainer.appendChild(addButton);
+  dashboardContainer.appendChild(backButton);
+}
+
+async function miscExpenses(someDate = null) {
+  const monthAgo = new Date();
+  monthAgo.setMonth(monthAgo.getMonth() - 3);
+  const monthsAgo = monthAgo.toISOString().split('T')[0];
+  try {
+    const expenses = await window.electron.call('getMiscExpensesByDate', [someDate ?? monthsAgo]);
+    if (expenses.success) {
+      displayExpenses(expenses.data);
+    }
+  } catch (e) {
+    console.log(e);
+    showToast(e);
+  }
+}
+
+function displayExpenses(expensesData) {
+  dashboardContainer.innerHTML = '';
+
+  const table = document.createElement('table');
+  table.className = 'modal-show-table';
+
+  const headerRow = document.createElement('tr');
+  headerRow.innerHTML = `
+    <th>Date</th>
+    <th>Description</th>
+    <th>Qty</th>
+    <th>Amount</th>
+    <th>Entered By</th>    
+  `;
+  table.appendChild(headerRow);
+
+  if (expensesData.length === 0) {
+    const noDataRow = document.createElement('tr');
+    noDataRow.innerHTML = `<td colspan="5">No expenses since 3 months ago</td>`;
+    table.appendChild(noDataRow);
+  } else {
+    expensesData.forEach(expense => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${expense.date}</td>
+        <td>${expense.description}</td>
+        <td>${expense.quantity}</td>
+        <td>${expense.amount}</td>
+        <td>${expense.operatorName}</td>
+      `;
+      table.appendChild(row);
+    });
+  }
+
+  const backButton = document.createElement('button');
+  backButton.className = 'modal-show-back';
+  backButton.innerText = 'Back';
+  backButton.onclick = () => {
+    dashboardContainer.innerHTML = '';
+    showDashboard()
+  };
+
+  const addButton = document.createElement("button");
+  addButton.className = "menu-item";
+  addButton.textContent = 'Add Misc. Expense';
+  addButton.onclick = () => {
+    openForm('Add Misc. Expense')
+  }
+
+  dashboardContainer.appendChild(table);
+  dashboardContainer.appendChild(addButton);
+  dashboardContainer.appendChild(backButton);
 }
 
 function getIcon(iconName) {
@@ -51,3 +189,5 @@ function getIcon(iconName) {
 function formatNumber(num) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
+export {showCards, miscExpenses}

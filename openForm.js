@@ -1,4 +1,5 @@
 import { showLoginPrompt } from './logins.js';
+import { miscExpenses } from './showCards.js';
 import showToast from './showToast.js'
 
 export default function openForm(title) {
@@ -9,23 +10,11 @@ export default function openForm(title) {
   const form = document.createElement("div");
   form.className = "modal-form";
 
-  // Form Title
   const formTitle = document.createElement("h2");
   formTitle.textContent = title;
   form.appendChild(formTitle);
 
-  // Form content based on title
   const formContent = document.createElement("form");
-
-  if (title === "Add New Tenant") {
-    addTenantFormFields(formContent)
-  } else if (title === "Record Money Received") {
-    addPaymentFormFields(formContent)
-  }
-  if (title === 'Users') {
-    showUserAccounts(formContent)
-  }
-
   form.appendChild(formContent);
 
   if (title === 'Log Out') {
@@ -34,6 +23,16 @@ export default function openForm(title) {
   } else {
     document.body.appendChild(overlay);
     document.body.appendChild(form);
+  }
+
+  if (title === "Add New Tenant") {
+    addTenantFormFields(formContent)
+  } else if (title === "Record Money Received") {
+    addPaymentFormFields(formContent)
+  } else if (title === 'Users') {
+    showUserAccounts(formContent)
+  } else if (title === 'Add Misc. Expense') {
+    addMiscsFormFields(formContent)
   }
 }
 
@@ -247,6 +246,60 @@ async function addTenantFormFields(formContent) {
   }
 }
 
+function addMiscsFormFields(formContent) {
+  const fields = [
+    { label: "Description", type: "text", name: "description", placeholder: "Describe the expense" },
+    { label: "Quantity", type: "number", name: "quantity", placeholder: "Enter quantity" },
+    { label: "Amount", type: "number", name: "amount", placeholder: "Enter amount" },
+    { label: "Add Transaction Date", type: "date", name: "date" }
+  ];
+
+  fields.forEach(field => {
+    const label = document.createElement("label");
+    label.textContent = field.label;
+    formContent.appendChild(label);
+    const input = document.createElement("input");
+    input.type = field.type;
+    input.name = field.name;
+    input.placeholder = field.placeholder || "";
+    formContent.appendChild(input);
+  });
+  
+  const submitButton = document.createElement("button");
+  submitButton.type = "submit";
+  submitButton.className = "add-tenant-submit";
+  submitButton.textContent = "Submit";
+  submitButton.onclick = async (event) => {
+    event.preventDefault()
+    const formData = {}
+    fields.forEach(field => {
+      const inputElement = formContent.querySelector(`input[name=${field.name}]`);
+      formData[field.name] = inputElement.value;
+    });
+    try {
+      const response = await window.electron.call('createMiscExpense', [formData, user.accountId]);
+      if (response.success) {
+        showToast('Added Miscellaneous Expense');
+        closeForm()
+        miscExpenses()
+      } else {
+        showToast('Something went wrong. Try again')
+      }
+    } catch (error) {
+      console.error(error);
+      showToast(error)
+    }
+  }
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "add-tenant-submit";
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.onclick = closeForm
+
+  formContent.appendChild(cancelBtn);
+  formContent.appendChild(submitButton);
+}
+
 function addPaymentFormFields(formContent) {
   const fields = [
     { label: "Add Transaction Date", type: "date", name: "date" },
@@ -265,7 +318,6 @@ function addPaymentFormFields(formContent) {
     formContent.appendChild(input);
   });
 
-  // Billing Period Dropdown
   const billingPeriodLabel = document.createElement("label");
   billingPeriodLabel.textContent = "Billing Period";
   formContent.appendChild(billingPeriodLabel);
