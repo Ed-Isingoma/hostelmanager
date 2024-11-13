@@ -791,11 +791,11 @@ const query3 = `INSERT INTO Transactionn (receiptNumber, periodId, date, amount,
 (9, 7, '2024-11-09', 900, 0),
 (10, 8, '2024-11-10', 1300, 0);`;
 
-// executeQuery(query1)
+// setTimeout(async ()=> {await executeQuery(query1)}, 1000)
 
-// setTimeout(async ()=> {await executeQuery(query2); console.log(await getTenantById(5))}, 2000)
+// setTimeout(async ()=> {await executeQuery(query2)}, 2000)
 
-// setTimeout(async()=>{await executeQuery(query3); console.log(await getBillingPeriodById(3))}, 4000)
+// setTimeout(async()=>{await executeQuery(query3)}, 4000)
 
 module.exports = {
   createAccount,
