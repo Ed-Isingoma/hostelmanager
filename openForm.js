@@ -277,13 +277,13 @@ function addMiscsFormFields(formContent) {
       formData[field.name] = inputElement.value;
     });
     try {
-      const response = await window.electron.call('createMiscExpense', [formData, user.accountId]);
+      const response = await window.electron.call('createMiscExpense', [formData, user.accountId, selectedPeriodNameId]);
       if (response.success) {
         showToast('Added Miscellaneous Expense');
         closeForm()
         miscExpenses()
       } else {
-        showToast('Something went wrong. Try again')
+        showToast(response.error)
       }
     } catch (error) {
       console.error(error);

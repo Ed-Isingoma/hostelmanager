@@ -31,12 +31,13 @@ ipcMain.handle("call", async (event, funcName, params) => {
   try {
     if (typeof dbScript[funcName] === "function") {
       const resp = await dbScript[funcName].apply(null, params);
-      return { success: true, data: resp };
+      return { success: true, data: resp };      
     } else {
       throw new Error("Function not found");
     }
   } catch (error) {
     console.error("Error in function call:", error);
-    return { success: false, error: error.message };
+    console.log('variables:', params)
+    return { success: false, error: error };
   }
 });

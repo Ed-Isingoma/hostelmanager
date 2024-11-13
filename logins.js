@@ -130,10 +130,10 @@ async function showSignupPrompt() {
         signupContainer.remove();
         showLoginPrompt();
       } else {
-        showToast("Account creation failed.");
+        showToast(response.error);
       }
     } catch (error) {
-      showToast("An error occurred: " + error.message);
+      showToast("An error occurred: " + error);
     }
   });
 }

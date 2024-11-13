@@ -48,3 +48,104 @@
 .modal-show-back:hover {
   background-color: #0056b3;
 }
+
+.rooms-levels-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rooms-level-box {
+  border: 2px solid #ccc;
+  padding: 20px;
+  background-color: #f4f4f4;
+}
+
+.rooms-level-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.rooms-rooms-container {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.rooms-room-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px;
+  width: 120px;
+  height: 120px;
+  border: 2px solid #ddd;
+  text-align: center;
+  background-color: #fff;
+}
+
+.rooms-room-name {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.rooms-occupancy-container {
+  display: flex;
+  gap: 5px;
+}
+
+.rooms-occupancy-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  background-color: #ddd;
+}
+
+.rooms-occupancy-box.occupied {
+  background-color: blue;
+}
+
+.rooms-occupancy-box.empty {
+  background-color: lightgrey;
+}
+
+.tenants-popup-container {
+  position: absolute;
+  background-color: #fff;
+  border: 2px solid #ccc;
+  padding: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 200px;
+}
+
+.tenant-box {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+}
+
+.tenant-name,
+.tenant-owing-amount,
+.tenant-gender {
+  font-size: 14px;
+}
+
+.tenant-name {
+  font-weight: bold;
+}
+
+.tenant-owing-amount {
+  color: #e74c3c; /* Red for owing amounts */
+}
+
+.tenant-gender {
+  font-style: italic;
+}

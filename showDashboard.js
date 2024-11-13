@@ -51,19 +51,23 @@ async function showSemesters(navbar) {
     
     periodNames.data.forEach(semester => {
       const option = document.createElement("option");
-      option.value = semester.id;
+      option.value = semester.periodNameId;
       option.textContent = semester.name;
       semesterDropdown.appendChild(option);
     });
-    
-    if (currentPeriodName.data.length) {
-      semesterDropdown.value = currentPeriodName.data[0].id;
-      window.selectedPeriodNameId = currentPeriodName.data[0].id
+    if (!window.selectedPeriodNameId) {
+      if (currentPeriodName.data.length) {
+        semesterDropdown.value = currentPeriodName.data[0].periodNameId;
+        window.selectedPeriodNameId = currentPeriodName.data[0].periodNameId
+      } else {
+        window.selectedPeriodNameId = semesterDropdown.value
+      }
+    } else {
+      semesterDropdown.value = selectedPeriodNameId
     }
 
     semesterDropdown.addEventListener("change", () => {
       window.selectedPeriodNameId = semesterDropdown.value;
-      console.log("Selected Period Name ID:", window.selectedPeriodNameId)
     });
 
     navbar.appendChild(semesterDropdown);
