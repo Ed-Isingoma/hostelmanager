@@ -222,7 +222,7 @@ function displayTenants(tenantsData) {
   headerRow.innerHTML = `
     <th>Name</th>
     <th>Gender</th>
-    <th>Course</th>
+    <th>Room</th>
     <th>Contact</th>
     <th>Owing Amount</th>
   `;
@@ -237,8 +237,8 @@ function displayTenants(tenantsData) {
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${tenant.name}</td>
-        <td>${tenant.gender}</td>
-        <td>${tenant.course}</td>
+       <td>${tenant.gender.charAt(0).toUpperCase() + tenant.gender.slice(1).toLowerCase()}</td>
+        <td>${tenant.roomName}</td>
         <td>${tenant.ownContact}</td>
         <td>${tenant.owingAmount}</td>
       `;

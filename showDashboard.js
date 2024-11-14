@@ -11,7 +11,7 @@ export default async function showDashboard() {
   const navbar = document.createElement("nav");
   navbar.className = "navbar";
 
-  const menuItems = ["Log Out", "Add New Tenant", "Record Money Received", "Update Tenant"];
+  const menuItems = ["Log Out", "Add New Tenant", "Record Money Received", "Update Tenant", "Billing Periods"];
   if (user.role == 'admin') menuItems.unshift('Users');
   menuItems.forEach(item => {
     const menuOption = document.createElement("button");
@@ -22,11 +22,11 @@ export default async function showDashboard() {
   });
 
   // Create the search field
-  const searchField = document.createElement("input");
-  searchField.type = "text";
-  searchField.placeholder = "Search";
-  searchField.className = "search-field";
-  navbar.appendChild(searchField);
+  // const searchField = document.createElement("input");
+  // searchField.type = "text";
+  // searchField.placeholder = "Search";
+  // searchField.className = "search-field";
+  // navbar.appendChild(searchField);
 
   await showSemesters(navbar)
 

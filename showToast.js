@@ -21,5 +21,5 @@ export default function showToast(message) {
 
   setTimeout(() => {
     toastContainer.removeChild(toast);
-  }, 2150);
+  }, 2050);
 }

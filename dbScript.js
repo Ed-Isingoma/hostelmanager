@@ -310,6 +310,21 @@ async function updateBillingPeriod(periodId, updatedFields) {
   return await executeQuery(query, values);
 }
 
+async function updateBillingPeriodName(periodNameId, updatedFields) {
+  let query = 'UPDATE BillingPeriodName SET ';
+  const values = [];
+
+  Object.keys(updatedFields).forEach((field, index) => {
+    query += `${field} = ?${index < Object.keys(updatedFields).length - 1 ? ',' : ''} `;
+    values.push(updatedFields[field]);
+  });
+
+  query += 'WHERE periodNameId = ?';
+  values.push(periodNameId);
+
+  return await executeQuery(query, values);
+}
+
 async function updateAccount(accountId, updatedFields) {
   let query = 'UPDATE Account SET ';
   const values = [];
@@ -609,14 +624,16 @@ function getOnlyTenantsWithOwingAmt(periodNameId) {
 
 function getTenantsPlusOutstandingBalanceAll(periodNameId) {
   const query = `
-    SELECT Tenant.*, 
+    SELECT Tenant.*, Room.roomName,
       BillingPeriod.agreedPrice - IFNULL(SUM(Transactionn.amount), 0) AS owingAmount
     FROM Tenant
     JOIN BillingPeriod ON Tenant.tenantId = BillingPeriod.tenantId
+    JOIN Room on BillingPeriod.roomId = Room.roomId
     LEFT JOIN Transactionn ON BillingPeriod.periodId = Transactionn.periodId AND Transactionn.deleted = 0
     WHERE BillingPeriod.periodNameId = ? 
       AND Tenant.deleted = 0 
       AND BillingPeriod.deleted = 0
+      AND Room.deleted = 0
     GROUP BY Tenant.tenantId
   `;
 
@@ -796,6 +813,10 @@ const query3 = `INSERT INTO Transactionn (receiptNumber, periodId, date, amount,
 // setTimeout(async ()=> {await executeQuery(query2)}, 2000)
 
 // setTimeout(async()=>{await executeQuery(query3)}, 4000)
+// for (let i = 1; i <= 10; i++) {
+//   const ids = [151, 142, 143, 155, 189, 199, 140, 182, 172, 185]
+//   updateBillingPeriod(i, { roomId: ids[i - 1] })
+// }
 
 module.exports = {
   createAccount,
@@ -845,6 +866,7 @@ module.exports = {
   searchTenantByName,
   updateAccount,
   updateBillingPeriod,
+  updateBillingPeriodName,
   updateMiscExpense,
   updateRoom,
   updateTenant,

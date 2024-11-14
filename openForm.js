@@ -1,5 +1,6 @@
 import { showLoginPrompt } from './logins.js';
 import { miscExpenses } from './showCards.js';
+import showDashboard from './showDashboard.js';
 import showToast from './showToast.js'
 
 export default function openForm(title) {
@@ -20,7 +21,7 @@ export default function openForm(title) {
   if (title === 'Log Out') {
     document.body.innerHTML = ''
     showLoginPrompt()
-  } else {
+  } else if (title != 'Billing Periods') {
     document.body.appendChild(overlay);
     document.body.appendChild(form);
   }
@@ -33,13 +34,18 @@ export default function openForm(title) {
     showUserAccounts(formContent)
   } else if (title === 'Add Misc. Expense') {
     addMiscsFormFields(formContent)
+  } else if (title === 'Billing Periods') {
+    showBillingPeriods()
   }
 }
 
 async function showUserAccounts(formContent) {
   try {
     const accounts = await window.electron.call('getAccountsDeadAndLiving');
-
+    if (!accounts.success) {
+      showToast(accounts.error)
+      return
+    }
     const accountsListContainer = document.createElement('div');
     accountsListContainer.className = 'accounts-list';
     accounts.data.forEach(account => {
@@ -82,11 +88,93 @@ async function showUserAccounts(formContent) {
   }
 }
 
+async function showBillingPeriods() {
+  try {
+    const periodNames = await window.electron.call('getBillingPeriodNames')
+    if (!periodNames.success) return showToast(periodNames.error)
+    window.dashboardContainer.innerHTML = '';
+
+    const table = document.createElement('table');
+    table.className = 'modal-show-table';
+
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = `
+    <th>Name</th>
+    <th>Starting Date</th>
+    <th>End Date</th>
+    <th>Cost- Single</th>
+    <th>Cost- Double</th>
+    <th></th>
+    <th></th>
+  `;
+    table.appendChild(headerRow);
+
+    if (periodNames.data.length === 0) {
+      const noDataRow = document.createElement('tr');
+      noDataRow.innerHTML = `<td colspan="5">No billing periods available</td>`;
+      table.appendChild(noDataRow)
+    } else {
+      periodNames.data.forEach(period => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><input type="text" value="${period.name}" disabled /></td>
+            <td><input type="text" value="${period.startingDate}" disabled /></td>
+            <td><input type="text" value="${period.endDate}" disabled /></td>
+            <td><input type="number" value="${period.costSingle}" disabled /></td>
+            <td><input type="number" value="${period.costDouble}" disabled /></td>
+            <td>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
+                    style="cursor: pointer;" class="edit-icon">
+                    <path d="M3 17.25V21h3.75l11.03-11.03-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
+                </svg>
+            </td>
+            <td>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
+                    style="cursor: pointer;" class="delete-icon">
+                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z" fill="currentColor"/>
+                </svg>
+            </td>
+        `;
+        table.appendChild(row);
+
+        const editIcon = row.querySelector('.edit-icon');
+        editIcon.onclick = ()=> toggleEdit(period.periodNameId, editIcon);
+
+        const deleteIcon = row.querySelector('.delete-icon');
+        deleteIcon.addEventListener('click', () => deleteRow(period.periodNameId, row));
+      });
+    }
+
+    const backButton = document.createElement('button');
+    backButton.className = 'modal-show-back';
+    backButton.innerText = 'Back';
+    backButton.onclick = () => {
+      dashboardContainer.innerHTML = '';
+      showDashboard()
+    }
+
+    const addButton = document.createElement("button");
+    addButton.className = "menu-item";
+    addButton.textContent = 'Add Billing Period';
+    addButton.onclick = () => openForm('Add Billing Period')
+
+    dashboardContainer.appendChild(table);
+    dashboardContainer.appendChild(addButton);
+    dashboardContainer.appendChild(backButton);
+  } catch (e) {
+    console.log('Error fetching accounts:', e);
+    showToast(e)
+  }
+}
+
 async function approveAccount(accountId, e, approveButton) {
   e.preventDefault()
   try {
-    await window.electron.call('updateAccount', [accountId, { approved: 1 }])
-    showToast('Account approved')
+    const saving = await window.electron.call('updateAccount', [accountId, { approved: 1 }])
+    if (!saving.success) {
+      showToast(saving.error)
+      return
+    }
     approveButton.disabled = true
   } catch (e) {
     console.log(e)
@@ -97,13 +185,95 @@ async function approveAccount(accountId, e, approveButton) {
 async function deleteAccount(accountId, e, accountItem) {
   e.preventDefault()
   try {
-    await window.electron.call('updateAccount', [accountId, { deleted: 1 }])
-    showToast('Account deleted')
+    const saving = await window.electron.call('updateAccount', [accountId, { deleted: 1 }])
+    if (saving.success) {
+      showToast('Account deleted')
+    } else {
+      showToast(saving.error)
+    }
     accountItem.remove()
 
   } catch (e) {
     console.log(e)
     showToast(e)
+  }
+}
+
+async function deleteRow(periodId, item) {
+  try {
+    const saving = await window.electron.call('updateBillingPeriodName', [periodId, { deleted: 1 }])
+    if (saving.success) {
+      showToast('Billing period deleted')
+    } else {
+      showToast(saving.error)
+    }
+    item.remove()
+  } catch (e) {
+    console.log(e)
+    showToast(e)
+  }
+}
+
+function toggleEdit(periodId, editIcon) {
+  const row = editIcon.closest('tr');
+  const inputs = row.querySelectorAll('input');
+
+  // Toggle inputs between editable and read-only
+  inputs.forEach(input => input.disabled = !input.disabled);
+
+  if (!inputs[0].disabled) {
+    // Change icon to save mode
+    editIcon.innerHTML = `
+      <path d="M21 7H3v12h18V7zm-1 10H4v-8h16v8zm-8-3v3h2v-3h3l-4-4-4 4h3z" fill="currentColor"/>
+    `;
+    // Set the onclick directly to call saveRow
+    editIcon.onclick = () => saveRow(periodId, row);
+  } else {
+    // Revert to edit icon
+    editIcon.innerHTML = `
+      <path d="M3 17.25V21h3.75l11.03-11.03-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
+    `;
+    // Reset onclick to call toggleEdit for the next click
+    editIcon.onclick = () => toggleEdit(periodId, editIcon);
+  }
+}
+
+async function saveRow(periodId, row) {
+  const inputs = row.querySelectorAll('input');
+
+  const updatedData = {
+    name: inputs[0].value,
+    startingDate: inputs[1].value,
+    endDate: inputs[2].value,
+    costSingle: parseFloat(inputs[3].value),
+    costDouble: parseFloat(inputs[4].value)
+  };
+
+  try {
+    const saving = await window.electron.call('updateBillingPeriodName', [periodId, updatedData]);
+    if (saving.success) {
+      showToast('Billing period updated');
+    } else {
+      showToast(saving.error);
+    }
+  } catch (e) {
+    console.error(e);
+    showToast(e);
+  }
+
+  // Lock inputs again
+  inputs.forEach(input => input.disabled = true);
+
+  // Reset edit icon and its onclick event
+  const editIcon = row.querySelector('.edit-icon');
+  if (editIcon) {
+    editIcon.innerHTML = `
+      <path d="M3 17.25V21h3.75l11.03-11.03-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
+    `;
+    // Set onclick back to toggleEdit
+    editIcon.onclick = () => toggleEdit(periodId, editIcon);
+  } else {
+    console.error('Edit icon not found in the row');
   }
 }
 
@@ -152,6 +322,10 @@ async function addTenantFormFields(formContent) {
     formContent.appendChild(levelDropdown);
 
     const levels = await window.electron.call('getLevels');
+    if (!levels.success) {
+      showToast(levels.error)
+      return
+    }
     levels.data.forEach(level => {
       const option = document.createElement("option");
       option.value = level.levelNumber;
@@ -176,6 +350,7 @@ async function addTenantFormFields(formContent) {
 
       if (selectedGender && selectedLevel) {
         const rooms = await window.electron.call('getPotentialTenantRoomsByGender', [selectedGender, selectedLevel, window.selectedBillingPeriodNameId]);
+        if (!rooms.success) return showToast(rooms.error)
         roomDropdown.innerHTML = ''; // Clear existing room options
 
         rooms.data.forEach(room => {
@@ -222,7 +397,7 @@ async function addTenantFormFields(formContent) {
       if (periodNameRecord.success && periodNameRecord.data.length > 0) {
         const billingPeriod = periodNameRecord.data[0];
         agreedPriceInput.value = periodType === "single" ? billingPeriod.costSingle : billingPeriod.costDouble;
-      }
+      } else if (!periodNameRecord.success) return showToast(periodNameRecord.error)
     };
 
     periodTypeDropdown.addEventListener("change", setDefaultAgreedPrice);
@@ -264,7 +439,7 @@ function addMiscsFormFields(formContent) {
     input.placeholder = field.placeholder || "";
     formContent.appendChild(input);
   });
-  
+
   const submitButton = document.createElement("button");
   submitButton.type = "submit";
   submitButton.className = "add-tenant-submit";
