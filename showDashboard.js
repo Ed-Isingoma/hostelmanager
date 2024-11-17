@@ -1,4 +1,4 @@
-import {showCards} from "./showCards.js";
+import { doTotals, showCards } from "./showCards.js";
 import openForm from "./openForm.js";
 
 export default async function showDashboard() {
@@ -35,9 +35,9 @@ export default async function showDashboard() {
   // Create the container for cards and pass it to showCards
   const cardContainer = document.createElement("div");
   cardContainer.className = "card-container";
-  
+
   // Ensure showCards appends to this container
-  showCards(cardContainer);
+  await showCards(cardContainer);
 
   // Add the card container to the body
   document.body.appendChild(cardContainer);
@@ -60,7 +60,7 @@ async function showSemesters(navbar) {
     const currentPeriodName = await window.electron.call('getCurrentBillingPeriodName');
     const semesterDropdown = document.createElement("select");
     semesterDropdown.className = "semester-dropdown";
-    
+
     periodNames.data.forEach(semester => {
       const option = document.createElement("option");
       option.value = semester.periodNameId;
@@ -78,12 +78,52 @@ async function showSemesters(navbar) {
       semesterDropdown.value = selectedPeriodNameId
     }
 
-    semesterDropdown.addEventListener("change", () => {
+    semesterDropdown.addEventListener("change", async () => {
       window.selectedPeriodNameId = semesterDropdown.value;
+      await doTotals()
+      updateCardNumbers()
     });
 
     navbar.appendChild(semesterDropdown);
   } catch (e) {
     console.log(e);
+  }
+}
+
+function updateCardNumbers() {
+  const cards = document.querySelectorAll(".dash-card");
+  for (let card of cards) {
+    const titleDiv = card.querySelector(".dash-card-title");
+    if (titleDiv && titleDiv.textContent === "Number of Tenants") {
+      const numberDiv = card.querySelector(".dash-card-number");
+      if (numberDiv) {
+        numberDiv.textContent = window.totals.totalTenants
+      }
+    } else if (titleDiv && titleDiv.textContent === "Free Space") {
+      const numberDiv = card.querySelector(".dash-card-number");
+      if (numberDiv) {
+        numberDiv.textContent = window.totals.totalFreeSpaces
+      }
+    } else if (titleDiv && titleDiv.textContent === "Payments this semester/period") {
+      const numberDiv = card.querySelector(".dash-card-number");
+      if (numberDiv) {
+        numberDiv.textContent = window.totals.totalPayments
+      }
+    } else if (titleDiv && titleDiv.textContent === "Uncollected Amount this semester") {
+      const numberDiv = card.querySelector(".dash-card-number");
+      if (numberDiv) {
+        numberDiv.textContent = window.totals.totalOutstanding
+      }
+    } else if (titleDiv && titleDiv.textContent === "Misc. Expenses for current period") {
+      const numberDiv = card.querySelector(".dash-card-number");
+      if (numberDiv) {
+        numberDiv.textContent = window.totals.totalMisc
+      }
+    } else if (titleDiv && titleDiv.textContent === "Past Tenants") {
+      const numberDiv = card.querySelector(".dash-card-number");
+      if (numberDiv) {
+        numberDiv.textContent = window.totals.totalPastTenants
+      }
+    }
   }
 }

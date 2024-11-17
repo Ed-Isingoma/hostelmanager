@@ -2,14 +2,15 @@ import openForm from "./openForm.js";
 import showDashboard from "./showDashboard.js";
 import showToast from "./showToast.js";
 
-function showCards() {
+async function showCards() {
+  await doTotals()
   const cardData = [
-    { title: "Number of Tenants", icon: "people", number: 12456, func: numOfTenants },
-    { title: "Free Space", icon: "spaceship", number: 3042, func: showRooms },
-    { title: "Payments this semester/period", icon: "payment", number: 55000, func: collectedMoneys },
-    { title: "Uncollected Amount this semester", icon: "balance", number: 75230, func: uncollectedMoneys },
-    { title: "Misc. Expenses for current period", icon: "expenses", number: 13330, func: miscExpenses },
-    { title: "Past Tenants", icon: "past-tenants", number: 2890, func: olderTenants },
+    { title: "Number of Tenants", icon: "people", number: window.totals.totalTenants, func: numOfTenants },
+    { title: "Free Space", icon: "spaceship", number: window.totals.totalFreeSpaces, func: showRooms },
+    { title: "Payments this semester/period", icon: "payment", number: window.totals.totalPayments, func: collectedMoneys },
+    { title: "Uncollected Amount this semester", icon: "balance", number: window.totals.totalOutstanding, func: uncollectedMoneys },
+    { title: "Misc. Expenses for current period", icon: "expenses", number: window.totals.totalMisc, func: miscExpenses },
+    { title: "Past Tenants", icon: "past-tenants", number: window.totals.totalPastTenants, func: olderTenants },
   ];
 
   const cardContainer = document.createElement("div");
@@ -26,8 +27,8 @@ function showCards() {
 
     const number = document.createElement("div");
     number.className = "dash-card-number";
-    number.textContent = formatNumber(data.number);
-
+    number.textContent = formatNumber(Number(data.number));
+    
     const title = document.createElement("div");
     title.className = "dash-card-title";
     title.textContent = data.title;
@@ -39,6 +40,20 @@ function showCards() {
   });
 
   dashboardContainer.appendChild(cardContainer);
+}
+
+async function doTotals() {
+  try {
+    const tot = await window.electron.call('dashboardTotals', [selectedPeriodNameId])
+    if (tot.success) {
+      window.totals = tot.data
+    } else {
+      showToast(tot.error)
+    }
+  } catch(e) {
+    console.log(e)
+    showToast(e)
+  }
 }
 
 async function numOfTenants() {
@@ -525,4 +540,4 @@ function hideTenantsPopUp() {
 }
 
 
-export { showCards, miscExpenses }
+export { showCards, miscExpenses, doTotals }

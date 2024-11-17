@@ -746,6 +746,125 @@ async function getTransactionsByPeriodNameIdWithMetaData(periodNameId) {
   return await executeSelect(query, params);
 }
 
+async function dashboardTotals(periodNameId) {
+
+  const totals = {
+    totalTenants: 0,
+    totalFreeSpaces: 0,
+    totalPayments: 0,
+    totalOutstanding: 0,
+    totalMisc: 0,
+    totalPastTenants: 0,
+  };
+
+  const queries = {
+    totalTenants: `
+      SELECT COUNT(*) AS totalTenants
+      FROM (
+        SELECT Tenant.tenantId
+        FROM Tenant
+        JOIN BillingPeriod ON Tenant.tenantId = BillingPeriod.tenantId
+        JOIN Room ON BillingPeriod.roomId = Room.roomId
+        LEFT JOIN Transactionn ON BillingPeriod.periodId = Transactionn.periodId AND Transactionn.deleted = 0
+        WHERE BillingPeriod.periodNameId = ? 
+          AND Tenant.deleted = 0 
+          AND BillingPeriod.deleted = 0
+          AND Room.deleted = 0
+        GROUP BY Tenant.tenantId
+      ) AS groupedRecords;
+    `,
+    totalFreeSpaces: `
+      WITH TotalRoomSpaces AS (
+          SELECT COUNT(*) * 2 AS totalSpaces
+          FROM Room WHERE Room.deleted = 0
+      ),
+      OccupiedSpaces AS (
+          SELECT SUM(CASE WHEN BillingPeriod.periodType = 'single' THEN 2
+                  ELSE 1 END) AS occupiedSpaces
+          FROM BillingPeriod WHERE periodNameId = ? AND deleted = 0
+      )
+      SELECT 
+          TotalRoomSpaces.totalSpaces - IFNULL(OccupiedSpaces.occupiedSpaces, 0) AS totalFreeSpaces
+      FROM TotalRoomSpaces, OccupiedSpaces;
+    `,
+    totalPayments: `
+      SELECT 
+        SUM(Transactionn.amount) AS totalPayments
+      FROM Transactionn
+      JOIN BillingPeriod ON Transactionn.periodId = BillingPeriod.periodId
+      WHERE BillingPeriod.periodNameId = ?
+        AND Transactionn.deleted = 0
+        AND BillingPeriod.deleted = 0;
+    `,
+    totalOutstanding: `
+        SELECT COALESCE(SUM(BillingPeriod.agreedPrice) - (
+            SELECT 
+                SUM(Transactionn.amount) 
+            FROM 
+                Transactionn 
+            JOIN 
+                BillingPeriod ON Transactionn.periodId = BillingPeriod.periodId 
+            WHERE 
+                transactionn.deleted = 0 
+                AND BillingPeriod.deleted = 0 
+                AND BillingPeriod.periodNameId = ?
+            ), 0) AS totalOutstanding
+        FROM BillingPeriod
+        WHERE 
+            BillingPeriod.periodNameId = ? 
+            AND BillingPeriod.deleted = 0;
+    `,
+    totalMisc: `
+        SELECT 
+            COALESCE(SUM(COALESCE(MiscExpense.amount, 0)), 0) AS totalMisc
+        FROM 
+            MiscExpense
+        WHERE 
+            MiscExpense.periodNameId = ?
+            AND MiscExpense.deleted = 0;
+    `,
+    totalPastTenants: `
+      SELECT COUNT(DISTINCT Tenant.tenantId) as totalPastTenants
+      FROM Tenant
+      JOIN BillingPeriod ON Tenant.tenantId = BillingPeriod.tenantId
+      JOIN Room ON BillingPeriod.roomId = Room.roomId
+      JOIN BillingPeriodName ON BillingPeriod.periodNameId = BillingPeriodName.periodNameId
+      LEFT JOIN Transactionn ON BillingPeriod.periodId = Transactionn.periodId AND Transactionn.deleted = 0
+      WHERE BillingPeriodName.startingDate < (
+          SELECT startingDate 
+          FROM BillingPeriodName 
+          WHERE periodNameId = ?
+      )
+      AND Tenant.deleted = 0
+      AND BillingPeriod.deleted = 0
+      AND BillingPeriodName.deleted = 0
+      AND Room.deleted = 0
+      AND Tenant.tenantId NOT IN (
+          SELECT tenantId
+          FROM BillingPeriod
+          WHERE periodNameId = ?
+          AND deleted = 0
+      );
+    `,
+  };
+  
+  totals.totalTenants = await executeSelect(queries.totalTenants, [periodNameId]);
+  totals.totalPayments = await executeSelect(queries.totalPayments, [periodNameId]);
+  totals.totalFreeSpaces = await executeSelect(queries.totalFreeSpaces, [periodNameId])
+  totals.totalOutstanding = await executeSelect(queries.totalOutstanding, [periodNameId]);
+  totals.totalMisc = await executeSelect(queries.totalMisc, [periodNameId]);
+  totals.totalPastTenants = await executeSelect(queries.totalPastTenants, [periodNameId, periodNameId]);
+  
+  totals.totalTenants = totals.totalTenants[0].totalTenants
+  totals.totalPayments = totals.totalPayments[0].totalPayments
+  totals.totalFreeSpaces = totals.totalFreeSpaces[0].totalFreeSpaces
+  totals.totalOutstanding = totals.totalOutstanding[0].totalOutstanding
+  totals.totalMisc = totals.totalMisc[0].totalMisc
+  totals.totalPastTenants = totals.totalPastTenants[0].totalPastTenants
+
+  return totals;
+}
+
 function generateRandomRoomName() {
   const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
   const number = Math.floor(100 + Math.random() * 900);
@@ -827,6 +946,7 @@ module.exports = {
   createRoom,
   createTenant,
   createTransaction,
+  dashboardTotals,
   executeQuery,
   executeSelect,
   getAccountById,
