@@ -1,5 +1,6 @@
 import { doTotals, showCards } from "./showCards.js";
 import openForm from "./openForm.js";
+import showToast from "./showToast.js";
 
 export default async function showDashboard() {
   const header = document.createElement("h1");
@@ -60,15 +61,17 @@ async function showSemesters(navbar) {
     const currentPeriodName = await window.electron.call('getCurrentBillingPeriodName');
     const semesterDropdown = document.createElement("select");
     semesterDropdown.className = "semester-dropdown";
-
+    if (!periodNames.success) return showToast(periodNames.error)
+    
     periodNames.data.forEach(semester => {
       const option = document.createElement("option");
       option.value = semester.periodNameId;
       option.textContent = semester.name;
       semesterDropdown.appendChild(option);
     });
+    
     if (!window.selectedPeriodNameId) {
-      if (currentPeriodName.data.length) {
+      if (currentPeriodName.success && currentPeriodName.data.length) {
         semesterDropdown.value = currentPeriodName.data[0].periodNameId;
         window.selectedPeriodNameId = currentPeriodName.data[0].periodNameId
       } else {

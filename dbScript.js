@@ -669,6 +669,17 @@ function searchTenantByName(name) {
   return executeSelect(query, [`%${name}%`]);
 }
 
+function searchTenantNameAndId(name) {
+  const query = `
+    SELECT 
+      t.tenantId, 
+      t.name
+    FROM Tenant t
+    WHERE t.name LIKE ? AND t.deleted = 0
+  `;
+  return executeSelect(query, [`%${name}%`]);
+}
+
 function getTenantsOfBillingPeriodXButNotY(periodNameId1, periodNameId2) {
   const query = `
     SELECT Tenant.*
@@ -984,6 +995,7 @@ module.exports = {
   initDb,
   login,
   searchTenantByName,
+  searchTenantNameAndId,
   updateAccount,
   updateBillingPeriod,
   updateBillingPeriodName,

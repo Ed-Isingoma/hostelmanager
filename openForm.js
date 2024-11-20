@@ -542,10 +542,11 @@ function addMiscsFormFields(formContent) {
   formContent.appendChild(submitButton);
 }
 
-function addPaymentFormFields(formContent) {
+async function addPaymentFormFields(formContent) {
   const fields = [
     { label: "Add Transaction Date", type: "date", name: "date" },
-    { label: "Received Amount", type: "number", name: "amount", placeholder: "Enter amount" }
+    { label: "Received Amount", type: "number", name: "amount", placeholder: "Enter amount" },
+    { label: "Receipt number", type: "text", name: "receipt", placeholder: "Enter number" }
   ];
 
   fields.forEach(field => {
@@ -560,18 +561,102 @@ function addPaymentFormFields(formContent) {
     formContent.appendChild(input);
   });
 
-  const billingPeriodLabel = document.createElement("label");
-  billingPeriodLabel.textContent = "Billing Period";
-  formContent.appendChild(billingPeriodLabel);
+  try {
+    const label1 = document.createElement("label");
+    label1.textContent = "Select Tenant";
+    formContent.appendChild(label1);
+    
+    const tenantInput = document.createElement("input");
+    tenantInput.type = "text";
+    tenantInput.name = "tenants";
+    tenantInput.setAttribute("list", "tenants-datalist"); // Link to datalist
+    formContent.appendChild(tenantInput);
+    
+    const tenantDatalist = document.createElement("datalist");
+    tenantDatalist.id = "tenants-datalist";
+    formContent.appendChild(tenantDatalist);
+    
+    tenantInput.addEventListener("input", async () => {
+      const tenants = await window.electron.call("searchTenantNameAndId", [tenantInput.value]);
+      if (tenants.success) {
+        tenantDatalist.innerHTML = ""; // Clear previous options
+        for (let item of tenants.data) {
+          const option = document.createElement("option");
+          option.value = item.name; // Show tenant name as selectable option
+          option.setAttribute("data-id", item.tenantId); // Attach tenant ID as custom data attribute
+          tenantDatalist.appendChild(option);
+        }
+      }
+    });    
 
-  const billingPeriodSelect = document.createElement("select");
-  billingPeriodSelect.name = "billingPeriod";
-  const billingOptions = ["Monthly", "Quarterly", "Annually"];
-  billingOptions.forEach(option => {
-    const optionElement = document.createElement("option");
-    optionElement.value = option.toLowerCase();
-    optionElement.textContent = option;
-    billingPeriodSelect.appendChild(optionElement);
-  });
-  formContent.appendChild(billingPeriodSelect);
+    const labell = document.createElement("label");
+    labell.textContent = "Billing Period"
+    formContent.appendChild(labell);
+    const periodNames = await window.electron.call('getBillingPeriodNames');
+    const semesterDropdown = document.createElement("select");
+    semesterDropdown.className = "semester-dropdown";
+
+    periodNames.data.forEach(semester => {
+      const option = document.createElement("option");
+      option.value = semester.periodNameId;
+      option.textContent = semester.name;
+      semesterDropdown.appendChild(option);
+    });
+    formContent.appendChild(semesterDropdown)
+
+  } catch (e) {
+    return showToast(e)
+  }
 }
+
+function createFilterableSelect(containerId, options) {
+  const container = document.getElementById(containerId);
+
+  // Create filter input
+  const filterInput = document.createElement("input");
+  filterInput.type = "text";
+  filterInput.placeholder = "Type to filter...";
+  filterInput.className = "filter-container";
+
+  // Create select element
+  const select = document.createElement("select");
+
+  // Populate select element with initial options
+  options.forEach(option => {
+    const optElement = document.createElement("option");
+    optElement.value = option;
+    optElement.textContent = option;
+    select.appendChild(optElement);
+  });
+
+  // Add filter functionality
+  filterInput.addEventListener("input", () => {
+    const filterValue = filterInput.value.toLowerCase();
+    select.innerHTML = ""; // Clear existing options
+
+    const filteredOptions = options.filter(option =>
+      option.toLowerCase().startsWith(filterValue)
+    );
+
+    filteredOptions.forEach(option => {
+      const optElement = document.createElement("option");
+      optElement.value = option;
+      optElement.textContent = option;
+      select.appendChild(optElement);
+    });
+
+    if (filteredOptions.length === 0) {
+      const emptyOption = document.createElement("option");
+      emptyOption.textContent = "No matches";
+      emptyOption.disabled = true;
+      select.appendChild(emptyOption);
+    }
+  });
+
+  // Append filter input and select to container
+  container.appendChild(filterInput);
+  container.appendChild(select);
+}
+
+// Example usage
+// createFilterableSelect("select-container", ["Apple", "Banana", "Cherry", "Date"]);
