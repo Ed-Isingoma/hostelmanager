@@ -569,7 +569,7 @@ async function addPaymentFormFields(formContent) {
     const tenantInput = document.createElement("input");
     tenantInput.type = "text";
     tenantInput.name = "tenants";
-    tenantInput.setAttribute("list", "tenants-datalist"); // Link to datalist
+    tenantInput.setAttribute("list", "tenants-datalist");
     formContent.appendChild(tenantInput);
     
     const tenantDatalist = document.createElement("datalist");
@@ -579,7 +579,7 @@ async function addPaymentFormFields(formContent) {
     tenantInput.addEventListener("input", async () => {
       const tenants = await window.electron.call("searchTenantNameAndId", [tenantInput.value]);
       if (tenants.success) {
-        tenantDatalist.innerHTML = ""; // Clear previous options
+        tenantDatalist.innerHTML = "";
         for (let item of tenants.data) {
           const option = document.createElement("option");
           option.value = item.name; // Show tenant name as selectable option
@@ -590,7 +590,7 @@ async function addPaymentFormFields(formContent) {
     });    
 
     const labell = document.createElement("label");
-    labell.textContent = "Billing Period"
+    labell.textContent = "Being Payment For:"
     formContent.appendChild(labell);
     const periodNames = await window.electron.call('getBillingPeriodNames');
     const semesterDropdown = document.createElement("select");
@@ -604,59 +604,52 @@ async function addPaymentFormFields(formContent) {
     });
     formContent.appendChild(semesterDropdown)
 
+    const submitButton = document.createElement("button");
+    submitButton.type = "submit";
+    submitButton.className = "add-tenant-submit";
+    submitButton.textContent = "Submit";
+    submitButton.onclick = async (event) => {
+      event.preventDefault();
+      const formData = {};
+      let isFieldEmpty = false;
+      fields.forEach(field => {
+        const inputElement = formContent.querySelector(`input[name=${field.name}]`);
+        formData[field.name] = inputElement.value.trim();
+    
+        if (!formData[field.name]) {
+          inputElement.style.border = '2px solid red';
+          isFieldEmpty = true;
+        } else {
+          inputElement.style.border = '';
+        }
+      });
+    
+      if (isFieldEmpty) {
+        showToast('One required field\'s data is missing');
+        return;
+      }
+      try {
+        const response = '//'
+        if (response.success) {
+          showToast('Transaction recorded');
+          closeForm()
+        } else {
+          showToast(response.error)
+        }
+      } catch (error) {
+        console.error(error);
+        showToast(error)
+      }
+    }
+  
+    const cancelBtn = document.createElement("button");
+    cancelBtn.className = "add-tenant-submit";
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.onclick = closeForm
+  
+    formContent.appendChild(cancelBtn);
+    formContent.appendChild(submitButton);
   } catch (e) {
     return showToast(e)
   }
 }
-
-function createFilterableSelect(containerId, options) {
-  const container = document.getElementById(containerId);
-
-  // Create filter input
-  const filterInput = document.createElement("input");
-  filterInput.type = "text";
-  filterInput.placeholder = "Type to filter...";
-  filterInput.className = "filter-container";
-
-  // Create select element
-  const select = document.createElement("select");
-
-  // Populate select element with initial options
-  options.forEach(option => {
-    const optElement = document.createElement("option");
-    optElement.value = option;
-    optElement.textContent = option;
-    select.appendChild(optElement);
-  });
-
-  // Add filter functionality
-  filterInput.addEventListener("input", () => {
-    const filterValue = filterInput.value.toLowerCase();
-    select.innerHTML = ""; // Clear existing options
-
-    const filteredOptions = options.filter(option =>
-      option.toLowerCase().startsWith(filterValue)
-    );
-
-    filteredOptions.forEach(option => {
-      const optElement = document.createElement("option");
-      optElement.value = option;
-      optElement.textContent = option;
-      select.appendChild(optElement);
-    });
-
-    if (filteredOptions.length === 0) {
-      const emptyOption = document.createElement("option");
-      emptyOption.textContent = "No matches";
-      emptyOption.disabled = true;
-      select.appendChild(emptyOption);
-    }
-  });
-
-  // Append filter input and select to container
-  container.appendChild(filterInput);
-  container.appendChild(select);
-}
-
-// Example usage
-// createFilterableSelect("select-container", ["Apple", "Banana", "Cherry", "Date"]);
