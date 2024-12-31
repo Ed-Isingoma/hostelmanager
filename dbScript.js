@@ -56,6 +56,8 @@ function initDb() {
         roomId INTEGER NOT NULL,
         demandNoticeDate TEXT,
         agreedPrice INTEGER NOT NULL,
+        ownStartingDate TEXT,
+        ownEndDate TEXT,
         deleted BOOLEAN NOT NULL DEFAULT 0,
         periodType TEXT NOT NULL CHECK(periodType IN ('single', 'double')),
         FOREIGN KEY (tenantId) REFERENCES Tenant(tenantId),
@@ -68,7 +70,6 @@ function initDb() {
         periodId INTEGER NOT NULL,
         date TEXT NOT NULL,
         amount INTEGER NOT NULL,
-        receiptNumber TEXT NOT NULL,
         deleted BOOLEAN NOT NULL DEFAULT 0,
         FOREIGN KEY (periodId) REFERENCES BillingPeriod(periodId)
       )`, errorHandler);
@@ -220,14 +221,16 @@ async function createBillingPeriodName(periodName) {
 }
 
 async function createBillingPeriod(billingPeriod, periodNameId, roomId, tenantId) {
-  const query = `INSERT INTO BillingPeriod (periodNameId, tenantId, roomId, demandNoticeDate, agreedPrice, periodType) VALUES (?, ?, ?, ?, ?, ?)`;
+  const query = `INSERT INTO BillingPeriod (periodNameId, tenantId, roomId, demandNoticeDate, agreedPrice, periodType, ownStartingDate, ownEndDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
   const params = [
     periodNameId,
     tenantId,
     roomId,
     billingPeriod.demandNoticeDate,
     billingPeriod.agreedPrice,
-    billingPeriod.periodType
+    billingPeriod.periodType,
+    billingPeriod.ownStartingDate,
+    billingPeriod.ownEndDate
   ];
   return await executeQuery(query, params);
 }
@@ -260,8 +263,8 @@ async function createMiscExpense(expense, operator, periodNameId) {
 }
 
 async function createTransaction(transaction, periodId) {
-  const query = `INSERT INTO Transactionn (periodId, date, amount, receiptNumber) VALUES (?, ?, ?, ?)`;
-  const params = [periodId, transaction.date, transaction.amount, transaction.receiptNumber];
+  const query = `INSERT INTO Transactionn (periodId, date, amount) VALUES (?, ?, ?)`;
+  const params = [periodId, transaction.date, transaction.amount];
   return await executeQuery(query, params);
 }
 
@@ -471,15 +474,6 @@ function getBillingPeriodNames() {
   return executeSelect(query);
 }
 
-function getCurrentBillingPeriodName() {
-  const today = new Date().toISOString().split('T')[0];
-  const query = `SELECT * FROM BillingPeriodName 
-             WHERE startingDate <= ? AND endDate >= ? AND deleted = 0 
-             ORDER BY startingDate DESC LIMIT 1`
-  const params = [today, today]
-  return executeSelect(query, params)
-}
-
 async function getRoomsAndOccupancyByLevel(levelNumber, periodNameId) {
   const query = `
     SELECT Room.roomId, Room.roomName, Room.levelNumber,
@@ -606,7 +600,7 @@ function getBillingPeriodById(periodId) {
 function getOnlyTenantsWithOwingAmt(periodNameId) {
   const query = `
     SELECT Tenant.*, Room.roomName, BillingPeriod.agreedPrice, Transactionn.date, BillingPeriod.demandNoticeDate,
-      BillingPeriod.agreedPrice - IFNULL(SUM(Transactionn.amount), 0) AS owingAmount
+      BillingPeriod.agreedPrice - IFNULL(SUM(Transactionn.amount), 0) AS owingAmount, CASE WHEN BillingPeriod.ownEndDate IS NOT NULL THEN 'Yes' ELSE 'No' END AS paysMonthly
     FROM Tenant
     JOIN BillingPeriod ON Tenant.tenantId = BillingPeriod.tenantId
     JOIN Room on BillingPeriod.roomId = Room.roomId
@@ -701,7 +695,7 @@ function getTenantsOfBillingPeriodXButNotY(periodNameId1, periodNameId2) {
 function getOlderTenantsThan(periodNameId) {
   let query = `
     SELECT Tenant.*, Room.roomName, 
-       BillingPeriod.agreedPrice - IFNULL(SUM(Transactionn.amount), 0) AS owingAmount
+       BillingPeriod.agreedPrice - IFNULL(SUM(Transactionn.amount), 0) AS owingAmount, CASE WHEN BillingPeriod.ownEndDate IS NOT NULL THEN 'Yes' ELSE 'No' END AS paysMonthly
     FROM Tenant
     JOIN BillingPeriod ON Tenant.tenantId = BillingPeriod.tenantId
     JOIN Room ON BillingPeriod.roomId = Room.roomId
@@ -738,7 +732,7 @@ async function getTransactionsByPeriodNameIdWithMetaData(periodNameId) {
       Room.roomName AS roomName,
       BillingPeriodName.name AS billingPeriodName,
       BillingPeriod.agreedPrice - IFNULL(SUM(Transactionn.amount), 0) AS owingAmount,
-      Transactionn.receiptNumber AS receiptNumber
+      Transactionn.transactionId AS transactionId
     FROM Transactionn
     JOIN BillingPeriod ON Transactionn.periodId = BillingPeriod.periodId
     JOIN Tenant ON BillingPeriod.tenantId = Tenant.tenantId
@@ -900,6 +894,14 @@ async function createDefaultRooms() {
   }
 }
 
+async function moveMonthlyBillingPeriods(periodNameId) {
+  const today = new Date(new Date().getTime() + 3 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+  const query = `UPDATE BillingPeriod SET periodNameId = ? WHERE ownEndDate IS NOT NULL AND ownEndDate >= ?;`
+
+  return executeQuery(query, [periodNameId, today])
+}
+
 // createDefaultRooms()
 
 const query1 = `INSERT INTO Tenant (tenantId, name, gender, age, course, ownContact, nextOfKin, kinContact, deleted) VALUES
@@ -926,17 +928,17 @@ const query2 = `INSERT INTO BillingPeriod (periodId, periodNameId, tenantId, roo
 (9, 3, 9, 9, 600, 'single', 0),
 (10, 3, 10, 10, 1400, 'double', 0);`;
 
-const query3 = `INSERT INTO Transactionn (receiptNumber, periodId, date, amount, deleted) VALUES
-(1, 1, '2024-11-01', 400, 0),
-(2, 1, '2024-11-02', 400, 0),
-(3, 2, '2024-11-02', 600, 0),
-(4, 3, '2024-11-03', 500, 0),
-(5, 3, '2024-11-04', 500, 0),
-(6, 4, '2024-11-05', 1000, 0),
-(7, 5, '2024-11-06', 700, 0),
-(8, 6, '2024-11-08', 1100, 0),
-(9, 7, '2024-11-09', 900, 0),
-(10, 8, '2024-11-10', 1300, 0);`;
+const query3 = `INSERT INTO Transactionn (periodId, date, amount, deleted) VALUES
+(1, '2024-11-01', 400, 0),
+( 1, '2024-11-02', 400, 0),
+( 2, '2024-11-02', 600, 0),
+(3, '2024-11-03', 500, 0),
+( 3, '2024-11-04', 500, 0),
+( 4, '2024-11-05', 1000, 0),
+( 5, '2024-11-06', 700, 0),
+( 6, '2024-11-08', 1100, 0),
+( 7, '2024-11-09', 900, 0),
+( 8, '2024-11-10', 1300, 0);`;
 
 // setTimeout(async ()=> {await executeQuery(query1)}, 1000)
 
@@ -967,7 +969,6 @@ module.exports = {
   getAllTenantsNameAndId,
   getBillingPeriodById,
   getBillingPeriodNames,
-  getCurrentBillingPeriodName,
   getFullTenantProfile,
   getLevels,
   getMiscExpenseById,
@@ -994,6 +995,7 @@ module.exports = {
   getUnapprovedAccounts,
   initDb,
   login,
+  moveMonthlyBillingPeriods,
   searchTenantByName,
   searchTenantNameAndId,
   updateAccount,

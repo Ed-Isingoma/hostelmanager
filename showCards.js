@@ -7,9 +7,9 @@ async function showCards() {
   const cardData = [
     { title: "Number of Tenants", icon: "people", number: window.totals.totalTenants, func: numOfTenants },
     { title: "Free Space", icon: "spaceship", number: window.totals.totalFreeSpaces, func: showRooms },
-    { title: "Payments this semester/period", icon: "payment", number: window.totals.totalPayments, func: collectedMoneys },
+    { title: "Payments for this semester", icon: "payment", number: window.totals.totalPayments, func: collectedMoneys },
     { title: "Uncollected Amount this semester", icon: "balance", number: window.totals.totalOutstanding, func: uncollectedMoneys },
-    { title: "Misc. Expenses for current period", icon: "expenses", number: window.totals.totalMisc, func: miscExpenses },
+    { title: "Misc. Expenses for this semester", icon: "expenses", number: window.totals.totalMisc, func: miscExpenses },
     { title: "Past Tenants", icon: "past-tenants", number: window.totals.totalPastTenants, func: olderTenants },
   ];
 
@@ -28,7 +28,7 @@ async function showCards() {
     const number = document.createElement("div");
     number.className = "dash-card-number";
     number.textContent = formatNumber(Number(data.number));
-    
+
     const title = document.createElement("div");
     title.className = "dash-card-title";
     title.textContent = data.title;
@@ -50,7 +50,7 @@ async function doTotals() {
     } else {
       showToast(tot.error)
     }
-  } catch(e) {
+  } catch (e) {
     console.log(e)
     showToast(e)
   }
@@ -154,7 +154,7 @@ function displayRooms(levelsData) {
 
   const container = document.createElement('div');
   container.classList.add('rooms-levels-container');
-  
+
   levelsData.forEach(levelData => {
     const levelBox = document.createElement('div');
     levelBox.classList.add('rooms-level-box');
@@ -203,11 +203,11 @@ function displayRooms(levelsData) {
           showToast(e);
         }
       });
-      
+
       occupancyContainer.addEventListener("mouseleave", () => {
         hideTenantsPopUp();
       });
-      
+
       roomBox.appendChild(occupancyContainer);
       roomsContainer.appendChild(roomBox);
     });
@@ -230,6 +230,11 @@ function displayRooms(levelsData) {
 
 function displayTenants(tenantsData) {
   window.dashboardContainer.innerHTML = '';
+
+  const subHeading = document.createElement("h3");
+  subHeading.textContent = "Tenants for billing period: " + selectedPeriodNameName;
+  dashboardContainer.appendChild(subHeading);
+
   const table = document.createElement('table');
   table.className = 'modal-show-table';
 
@@ -239,24 +244,42 @@ function displayTenants(tenantsData) {
     <th>Gender</th>
     <th>Room</th>
     <th>Contact</th>
+    <th>Pays Monthly</th>
     <th>Owing Amount</th>
   `;
   table.appendChild(headerRow);
 
   if (tenantsData.length === 0) {
     const noDataRow = document.createElement('tr');
-    noDataRow.innerHTML = `<td colspan="5">No tenants available</td>`;
+    noDataRow.innerHTML = `<td colspan="6">No tenants available</td>`;
     table.appendChild(noDataRow);
   } else {
+    tenantsData.sort((a, b) => {
+      if (a.ownEndDate && !b.ownEndDate) return -1;
+      if (!a.ownEndDate && b.ownEndDate) return 1;
+      return a.name.localeCompare(b.name);
+    });
+
     tenantsData.forEach(tenant => {
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td>${tenant.name}</td>
-       <td>${tenant.gender.charAt(0).toUpperCase() + tenant.gender.slice(1).toLowerCase()}</td>
-        <td>${tenant.roomName}</td>
-        <td>${tenant.ownContact}</td>
-        <td>${tenant.owingAmount}</td>
-      `;
+      <td>${tenant.name}</td>
+      <td>${tenant.gender.charAt(0).toUpperCase() + tenant.gender.slice(1).toLowerCase()}</td>
+      <td>${tenant.roomName}</td>
+      <td>${tenant.ownContact}</td>
+      <td>${tenant.ownEndDate ? 'Yes' : 'No'}</td>
+      <td>${tenant.owingAmount}</td>
+    `;
+
+      if (tenant.ownEndDate) {
+        const ownEndDate = new Date(tenant.ownEndDate);
+        const timeDifference = Math.floor((ownEndDate - window.globalNow) / (1000 * 60 * 60 * 24));
+
+        if (timeDifference >= 0 && timeDifference <= 7) {
+          row.classList.add('almostdone');
+        }
+      }
+
       table.appendChild(row);
     });
   }
@@ -282,6 +305,10 @@ function displayTenants(tenantsData) {
 function displayPayments(moneysData) {
   dashboardContainer.innerHTML = '';
 
+  const subHeading = document.createElement("h3");
+  subHeading.textContent = "Payments made for " + selectedPeriodNameName;
+  dashboardContainer.appendChild(subHeading);
+
   const table = document.createElement('table');
   table.className = 'modal-show-table';
 
@@ -290,16 +317,14 @@ function displayPayments(moneysData) {
     <th>Date</th>
     <th>Amount Paid</th> 
     <th>Tenant Name</th>
-    <th>Tenant Contact</th>
     <th>Room</th>    
-    <th>Billing Period</th>
     <th>Balance</th>   
-    <th>Receipt Number</th>   
+    <th>Transaction ID</th>   
   `;
   table.appendChild(headerRow);
   if (moneysData.length === 0) {
     const noDataRow = document.createElement('tr');
-    noDataRow.innerHTML = `<td colspan="8">No expenses for current semester/ period</td>`;
+    noDataRow.innerHTML = `<td colspan="6">No expenses for current semester/ period</td>`;
     table.appendChild(noDataRow);
   } else {
     moneysData.forEach(money => {
@@ -308,11 +333,9 @@ function displayPayments(moneysData) {
         <td>${money.date}</td>
         <td>${money.amount}</td>
         <td>${money.tenantName}</td>
-        <td>${money.contact}</td>
         <td>${money.roomName}</td>
-        <td>${money.billingPeriodName}</td>
         <td>${money.owingAmount}</td>
-        <td>${money.receiptNumber || '<i>unset</i>'}</td>
+        <td>K${money.transactionId}</td>
       `;
       table.appendChild(row);
     });
@@ -341,37 +364,61 @@ function displayPayments(moneysData) {
 function displayMoneys(moneysData) {
   dashboardContainer.innerHTML = '';
 
+  const subHeading = document.createElement("h3");
+  subHeading.textContent = "Uncollected Amounts In " + selectedPeriodNameName;
+  dashboardContainer.appendChild(subHeading);
+
   const table = document.createElement('table');
   table.className = 'modal-show-table';
 
   const headerRow = document.createElement('tr');
   headerRow.innerHTML = `
-    <th>Name</th>
-    <th>Contact</th> 
+    <th>Name</th> 
     <th>Room</th>
-    <th>Total Amount Payable</th>
     <th>Amount Paid</th>    
     <th>Amount Due</th>
+    <th>Demand Notice date</th>
+    <th>Pays Monthly</th>
     <th>Latest Payment date</th>   
-    <th>Demand Notice date</th>   
+    <th>Total Amount Payable</th>
+    <th>Contact</th> 
   `;
   table.appendChild(headerRow);
+
   if (moneysData.length === 0) {
     const noDataRow = document.createElement('tr');
-    noDataRow.innerHTML = `<td colspan="8">No expenses for current semester/ period</td>`;
+    noDataRow.innerHTML = `<td colspan="9">No expenses for current semester/period</td>`;
     table.appendChild(noDataRow);
   } else {
+  
+    moneysData.sort((a, b) => {
+      const dateA = a.demandNoticeDate ? new Date(a.demandNoticeDate).setHours(0, 0, 0, 0) : null;
+      const dateB = b.demandNoticeDate ? new Date(b.demandNoticeDate).setHours(0, 0, 0, 0) : null;
+  
+      if (dateA === dateB) return 0;
+      if (dateA === null) return 1; // Null values go to the end
+      if (dateB === null) return -1; // Null values go to the end
+  
+      if (dateA > globalNow && dateB > globalNow) return dateA - dateB; // Sort future dates
+      if (dateA > globalNow) return 1; // Future dates after today
+      if (dateB > globalNow) return -1; // Future dates after today
+  
+      // Sort descending for past dates (today, yesterday, etc.)
+      return dateB - dateA;
+    });
+  
     moneysData.forEach(money => {
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${money.name}</td>
-        <td>${money.ownContact}</td>
         <td>${money.roomName}</td>
-        <td>${money.agreedPrice}</td>
         <td>${money.agreedPrice - money.owingAmount}</td>
         <td>${money.owingAmount}</td>
+        <td class=${money.demandNoticeDate && new Date(money.demandNoticeDate).setHours(0, 0, 0, 0) == globalNow ? 'orangebg': ''}>${money.demandNoticeDate || '<i>unset</i>'}</td>
+        <td>${money.paysMonthly || '<i>unset</i>'}</td>
         <td>${money.date}</td>
-        <td>${money.demandNoticeDate || '<i>unset</i>'}</td>
+        <td>${money.agreedPrice}</td>
+        <td>${money.ownContact}</td>
       `;
       table.appendChild(row);
     });
@@ -391,6 +438,10 @@ function displayMoneys(moneysData) {
 
 function displayExpenses(expensesData) {
   dashboardContainer.innerHTML = '';
+
+  const subHeading = document.createElement("h3");
+  subHeading.textContent = "Misc. Expenses for period: " + selectedPeriodNameName;
+  dashboardContainer.appendChild(subHeading);
 
   const table = document.createElement('table');
   table.className = 'modal-show-table';
@@ -444,6 +495,11 @@ function displayExpenses(expensesData) {
 
 function displayOlders(oldersData) {
   dashboardContainer.innerHTML = '';
+
+  const subHeading = document.createElement("h3");
+  subHeading.textContent = "Tenants who left during or before " + selectedPeriodNameName;
+  dashboardContainer.appendChild(subHeading);
+
   const table = document.createElement('table');
   table.className = 'modal-show-table';
 
@@ -451,9 +507,10 @@ function displayOlders(oldersData) {
   headerRow.innerHTML = `
     <th>Name</th>
     <th>Gender</th>
-    <th>Contact</th>
     <th>Room</th>
-    <th>Owing Amount</th>    
+    <th>Pays Monthly</th>
+    <th>Contact</th>
+    <th>Unpaid Amount</th>    
   `;
   table.appendChild(headerRow);
   if (oldersData.length === 0) {
@@ -466,8 +523,9 @@ function displayOlders(oldersData) {
       row.innerHTML = `
         <td>${older.name}</td>
         <td>${older.gender}</td>
-        <td>${older.ownContact}</td>
         <td>${older.roomName}</td>
+        <td>${older.paysMonthly}</td>
+        <td>${older.ownContact}</td>
         <td>${older.owingAmount}</td>
       `;
       table.appendChild(row);
@@ -505,7 +563,7 @@ function formatNumber(num) {
 function showTenantsPopUp(tenants) {
   const popUpContainer = document.createElement('div');
   popUpContainer.classList.add('tenants-popup-container');
-  
+
   tenants.forEach(tenant => {
     const tenantBox = document.createElement('div');
     tenantBox.classList.add('tenant-box');
@@ -513,7 +571,7 @@ function showTenantsPopUp(tenants) {
     const tenantName = document.createElement('div');
     tenantName.classList.add('tenant-name');
     tenantName.innerHTML = `Name: ${tenant.name}`;
-    
+
     const owingAmount = document.createElement('div');
     owingAmount.classList.add('tenant-owing-amount');
     owingAmount.innerHTML = `Owing: $${tenant.owingAmount.toFixed(2)}`;

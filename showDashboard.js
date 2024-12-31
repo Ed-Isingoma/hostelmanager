@@ -62,27 +62,43 @@ async function showSemesters(navbar) {
     const semesterDropdown = document.createElement("select");
     semesterDropdown.className = "semester-dropdown";
     if (!periodNames.success) return showToast(periodNames.error)
-    
+
     periodNames.data.forEach(semester => {
       const option = document.createElement("option");
       option.value = semester.periodNameId;
       option.textContent = semester.name;
+      option.setAttribute("data-endDate", semester.endDate)
       semesterDropdown.appendChild(option);
     });
-    
+
     if (!window.selectedPeriodNameId) {
+      const now = new Date()
       if (currentPeriodName.success && currentPeriodName.data.length) {
         semesterDropdown.value = currentPeriodName.data[0].periodNameId;
         window.selectedPeriodNameId = currentPeriodName.data[0].periodNameId
+        window.selectedPeriodNameName = currentPeriodName.data[0].name
+        window.globalNow = now >= new Date(currentPeriodName.data[0].endDate).setHours(0, 0, 0, 0) ? now : new Date(currentPeriodName.data[0].endDate).setHours(0, 0, 0, 0)
       } else {
         window.selectedPeriodNameId = semesterDropdown.value
+        const selectedOption = semesterDropdown.options[semesterDropdown.selectedIndex];
+        window.selectedPeriodNameName = selectedOption.text
+        window.globalNow = new Date(selectedOption.dataset.endDate).setHours(0, 0, 0, 0)
       }
     } else {
       semesterDropdown.value = selectedPeriodNameId
     }
 
+    if (currentPeriodName.success && currentPeriodName.data.length) {
+      window.currentPeriodNameId = currentPeriodName.data[0].periodNameId
+    }
+
     semesterDropdown.addEventListener("change", async () => {
       window.selectedPeriodNameId = semesterDropdown.value;
+
+      const selectedOption = semesterDropdown.options[semesterDropdown.selectedIndex];
+      window.selectedPeriodNameName = selectedOption.text
+      window.globalNow = new Date(selectedOption.dataset.endDate).setHours(0, 0, 0, 0)
+
       await doTotals()
       updateCardNumbers()
     });
@@ -107,7 +123,7 @@ function updateCardNumbers() {
       if (numberDiv) {
         numberDiv.textContent = window.totals.totalFreeSpaces
       }
-    } else if (titleDiv && titleDiv.textContent === "Payments this semester/period") {
+    } else if (titleDiv && titleDiv.textContent === "Payments for this semester") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
         numberDiv.textContent = window.totals.totalPayments
@@ -117,7 +133,7 @@ function updateCardNumbers() {
       if (numberDiv) {
         numberDiv.textContent = window.totals.totalOutstanding
       }
-    } else if (titleDiv && titleDiv.textContent === "Misc. Expenses for current period") {
+    } else if (titleDiv && titleDiv.textContent === "Misc. Expenses for this semester") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
         numberDiv.textContent = window.totals.totalMisc

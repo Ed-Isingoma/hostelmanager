@@ -30,6 +30,14 @@
   background-color: #f1f1f1;
 }
 
+.almostdone {
+  background-color: rgba(0, 255, 255, 0.685);
+}
+
+.orangebg {
+  background-color: #e74d3cc0;
+}
+
 .modal-show-table th,
 .modal-show-table td {
   white-space: nowrap;
