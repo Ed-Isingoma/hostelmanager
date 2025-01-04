@@ -1,4 +1,5 @@
-import { doTotals, showCards } from "./showCards.js";
+import { showCards } from "./showCards.js";
+import { doTotals } from "./getIcon.js";
 import openForm from "./openForm.js";
 import showToast from "./showToast.js";
 
@@ -58,10 +59,12 @@ export default async function showDashboard() {
 async function showSemesters(navbar) {
   try {
     const periodNames = await window.electron.call('getBillingPeriodNames');
-    const currentPeriodName = await window.electron.call('getCurrentBillingPeriodName');
     const semesterDropdown = document.createElement("select");
     semesterDropdown.className = "semester-dropdown";
+
     if (!periodNames.success) return showToast(periodNames.error)
+    const currentPeriodName = getCurrentBillingPeriodName(periodNames.data)
+    window.semesters = periodNames.data
 
     periodNames.data.forEach(semester => {
       const option = document.createElement("option");
@@ -73,11 +76,11 @@ async function showSemesters(navbar) {
 
     if (!window.selectedPeriodNameId) {
       const now = new Date()
-      if (currentPeriodName.success && currentPeriodName.data.length) {
-        semesterDropdown.value = currentPeriodName.data[0].periodNameId;
-        window.selectedPeriodNameId = currentPeriodName.data[0].periodNameId
-        window.selectedPeriodNameName = currentPeriodName.data[0].name
-        window.globalNow = now >= new Date(currentPeriodName.data[0].endDate).setHours(0, 0, 0, 0) ? now : new Date(currentPeriodName.data[0].endDate).setHours(0, 0, 0, 0)
+      if (currentPeriodName) {
+        semesterDropdown.value = currentPeriodName.periodNameId;
+        window.selectedPeriodNameId = currentPeriodName.periodNameId
+        window.selectedPeriodNameName = currentPeriodName.name
+        window.globalNow = now >= new Date(currentPeriodName.endDate).setHours(0, 0, 0, 0) ? now : new Date(currentPeriodName.endDate).setHours(0, 0, 0, 0)
       } else {
         window.selectedPeriodNameId = semesterDropdown.value
         const selectedOption = semesterDropdown.options[semesterDropdown.selectedIndex];
@@ -88,8 +91,8 @@ async function showSemesters(navbar) {
       semesterDropdown.value = selectedPeriodNameId
     }
 
-    if (currentPeriodName.success && currentPeriodName.data.length) {
-      window.currentPeriodNameId = currentPeriodName.data[0].periodNameId
+    if (currentPeriodName) {
+      window.currentPeriodNameId = currentPeriodName.periodNameId
     }
 
     semesterDropdown.addEventListener("change", async () => {
@@ -107,6 +110,31 @@ async function showSemesters(navbar) {
   } catch (e) {
     console.log(e);
   }
+}
+
+function getCurrentBillingPeriodName(semesters) {
+  if (!Array.isArray(semesters) || semesters.length === 0) {
+    showToast('No semesters to select from')
+    return null
+  }
+  const now = new Date();
+
+  semesters.sort((a, b) => new Date(a.startingDate) - new Date(b.startingDate));
+  let currentPeriodName = null;
+
+  for (let i = 0; i < semesters.length; i++) {
+      const currentSemesterDate = new Date(semesters[i].startingDate);
+
+      if (currentSemesterDate <= now) {
+          const nextSemester = semesters[i + 1];
+          if (!nextSemester || new Date(nextSemester.startingDate) > now) {
+              currentPeriodName = semesters[i];
+              break;
+          }
+      }
+  }
+
+  return currentPeriodName
 }
 
 function updateCardNumbers() {
