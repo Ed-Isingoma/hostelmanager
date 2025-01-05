@@ -469,6 +469,37 @@ function getAllRooms() {
   return executeSelect(query);
 }
 
+//postgres
+
+// const pool = new Pool({
+//   user: 'your_username',
+//   host: 'your_host',
+//   database: 'your_database',
+//   password: 'your_password',
+//   port: 5432, // or your PostgreSQL port number
+// });
+
+// async function initDb() {
+//   return new Promise((resolve, reject) => {
+//     pool.query('SELECT NOW()', (err, res) => {
+//       if (err) {
+//         console.error('Error connecting to PostgreSQL:', err);
+//         reject(err);
+//       } else {
+//         console.log('Connected to the PostgreSQL database.');
+//         resolve();
+//       }
+//     });
+//   });
+// }
+
+// pool.connect((err, client, done) => {
+//   if (err) {
+//     return console.error('Error connecting to PostgreSQL:', err);
+//   }
+//   console.log('Connected to the PostgreSQL database.');
+// });
+
 function getBillingPeriodNames() {
   const query = `SELECT * FROM BillingPeriodName WHERE deleted = 0`
   return executeSelect(query);
@@ -740,9 +771,9 @@ function searchRoomByNamePart(name) {
   const query = `
     SELECT 
       r.roomId, 
-      r.name
+      r.roomName
     FROM Room r
-    WHERE r.name LIKE ? AND r.deleted = 0
+    WHERE r.roomName LIKE ? AND r.deleted = 0
   `;
   return executeSelect(query, [`%${name}%`]);
 }

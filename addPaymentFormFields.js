@@ -6,38 +6,39 @@ export async function addPaymentFormFields(formContent) {
     { label: "Add Transaction Date", type: "date", name: "date" },
     { label: "Received Amount", type: "number", name: "amount", placeholder: "Enter amount" }
   ];
-
+  const contentArea = document.createElement('div')
   fields.forEach(field => {
     const label = document.createElement("label");
     label.textContent = field.label;
-    formContent.appendChild(label);
+    contentArea.appendChild(label);
 
     const input = document.createElement("input");
     input.type = field.type;
     input.name = field.name;
     input.required = true
     input.placeholder = field.placeholder || "";
-    formContent.appendChild(input);
+    contentArea.appendChild(input);
   });
 
   try {
     const label1 = document.createElement("label");
     label1.textContent = "Select Tenant";
-    formContent.appendChild(label1);
+    contentArea.appendChild(label1);
 
     const tenantInput = document.createElement("input");
     tenantInput.type = "text";
     tenantInput.name = "tenants";
     tenantInput.required = true
     tenantInput.setAttribute("list", "tenants-datalist");
-    formContent.appendChild(tenantInput);
+    contentArea.appendChild(tenantInput);
 
     const tenantDatalist = document.createElement("datalist");
     tenantDatalist.id = "tenants-datalist";
-    formContent.appendChild(tenantDatalist);
+    contentArea.appendChild(tenantDatalist);
 
     tenantInput.addEventListener("input", async () => {
-      const tenants = await window.electron.call("searchTenantNameAndId", [tenantInput.value]);
+      const tenants = await window.electron.call("searchTenantNameAndId", [tenantInput.value.split(' (')[0]]);
+      //that split is because the option value is intertwined
       if (tenants.success) {
         tenantDatalist.innerHTML = "";
         for (let item of tenants.data) {
@@ -51,7 +52,7 @@ export async function addPaymentFormFields(formContent) {
 
     const labell = document.createElement("label");
     labell.textContent = "Being Payment For:";
-    formContent.appendChild(labell);
+    contentArea.appendChild(labell);
 
     const semesterDropdown = document.createElement("select");
     semesterDropdown.className = "semester-dropdown";
@@ -71,12 +72,12 @@ export async function addPaymentFormFields(formContent) {
       semesterDropdown.appendChild(option);
     });
 
-    semesterDropdown.value = window.currentPeriodNameId;
+    semesterDropdown.value = ""
 
-    formContent.appendChild(semesterDropdown);
+    contentArea.appendChild(semesterDropdown);
 
     const subheadingPayForm = document.createElement("h5");
-    formContent.appendChild(subheadingPayForm);
+    contentArea.appendChild(subheadingPayForm);
 
     const customOption = document.createElement("option");
     customOption.value = "custom";
@@ -97,10 +98,10 @@ export async function addPaymentFormFields(formContent) {
     endDateInput.type = "date";
     endDateInput.style.display = "none";
 
-    formContent.appendChild(startDateLabel);
-    formContent.appendChild(startDateInput);
-    formContent.appendChild(endDateLabel);
-    formContent.appendChild(endDateInput);
+    contentArea.appendChild(startDateLabel);
+    contentArea.appendChild(startDateInput);
+    contentArea.appendChild(endDateLabel);
+    contentArea.appendChild(endDateInput);
 
     tenantInput.addEventListener("change", async () => {
       Array.from(semesterDropdown.options).forEach((option) => {
@@ -155,6 +156,9 @@ export async function addPaymentFormFields(formContent) {
           subheadingPayForm.textContent = 'Tenant data for selected billing period'
         } else {
           try {
+             console.log('the options of datalist', tenantDatalist)
+             console.log('the tenantinput value:', tenantInput.value)
+             console.log('tenantInput', tenantInput)
             const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
 
             const periodTherein = await window.electron.call('getBillingPeriodBeingPaidFor', [selectedTenantOption.dataset.id, semesterDropdown.value])
@@ -177,24 +181,25 @@ export async function addPaymentFormFields(formContent) {
 
       const roomLabel = document.createElement("label");
       roomLabel.textContent = "Room Number";
-      formContent.appendChild(roomLabel);
+      contentArea.appendChild(roomLabel);
 
       const roomInput = document.createElement("input");
       roomInput.type = 'text';
       roomInput.name = "room";
-      roomInput.setAttribute('list', 'rooms-datalist');
-      formContent.appendChild(roomInput);
+      roomInput.setAttribute('list', 'room-datalist');
+      contentArea.appendChild(roomInput);
       roomInput.required = true
 
       const roomDatalist = document.createElement('datalist');
       roomDatalist.id = 'room-datalist';
-      formContent.appendChild(roomDatalist);
+      contentArea.appendChild(roomDatalist);
       roomInput.disabled = Object.keys(chosenBillingPeriod).length ? true : false
       roomInput.value = chosenBillingPeriod['roomName'] || ''
 
       roomInput.addEventListener('input', async () => {
         const rooms = await window.electron.call('searchRoomByNamePart', [roomInput.value]);
         if (rooms.success) {
+          console.log('going to empty datalist roominput')
           roomDatalist.innerHTML = '';
           for (let item of rooms.data) {
             const option = document.createElement('option');
@@ -207,7 +212,7 @@ export async function addPaymentFormFields(formContent) {
 
       const periodTypeLabel = document.createElement("label");
       periodTypeLabel.textContent = "Single or Double";
-      formContent.appendChild(periodTypeLabel);
+      contentArea.appendChild(periodTypeLabel);
 
       const periodTypeDropdown = document.createElement("select");
       periodTypeDropdown.name = "periodType";
@@ -217,19 +222,19 @@ export async function addPaymentFormFields(formContent) {
         option.textContent = type.charAt(0).toUpperCase() + type.slice(1);
         periodTypeDropdown.appendChild(option);
       });
-      formContent.appendChild(periodTypeDropdown);
+      contentArea.appendChild(periodTypeDropdown);
       periodTypeDropdown.disabled = Object.keys(chosenBillingPeriod).length ? true : false
       periodTypeDropdown.required = true
       periodTypeDropdown.value = chosenBillingPeriod['periodType']
 
       const agreedPriceLabel = document.createElement("label");
       agreedPriceLabel.textContent = "Room Amount Per Month/Semester";
-      formContent.appendChild(agreedPriceLabel);
+      contentArea.appendChild(agreedPriceLabel);
 
       const agreedPriceInput = document.createElement("input");
       agreedPriceInput.type = "number";
       agreedPriceInput.name = "agreedPrice";
-      formContent.appendChild(agreedPriceInput);
+      contentArea.appendChild(agreedPriceInput);
       agreedPriceInput.disabled = Object.keys(chosenBillingPeriod).length ? true : false
       agreedPriceInput.required = true
       agreedPriceInput.value = chosenBillingPeriod['agreedPrice'] || ''
@@ -310,6 +315,7 @@ export async function addPaymentFormFields(formContent) {
     cancelBtn.textContent = "Cancel";
     cancelBtn.onclick = closeForm;
 
+    formContent.appendChild(contentArea)
     formContent.appendChild(cancelBtn);
     formContent.appendChild(submitButton);
   } catch (e) {

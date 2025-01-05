@@ -202,7 +202,7 @@ async function addTenantFormFields(formContent) {
     const roomInput = document.createElement("input");
     roomInput.type = 'text'
     roomInput.name = "room";
-    roomInput.setAttribute('list', 'rooms-datalist')
+    roomInput.setAttribute('list', 'room-datalist')
     formContent.appendChild(roomInput);
 
     const roomDatalist = document.createElement('datalist')
