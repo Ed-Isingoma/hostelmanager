@@ -58,7 +58,6 @@ function initDb() {
         agreedPrice INTEGER NOT NULL,
         ownStartingDate TEXT,
         ownEndDate TEXT,
-        leftPrematurely BOOLEAN NOT NULL DEFAULT 0,
         periodType TEXT NOT NULL CHECK(periodType IN ('single', 'double')),
         deleted BOOLEAN NOT NULL DEFAULT 0,
         FOREIGN KEY (tenantId) REFERENCES Tenant(tenantId),
@@ -561,16 +560,6 @@ function getTenantsByBillingPeriodName(periodNameId) {
   return executeSelect(query, [periodNameId]);
 }
 
-function getTenantAllBillingPeriods(tenantId) {
-  const query = `SELECT b.* FROM BillingPeriod b WHERE b.tenantId = ?`;
-  return executeSelect(query, [tenantId]);
-}
-
-function getRoomById(roomId) {
-  const query = `SELECT * FROM Room WHERE roomId = ? AND deleted = 0`;
-  return executeSelect(query, [roomId]);
-}
-
 function getMiscExpenseById(miscExpenseId) {
   const query = `SELECT * FROM MiscExpense WHERE miscExpenseId = ? AND deleted = 0`;
   return executeSelect(query, [miscExpenseId]);
@@ -581,23 +570,13 @@ function getTransactionById(transactionId) {
   return executeSelect(query, [transactionId]);
 }
 
-function getTransactionsByBillingPeriod(periodId) {
-  const query = `SELECT * FROM Transactionn WHERE periodId = ? AND deleted = 0`;
-  return executeSelect(query, [periodId]);
-}
-
 function getAccountById(accountId) {
   const query = `SELECT * FROM Account WHERE accountId = ? AND deleted = 0`;
   return executeSelect(query, [accountId]);
 }
 
-function getTenantById(tenantId) {
-  const query = `SELECT * FROM Tenant WHERE tenantId = ? AND deleted = 0`;
-  return executeSelect(query, [tenantId]);
-}
-
 function getMonthliesFor(tenantId) {
-  const query = `SELECT BillingPeriod.*, Room.name as roomName 
+  const query = `SELECT BillingPeriod.*, Room.roomName 
   FROM BillingPeriod JOIN Room ON BillingPeriod.roomId = Room.roomId
   WHERE ownStartingDate IS NOT NULL
   AND ownEndDate IS NOT NULL
@@ -613,7 +592,7 @@ function getBillingPeriodById(periodId) {
 }
 
 function getBillingPeriodBeingPaidFor(tenantId, periodNameId) {
-  const query = `SELECT BillingPeriod.*, Room.name as roomName
+  const query = `SELECT BillingPeriod.*, Room.roomName
   FROM BillingPeriod JOIN Room ON BillingPeriod.roomId = Room.roomId
   WHERE tenantId = ? 
   AND periodNameId = ?
@@ -662,15 +641,72 @@ function getTenantsPlusOutstandingBalanceAll(periodNameId) {
 }
 
 async function getFullTenantProfile(tenantId) {
-  const fullTenant = await getTenantById(tenantId)
-  const periods = await getTenantAllBillingPeriods(tenantId)
-  periods.forEach(async period => {
-    const transactions = await getTransactionsByBillingPeriod(period.periodId)
-    const room = await getRoomById(period.roomId)
-    period = { ...period, ...room[0], transactions: transactions }
-  })
-  fullTenant[0] = { ...fullTenant[0], billingPeriods: periods }
-  return fullTenant
+  const query = `
+    SELECT 
+      t.*, b.*, tr.*, r.*
+    FROM Tenant t
+    LEFT JOIN BillingPeriod b ON t.tenantId = b.tenantId
+    LEFT JOIN Room r ON b.roomId = r.roomId
+    LEFT JOIN Transactionn tr ON b.periodId = tr.periodId
+    WHERE t.tenantId = ?
+    AND t.deleted = 0 AND tr.deleted = 0 AND r.deleted = 0 AND b.deleted = 0
+  `;
+  
+  const results = await executeSelect(query, [tenantId]);
+
+  const fullTenantProfile = {};
+  results.forEach(row => {
+    if (!fullTenantProfile.tenantId) {
+      fullTenantProfile.tenantId = row.tenantId;
+      fullTenantProfile.name = row.name;
+      fullTenantProfile.gender = row.gender
+      fullTenantProfile.age = row.age
+      fullTenantProfile.course = row.course
+      fullTenantProfile.ownContact = row.ownContact;
+      fullTenantProfile.nextOfKin = row.nextOfKin
+      fullTenantProfile.kinContact = row.kinContact
+      fullTenantProfile.billingPeriods = [];
+    }
+    
+    const billingPeriod = fullTenantProfile.billingPeriods.find(
+      bp => bp.periodId === row.periodId
+    )
+
+    if (!billingPeriod) {
+      fullTenantProfile.billingPeriods.push({
+        periodId: row.periodId,
+        periodNameId: row.periodNameId,
+        roomId: row.roomId,
+        agreedPrice: row.agreedPrice,
+        periodType: row.periodType,
+        demandNoticeDate: row.demandNoticeDate,
+        ownStartingDate: row.ownStartingDate,
+        ownEndDate: row.ownEndDate,
+        room: {
+          roomId: row.roomId,
+          roomName: row.roomName,
+          levelNumber: row.levelNumber
+        },
+        transactions: row.transactionId
+          ? [
+              {
+                transactionId: row.transactionId,
+                amount: row.amount,
+                date: row.date
+              },
+            ]
+          : [],
+      });
+    } else if (row.transactionId) {
+      billingPeriod.transactions.push({
+        transactionId: row.transactionId,
+        amount: row.amount,
+        date: row.date
+      });
+    }
+  });
+
+  return fullTenantProfile;
 }
 
 function searchTenantByName(name) {
@@ -771,8 +807,9 @@ async function getTransactionsByPeriodNameIdWithMetaData(periodNameId) {
       Transactionn.date AS date,
       Transactionn.amount AS amount,
       Tenant.name AS tenantName,
+      Tenant.tenantId AS tenandId,
       Tenant.ownContact AS contact,
-      Room.roomName AS roomName,
+      Room.roomName,
       BillingPeriodName.name AS billingPeriodName,
       BillingPeriod.agreedPrice - IFNULL(SUM(Transactionn.amount), 0) AS owingAmount,
       Transactionn.transactionId AS transactionId
@@ -867,7 +904,7 @@ async function dashboardTotals(periodNameId) {
     `,
     totalMisc: `
         SELECT 
-            COALESCE(SUM(COALESCE(MiscExpense.amount, 0)), 0) AS totalMisc
+            COALESCE(SUM(MiscExpense.amount * MiscExpense.quantity), 0) AS totalMisc
         FROM 
             MiscExpense
         WHERE 
@@ -1045,10 +1082,7 @@ module.exports = {
   getOlderTenantsThan,
   getOnlyTenantsWithOwingAmt,
   getPotentialTenantRoomsByGender,
-  getRoomById,
   getRoomsAndOccupancyByLevel,
-  getTenantAllBillingPeriods,
-  getTenantById,
   getTenantsByBillingPeriodName,
   getTenantsByLevel,
   getTenantsAndOwingAmtByRoom,
@@ -1056,7 +1090,6 @@ module.exports = {
   getTenantsPlusOutstandingBalanceAll,
   getTransactionById,
   getTransactions,
-  getTransactionsByBillingPeriod,
   getTransactionsByBillingPeriodName,
   getTransactionsByPeriodNameIdWithMetaData,
   getUnapprovedAccounts,

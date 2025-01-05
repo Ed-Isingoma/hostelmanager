@@ -1,4 +1,5 @@
 import { addPaymentFormFields } from './addPaymentFormFields.js';
+import { displayTenantProfile } from './displayTenantProfile.js';
 import { approveAccount, deleteAccount } from './getIcon.js';
 import { showLoginPrompt } from './logins.js';
 import { showBillingPeriods } from './showBillingPeriods.js';
@@ -14,7 +15,8 @@ export default function openForm(title) {
   form.className = "modal-form";
 
   const formTitle = document.createElement("h2");
-  formTitle.textContent = title;
+  const splicedTitle = title.split("-")
+  formTitle.textContent = splicedTitle[0] == 'tenant' ? splicedTitle[2] : title
   form.appendChild(formTitle);
 
   const formContent = document.createElement("form");
@@ -38,6 +40,8 @@ export default function openForm(title) {
     addMiscsFormFields(formContent)
   } else if (title === 'Billing Periods') {
     showBillingPeriods()
+  } else if (splicedTitle[0] === 'tenant') {
+    showTenant(formContent, splicedTitle)
   }
 }
 
@@ -315,6 +319,31 @@ async function addTenantFormFields(formContent) {
   }
 }
 
+async function showTenant(formContent, splicedTitle) {
+  try {
+    const profile = await window.electron.call('getFullTenantProfile', [splicedTitle[1]])
+    if (!profile.success) {
+      showToast(profile.error)
+      return
+    }
+    const transformedProfile = {
+      tenantId: profile.data.tenantId,
+      name: profile.data.name,
+      gender: profile.data.gender,
+      Age: profile.data.age,
+      Course: profile.data.course,
+      Contact: profile.data.ownContact,
+      "Next of Kin": profile.data.nextOfKin,
+      "Next of Kin Contact": profile.data.kinContact,
+      billingPeriods: profile.data.billingPeriods
+    };
+    displayTenantProfile(transformedProfile, formContent)
+  } catch (e) {
+    console.log('Error fetching tenant:', e);
+    showToast(e)
+  }
+}
+
 function addMiscsFormFields(formContent) {
   const fields = [
     { label: "Description", type: "text", name: "description", placeholder: "Describe the expense" },
@@ -390,3 +419,4 @@ function addMiscsFormFields(formContent) {
   formContent.appendChild(cancelBtn);
   formContent.appendChild(submitButton);
 }
+

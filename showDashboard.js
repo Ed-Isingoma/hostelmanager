@@ -1,5 +1,5 @@
 import { showCards } from "./showCards.js";
-import { doTotals } from "./getIcon.js";
+import { doTotals, formatNumber } from "./getIcon.js";
 import openForm from "./openForm.js";
 import showToast from "./showToast.js";
 
@@ -144,32 +144,32 @@ function updateCardNumbers() {
     if (titleDiv && titleDiv.textContent === "Number of Tenants") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
-        numberDiv.textContent = window.totals.totalTenants
+        numberDiv.textContent = formatNumber(Number(window.totals.totalTenants)) 
       }
     } else if (titleDiv && titleDiv.textContent === "Free Space") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
-        numberDiv.textContent = window.totals.totalFreeSpaces
+        numberDiv.textContent = formatNumber(Number(window.totals.totalFreeSpaces)) 
       }
     } else if (titleDiv && titleDiv.textContent === "Payments for this semester") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
-        numberDiv.textContent = window.totals.totalPayments
+        numberDiv.textContent = formatNumber(Number(window.totals.totalPayments)) 
       }
     } else if (titleDiv && titleDiv.textContent === "Uncollected Amount this semester") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
-        numberDiv.textContent = window.totals.totalOutstanding
+        numberDiv.textContent = formatNumber(Number(window.totals.totalOutstanding)) 
       }
     } else if (titleDiv && titleDiv.textContent === "Misc. Expenses for this semester") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
-        numberDiv.textContent = window.totals.totalMisc
+        numberDiv.textContent = formatNumber(Number(window.totals.totalMisc)) 
       }
     } else if (titleDiv && titleDiv.textContent === "Past Tenants") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
-        numberDiv.textContent = window.totals.totalPastTenants
+        numberDiv.textContent = formatNumber(Number(window.totals.totalPastTenants)) 
       }
     }
   }

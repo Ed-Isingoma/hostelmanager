@@ -256,7 +256,7 @@ function displayTenants(tenantsData) {
       <td>${tenant.ownContact}</td>
       <td>${tenant.ownEndDate ? 'Yes' : 'No'}</td>
       <td>${tenant.owingAmount}</td>
-    `;
+      `;
 
       if (tenant.ownEndDate) {
         const ownEndDate = new Date(tenant.ownEndDate);
@@ -266,7 +266,7 @@ function displayTenants(tenantsData) {
           row.classList.add('almostdone');
         }
       }
-
+      row.querySelector('td:first-of-type').onclick = () => openForm(`tenant-${tenant.tenantId}-${tenant.name}`);
       table.appendChild(row);
     });
   }
@@ -324,6 +324,8 @@ function displayPayments(moneysData) {
         <td>${money.owingAmount}</td>
         <td>K${money.transactionId}</td>
       `;
+      row.querySelector('td:nth-of-type(3)').onclick = () => openForm(`tenant-${money.tenantId}-${money.tenantName}`);
+
       table.appendChild(row);
     });
   }
@@ -407,6 +409,7 @@ function displayMoneys(moneysData) {
         <td>${money.agreedPrice}</td>
         <td>${money.ownContact}</td>
       `;
+      row.querySelector('td:nth-of-type(1)').onclick = () => openForm(`tenant-${money.tenantId}-${money.name}`);
       table.appendChild(row);
     });
   }
@@ -435,7 +438,7 @@ function displayExpenses(expensesData) {
 
   const headerRow = document.createElement('tr');
   headerRow.innerHTML = `
-    <th>Date</th>
+    <th>Payment Date</th>
     <th>Description</th>
     <th>Qty</th>
     <th>Amount</th>
@@ -484,7 +487,7 @@ function displayOlders(oldersData) {
   dashboardContainer.innerHTML = '';
 
   const subHeading = document.createElement("h3");
-  subHeading.textContent = "Tenants who left during or before " + selectedPeriodNameName;
+  subHeading.textContent = `Tenants who already left in ${selectedPeriodNameName} or the semester before`
   dashboardContainer.appendChild(subHeading);
 
   const table = document.createElement('table');
@@ -515,6 +518,8 @@ function displayOlders(oldersData) {
         <td>${older.ownContact}</td>
         <td>${older.owingAmount}</td>
       `;
+      row.querySelector('td:nth-of-type(1)').onclick = () => openForm(`tenant-${older.tenantId}-${older.tenantName}`);
+
       table.appendChild(row);
     });
   }
@@ -532,3 +537,5 @@ function displayOlders(oldersData) {
 }
 
 export { showCards, miscExpenses, doTotals }
+
+
