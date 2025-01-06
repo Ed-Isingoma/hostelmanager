@@ -210,12 +210,13 @@ async function addTenantFormFields(formContent) {
     formContent.appendChild(roomDatalist)
 
     roomInput.addEventListener('input', async () => {
+      // if (roomInput.value.length == 4) return  //add this when you know the length of a room string, to prevent that extra last search on datalist select of the wanted room
       const rooms = await window.electron.call('searchRoomByNamePart', [roomInput.value])
       if (rooms.success) {
         roomDatalist.innerHTML = ''
         for (let item of rooms.data) {
           const option = document.createElement('option')
-          option.value = item.name
+          option.value = item.roomName
           option.setAttribute('data-id', item.roomId)
           roomDatalist.appendChild(option)
         }
@@ -234,6 +235,9 @@ async function addTenantFormFields(formContent) {
       option.textContent = type.charAt(0).toUpperCase() + type.slice(1);
       periodTypeDropdown.appendChild(option);
     });
+    
+    periodTypeDropdown.value = "double"
+
     formContent.appendChild(periodTypeDropdown);
 
     const agreedPriceLabel = document.createElement("label");

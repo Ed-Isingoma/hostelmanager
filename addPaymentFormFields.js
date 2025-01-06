@@ -37,7 +37,8 @@ export async function addPaymentFormFields(formContent) {
     contentArea.appendChild(tenantDatalist);
 
     tenantInput.addEventListener("input", async () => {
-      const tenants = await window.electron.call("searchTenantNameAndId", [tenantInput.value.split(' (')[0]]);
+      if (tenantInput.value.split(' (')[1]) return
+      const tenants = await window.electron.call("searchTenantNameAndId", [tenantInput.value]);
       //that split is because the option value is intertwined
       if (tenants.success) {
         tenantDatalist.innerHTML = "";
@@ -58,13 +59,6 @@ export async function addPaymentFormFields(formContent) {
     semesterDropdown.className = "semester-dropdown";
     semesterDropdown.required = true
 
-    //first one
-    const disabledOpt = document.createElement("option");
-    disabledOpt.value = "";
-    disabledOpt.textContent = "Select a billing period";
-    disabledOpt.disabled = true;
-    semesterDropdown.appendChild(disabledOpt);
-
     semesters.forEach(semester => {
       const option = document.createElement("option");
       option.value = semester.periodNameId;
@@ -72,7 +66,7 @@ export async function addPaymentFormFields(formContent) {
       semesterDropdown.appendChild(option);
     });
 
-    semesterDropdown.value = ""
+    semesterDropdown.value = currentPeriodNameId
 
     contentArea.appendChild(semesterDropdown);
 
@@ -89,6 +83,7 @@ export async function addPaymentFormFields(formContent) {
     startDateLabel.style.display = "none";
     const startDateInput = document.createElement("input");
     startDateInput.type = "date";
+    startDateInput.name = "startDate"
     startDateInput.style.display = "none";
 
     const endDateLabel = document.createElement("label");
@@ -96,44 +91,32 @@ export async function addPaymentFormFields(formContent) {
     endDateLabel.style.display = "none";
     const endDateInput = document.createElement("input");
     endDateInput.type = "date";
+    endDateInput.name = "endDate"
     endDateInput.style.display = "none";
 
     contentArea.appendChild(startDateLabel);
     contentArea.appendChild(startDateInput);
     contentArea.appendChild(endDateLabel);
     contentArea.appendChild(endDateInput);
-
-    tenantInput.addEventListener("change", async () => {
-      Array.from(semesterDropdown.options).forEach((option) => {
-        if (option.getAttribute("isPeriodId") === "true") {
-          option.remove();
-        }
-      });
-
-      const monthlies = await window.electron.call('getMonthliesFor', [tenantInput.value]);
-      if (!monthlies.success) showToast('Error getting some billing periods');
-
-      monthlies.data.forEach((rec) => {
-        const option = document.createElement("option");
-        option.value = rec.periodId;
-        option.textContent = formatDateRange(rec);
-        option.setAttribute('isPeriodId', rec);
-        semesterDropdown.appendChild(option);
-      });
-    });
+    const contentLowerArea = document.createElement('div')
+    contentArea.appendChild(contentLowerArea)
 
     const setDefaultAgreedPrice = async () => {
       const periodTypeDropdown = formContent.querySelector("select[name='periodType']");
       const agreedPriceInput = formContent.querySelector('input[name="agreedPrice"]');
       const periodType = periodTypeDropdown.value;
-      const periodNameRecord = semesters.find(semester => semester.periodNameId === semesterDropdown.value);
+      const periodNameRecord = semesters.find(semester => semester.periodNameId == semesterDropdown.value);
       agreedPriceInput.value = periodType === "single" ? periodNameRecord.costSingle : periodNameRecord.costDouble;
     };
 
     let selectedPeriodId;
     let chosenBillingPeriod = {}
 
-    semesterDropdown.addEventListener("change", async () => {
+    //these above and below go together if youre shifting them
+    const billingDataRefresh = async () => {
+      contentLowerArea.innerHTML = ''
+      selectedPeriodId = null
+      chosenBillingPeriod = {}
       if (semesterDropdown.value === "custom") {
         startDateLabel.style.display = "";
         startDateInput.style.display = "";
@@ -156,9 +139,6 @@ export async function addPaymentFormFields(formContent) {
           subheadingPayForm.textContent = 'Tenant data for selected billing period'
         } else {
           try {
-             console.log('the options of datalist', tenantDatalist)
-             console.log('the tenantinput value:', tenantInput.value)
-             console.log('tenantInput', tenantInput)
             const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
 
             const periodTherein = await window.electron.call('getBillingPeriodBeingPaidFor', [selectedTenantOption.dataset.id, semesterDropdown.value])
@@ -181,29 +161,29 @@ export async function addPaymentFormFields(formContent) {
 
       const roomLabel = document.createElement("label");
       roomLabel.textContent = "Room Number";
-      contentArea.appendChild(roomLabel);
+      contentLowerArea.appendChild(roomLabel);
 
       const roomInput = document.createElement("input");
       roomInput.type = 'text';
       roomInput.name = "room";
       roomInput.setAttribute('list', 'room-datalist');
-      contentArea.appendChild(roomInput);
+      contentLowerArea.appendChild(roomInput);
       roomInput.required = true
 
       const roomDatalist = document.createElement('datalist');
       roomDatalist.id = 'room-datalist';
-      contentArea.appendChild(roomDatalist);
+      contentLowerArea.appendChild(roomDatalist);
       roomInput.disabled = Object.keys(chosenBillingPeriod).length ? true : false
       roomInput.value = chosenBillingPeriod['roomName'] || ''
 
       roomInput.addEventListener('input', async () => {
+        // if (roomInput.value.length == 4) return  //add this when you know the length of a room string, to prevent that extra last search on datalist select of the wanted room
         const rooms = await window.electron.call('searchRoomByNamePart', [roomInput.value]);
         if (rooms.success) {
-          console.log('going to empty datalist roominput')
           roomDatalist.innerHTML = '';
           for (let item of rooms.data) {
             const option = document.createElement('option');
-            option.value = item.name;
+            option.value = item.roomName;
             option.setAttribute('data-id', item.roomId);
             roomDatalist.appendChild(option);
           }
@@ -212,7 +192,7 @@ export async function addPaymentFormFields(formContent) {
 
       const periodTypeLabel = document.createElement("label");
       periodTypeLabel.textContent = "Single or Double";
-      contentArea.appendChild(periodTypeLabel);
+      contentLowerArea.appendChild(periodTypeLabel);
 
       const periodTypeDropdown = document.createElement("select");
       periodTypeDropdown.name = "periodType";
@@ -222,25 +202,51 @@ export async function addPaymentFormFields(formContent) {
         option.textContent = type.charAt(0).toUpperCase() + type.slice(1);
         periodTypeDropdown.appendChild(option);
       });
-      contentArea.appendChild(periodTypeDropdown);
+      contentLowerArea.appendChild(periodTypeDropdown);
       periodTypeDropdown.disabled = Object.keys(chosenBillingPeriod).length ? true : false
       periodTypeDropdown.required = true
-      periodTypeDropdown.value = chosenBillingPeriod['periodType']
+      periodTypeDropdown.value = chosenBillingPeriod['periodType'] || "double"
 
       const agreedPriceLabel = document.createElement("label");
-      agreedPriceLabel.textContent = "Room Amount Per Month/Semester";
-      contentArea.appendChild(agreedPriceLabel);
+      agreedPriceLabel.textContent = "Total Rent for this period";
+      contentLowerArea.appendChild(agreedPriceLabel);
 
       const agreedPriceInput = document.createElement("input");
       agreedPriceInput.type = "number";
       agreedPriceInput.name = "agreedPrice";
-      contentArea.appendChild(agreedPriceInput);
+      contentLowerArea.appendChild(agreedPriceInput);
       agreedPriceInput.disabled = Object.keys(chosenBillingPeriod).length ? true : false
       agreedPriceInput.required = true
       agreedPriceInput.value = chosenBillingPeriod['agreedPrice'] || ''
 
+      if (!chosenBillingPeriod['periodType']) setDefaultAgreedPrice()
       periodTypeDropdown.addEventListener("change", setDefaultAgreedPrice);
 
+    }
+
+    semesterDropdown.addEventListener("change", billingDataRefresh);
+
+    tenantInput.addEventListener("change", async () => {
+      Array.from(semesterDropdown.options).forEach((option) => {
+        if (option.getAttribute("isPeriodId") === "true") {
+          option.remove();
+        }
+      });
+
+      const monthlies = await window.electron.call('getMonthliesFor', [tenantInput.value]);
+      if (!monthlies.success) showToast('Error getting some billing periods');
+
+      monthlies.data.forEach((rec) => {
+        const option = document.createElement("option");
+        option.value = rec.periodId;
+        option.textContent = formatDateRange(rec);
+        option.setAttribute('isPeriodId', rec);
+        semesterDropdown.appendChild(option);
+      });
+
+      if(semesterDropdown.value) {
+        billingDataRefresh()
+      }
     });
 
     const submitButton = document.createElement("button");
@@ -261,39 +267,36 @@ export async function addPaymentFormFields(formContent) {
         };
 
         if (!selectedPeriodId) {
-          const selectedRoomOption = Array.from(roomDatalist.options).find(
-            (option) => option.value === roomInput.value
+          const selectedRoomOption = Array.from(formContent.querySelector('#room-datalist').options).find(
+            (option) => option.value === formContent.querySelector("input[name='room']").value
           );
-          const roomInput = selectedRoomOption.dataset.id
-          const tenantInput = selectedTenantOption.dataset.id
+          const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
+
           const periodTypeInput = formContent.querySelector("select[name='periodType']").value
           const agreedPriceInput = formContent.querySelector("input[name='agreedPrice']").value
           const periodNameIdInput = formContent.querySelector(".semester-dropdown").value
           const startDateInput = formContent.querySelector("input[name='startDate']").value || null;
           const endDateInput = formContent.querySelector("input[name='endDate']").value || null;
+          const theBillingPeriodName = periodNameIdInput === 'custom' ? window.currentPeriodNameId : periodNameIdInput
 
           const billingPeriodData = {
             ownStartingDate: startDateInput,
             ownEndDate: endDateInput,
-            roomId: roomInput,
             periodType: periodTypeInput,
-            agreedPrice: parseInt(agreedPriceInput),
-            tenantId: tenantInput,
-            periodNameId: periodNameIdInput === 'custom' ? window.currentPeriodNameId : periodNameIdInput,
+            agreedPrice: parseInt(agreedPriceInput)
           };
 
-          const createBillingPeriodResponse = await window.electron.call('createBillingPeriod', [billingPeriodData]);
+          const createBillingPeriodResponse = await window.electron.call('createBillingPeriod', [billingPeriodData, theBillingPeriodName, selectedRoomOption.dataset.id, selectedTenantOption.dataset.id]);
 
           if (!createBillingPeriodResponse.success) {
             showToast(createBillingPeriodResponse.error);
             return;
           }
+          console.log('the returned new periodid:', createBillingPeriodResponse.data)
           selectedPeriodId = createBillingPeriodResponse.data;
         }
 
-        transactionData.periodId = selectedPeriodId;
-
-        const createTransactionResponse = await window.electron.call('createTransaction', [transactionData]);
+        const createTransactionResponse = await window.electron.call('createTransaction', [transactionData, selectedPeriodId]);
 
         if (createTransactionResponse.success) {
           showToast('Transaction added successfully');
