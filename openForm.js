@@ -42,6 +42,8 @@ export default function openForm(title) {
     showBillingPeriods()
   } else if (splicedTitle[0] === 'tenant') {
     showTenant(formContent, splicedTitle)
+  } else if (title === 'Search Tenant') {
+    addTenantSearch(formContent)
   }
 }
 
@@ -235,7 +237,7 @@ async function addTenantFormFields(formContent) {
       option.textContent = type.charAt(0).toUpperCase() + type.slice(1);
       periodTypeDropdown.appendChild(option);
     });
-    
+
     periodTypeDropdown.value = "double"
 
     formContent.appendChild(periodTypeDropdown);
@@ -320,6 +322,94 @@ async function addTenantFormFields(formContent) {
   } catch (e) {
     showToast(e.message);
     console.log(e);
+  }
+}
+
+async function addTenantSearch(formContent) {
+  try {
+    const searchLabel = document.createElement("label");
+    searchLabel.textContent = "Select Tenant";
+    formContent.appendChild(searchLabel);
+
+    const tenantInput = document.createElement("input");
+    tenantInput.type = "text";
+    tenantInput.name = "tenants";
+    tenantInput.required = true
+    tenantInput.setAttribute("list", "tenants-datalist");
+    formContent.appendChild(tenantInput);
+
+    const tenantDatalist = document.createElement("datalist");
+    tenantDatalist.id = "tenants-datalist";
+    formContent.appendChild(tenantDatalist);
+
+    tenantInput.addEventListener("input", async () => {
+      if (tenantInput.value.split(' (')[1]) return
+      const tenants = await window.electron.call("searchTenantNameAndIdMeta", [tenantInput.value]);
+      //that split is because the option value is intertwined
+      if (tenants.success) {
+        tenantDatalist.innerHTML = "";
+        for (let item of tenants.data) {
+          const option = document.createElement("option");
+          option.value = `${item.name} (ID ${item.tenantId})`
+          option.setAttribute("data-id", item.tenantId);
+          tenantDatalist.appendChild(option);
+        }
+      } else showToast(tenants.error);
+    });
+
+    const tableArea = document.createElement('div')
+    formContent.appendChild(tableArea)
+
+    tenantInput.addEventListener("change", async () => {
+      const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
+      tableArea.innerHTML = ''
+
+      const table = document.createElement('table');
+      table.className = 'modal-show-table';
+
+      const headerRow = document.createElement('tr');
+      headerRow.innerHTML = `
+          <th>Name</th>
+          <th>Room</th>
+          <th>Most Recent Semester</th>
+          <th>Pays Monthly</th>
+        `;
+      table.appendChild(headerRow);
+
+      if (!selectedTenantOption) {
+        const noDataRow = document.createElement('tr');
+        noDataRow.innerHTML = `<td colspan="4">No tenant in search query</td>`;
+        table.appendChild(noDataRow);
+      } else {
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td>${selectedTenantOption.name}</td>
+            <td>${selectedTenantOption.roomName}</td>
+            <td>${selectedTenantOption.lastSemName}</td>
+            <td>${selectedTenantOption.paysMonthly}</td>
+            `;
+
+        row.querySelector('td:first-of-type').onclick = () => openForm(`tenant-${selectedTenantOption.tenantId}-${selectedTenantOption.name}`);
+        table.appendChild(row);
+      }
+
+      tableArea.appendChild(table);
+    });
+
+    const backButton = document.createElement('button');
+    backButton.className = 'modal-show-back';
+    backButton.innerText = 'Back';
+    backButton.onclick = (event) => {
+      event.preventDefault()
+      dashboardContainer.innerHTML = '';
+      showDashboard()
+    };
+
+    formContent.appendChild(backButton);
+  } catch (e) {
+    console.log('Error fetching tenant:', e);
+    showToast(e)
   }
 }
 

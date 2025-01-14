@@ -721,6 +721,17 @@ function searchTenantNameAndId(name) {
   return executeSelect(query, [`%${name}%`]);
 }
 
+function searchTenantNameAndIdMeta(name) {
+  const query = `
+    SELECT 
+      t.tenantId, 
+      t.name
+    FROM Tenant t
+    WHERE t.name LIKE ? AND t.deleted = 0
+  `;
+  return executeSelect(query, [`%${name}%`]);
+}
+
 function searchRoomByNamePart(name) {
   const query = `
     SELECT 
@@ -1103,6 +1114,7 @@ module.exports = {
   moveMonthlyBillingPeriods,
   searchTenantByName,
   searchTenantNameAndId,
+  searchTenantNameAndIdMeta,
   searchRoomByNamePart,
   updateAccount,
   updateBillingPeriod,
