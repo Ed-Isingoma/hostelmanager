@@ -2,7 +2,7 @@ import showToast from "./showToast.js";
 import { formatDateRange } from "./getIcon.js";
 
 export function displayTenantProfile(profile, formContent) {
-
+  // console.log(profile)
   const tenantSection = document.createElement("div");
   tenantSection.style.border = "1px solid grey";
   tenantSection.style.padding = "10px";
@@ -131,10 +131,10 @@ export function displayTenantProfile(profile, formContent) {
     });
 
     if (period.ownStartingDate) {
-    const customOption = document.createElement("option");
-    customOption.value = "custom"
-    customOption.textContent = formatDateRange(period)
-    periodSelect.appendChild(customOption);
+      const customOption = document.createElement("option");
+      customOption.value = "custom"
+      customOption.textContent = formatDateRange(period)
+      periodSelect.appendChild(customOption);
     }
 
     periodSelect.value = period.ownStartingDate ? "custom" : period.periodNameId
@@ -175,29 +175,43 @@ export function displayTenantProfile(profile, formContent) {
     const priceLabel = document.createElement("label");
     priceLabel.textContent = "Total Amount Payable: ";
     priceLabel.style.marginRight = "10px";
-    
+
     const priceInput = document.createElement("input");
     priceInput.type = "number";
     priceInput.value = period.agreedPrice;
     priceInput.disabled = true;
     priceInput.style.marginBottom = "10px";
-    
+
     periodSection.appendChild(priceLabel);
     periodSection.appendChild(priceInput);
+    periodSection.appendChild(document.createElement("br"))
+
+    const pendingLabel = document.createElement("label");
+    pendingLabel.textContent = "Total Amount Unpaid: ";
+    pendingLabel.style.marginRight = "10px";
+
+    const pendingInput = document.createElement("input");
+    pendingInput.type = "number";
+    pendingInput.value = period.agreedPrice - period.transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+    pendingInput.disabled = true;
+    pendingInput.style.marginBottom = "10px";
+
+    periodSection.appendChild(pendingLabel);
+    periodSection.appendChild(pendingInput);
     periodSection.appendChild(document.createElement("br"))
 
     const startLabel = document.createElement("label");
     startLabel.textContent = "Starting Date: (In case of monthly tenant)";
     startLabel.style.marginRight = "10px";
     startLabel.style.display = period.ownStartingDate ? "inline" : "none"
-    
+
     const startInput = document.createElement("input");
     startInput.type = "date";
     startInput.value = period.ownStartingDate;
     startInput.disabled = true;
     startInput.style.marginBottom = "10px";
     startInput.style.display = period.ownStartingDate ? "inline" : "none"
-    
+
     periodSection.appendChild(startLabel);
     periodSection.appendChild(startInput);
     periodSection.appendChild(document.createElement("br"))
@@ -206,14 +220,14 @@ export function displayTenantProfile(profile, formContent) {
     endLabel.textContent = "End Date: (In case of monthly tenant)";
     endLabel.style.marginRight = "10px";
     endLabel.style.display = period.ownEndDate ? "inline" : "none"
-    
+
     const endInput = document.createElement("input");
     endInput.type = "date";
     endInput.value = period.ownEndDate;
     endInput.disabled = true;
     endInput.style.marginBottom = "10px";
     endInput.style.display = period.ownEndDate ? "inline" : "none"
-    
+
     periodSection.appendChild(endLabel);
     periodSection.appendChild(endInput);
     periodSection.appendChild(document.createElement("br"))
@@ -221,13 +235,13 @@ export function displayTenantProfile(profile, formContent) {
     const demandLabel = document.createElement("label");
     demandLabel.textContent = "Demand Notice Date: ";
     demandLabel.style.marginRight = "10px";
-    
+
     const demandInput = document.createElement("input");
     demandInput.type = "date";
     demandInput.value = period.demandNoticeDate
     demandInput.disabled = true;
     demandInput.style.marginBottom = "10px";
-    
+
     periodSection.appendChild(demandLabel);
     periodSection.appendChild(demandInput);
     periodSection.appendChild(document.createElement("br"));
@@ -252,7 +266,7 @@ export function displayTenantProfile(profile, formContent) {
       const inputs = [periodSelect, roomInput, periodTypeDropdown, priceInput, startInput, endInput, demandInput]
       inputs.forEach(input => (input.disabled = !input.disabled));
       const hiddens = [startLabel, startInput, endLabel, endInput]
-      hiddens.forEach((hidden)=> hidden.style.display = "inline")
+      hiddens.forEach((hidden) => hidden.style.display = "inline")
       editPeriodButton.style.display = inputs[0].disabled ? "inline" : "none";
       savePeriodButton.style.display = inputs[0].disabled ? "none" : "inline";
       deleteButton.style.display = inputs[0].disabled ? "none" : "inline";
@@ -281,7 +295,7 @@ export function displayTenantProfile(profile, formContent) {
       const inputs = [periodSelect, roomInput, periodTypeDropdown, priceInput, startInput, endInput, demandInput]
       inputs.forEach(input => (input.disabled = true));
       const hiddens = [startLabel, startInput, endLabel, endInput]
-      hiddens.forEach((hidden)=> hidden.style.display = "none")
+      hiddens.forEach((hidden) => hidden.style.display = "none")
       editPeriodButton.style.display = "inline";
       savePeriodButton.style.display = "none";
       deleteButton.style.display = "none";
@@ -329,11 +343,11 @@ export function displayTenantProfile(profile, formContent) {
     });
 
     formContent.appendChild(periodSection);
-
-    const cancelBtn = document.createElement("button");
-    cancelBtn.className = "add-tenant-submit";
-    cancelBtn.textContent = "Back";
-    cancelBtn.onclick = closeForm;
-    formContent.appendChild(cancelBtn)
   });
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "add-tenant-submit";
+  cancelBtn.textContent = "Back";
+  cancelBtn.onclick = closeForm;
+  formContent.appendChild(cancelBtn)
 }

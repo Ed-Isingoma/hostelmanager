@@ -1,3 +1,4 @@
+import openForm from "./openForm.js";
 import showToast from "./showToast.js";
 
 export function getIcon(iconName) {
@@ -16,11 +17,20 @@ export function formatNumber(num) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-export function showTenantsPopUp(tenants) {
+export function showTenantsPopUp(tenants, roomName) {
+  const overlay = document.createElement('div');
+  overlay.classList.add('tenants-popup-overlay');
+  overlay.addEventListener('click', hideTenantsPopUp);
+
   const popUpContainer = document.createElement('div');
   popUpContainer.classList.add('tenants-popup-container');
 
-  tenants.forEach(tenant => {
+  const title = document.createElement('div')
+  title.classList.add('tenants-popup-title')
+  title.innerHTML = `Room ${roomName} Tenants`
+  popUpContainer.appendChild(title)
+
+  tenants.forEach((tenant) => {
     const tenantBox = document.createElement('div');
     tenantBox.classList.add('tenant-box');
 
@@ -36,20 +46,46 @@ export function showTenantsPopUp(tenants) {
     gender.classList.add('tenant-gender');
     gender.innerHTML = `Gender: ${tenant.gender}`;
 
+    const paysMonthly = document.createElement('div')
+    paysMonthly.classList.add('tenant-pays-monthly')
+    paysMonthly.innerHTML = `Pays Monthly: ${tenant.paysMonthly ? 'Yes' : 'No'}`
+
     tenantBox.appendChild(tenantName);
     tenantBox.appendChild(owingAmount);
     tenantBox.appendChild(gender);
+    tenantBox.appendChild(paysMonthly)
 
     popUpContainer.appendChild(tenantBox);
   });
 
-  dashboardContainer.appendChild(popUpContainer);
+  if (tenants.length ==0) {
+    const tenantBox = document.createElement('div')
+    tenantBox.classList.add('tenant-box')
+    tenantBox.innerHTML = "No tenants here for selected semester"
+    popUpContainer.appendChild(tenantBox)
+  }
+
+  const addTenantButton = document.createElement('button');
+  addTenantButton.classList.add('add-tenant-button');
+  addTenantButton.textContent = 'Add Tenant';
+  addTenantButton.addEventListener('click', (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    // window.selectedRoomId = event.target.parentElement.parentElement.parentElement.getAttribute('data-roomId');
+    openForm('Add New Tenant')
+  });
+  popUpContainer.appendChild(addTenantButton);
+  // Append the popup container to the overlay
+  overlay.appendChild(popUpContainer);
+
+  // Append the overlay to the dashboard container
+  dashboardContainer.appendChild(overlay);
 }
 
 export function hideTenantsPopUp() {
-  const popUpContainer = document.querySelector('.tenants-popup-container');
-  if (popUpContainer) {
-    popUpContainer.remove();
+  const overlay = document.querySelector('.tenants-popup-overlay');
+  if (overlay) {
+    overlay.remove();
   }
 }
 

@@ -118,13 +118,32 @@
   background-color: lightgrey;
 }
 
+.tenants-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(167, 167, 167, 0.507); /* Translucent grey */
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tenants-popup-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
 .tenants-popup-container {
-  position: absolute;
-  background-color: #fff;
-  border: 2px solid #ccc;
+  position: relative; /* Ensure the container is positioned correctly within the overlay */
+  background-color: #d7d890;
+  border: 2px solid #e7cc9a;
   padding: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  z-index: 4;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -142,7 +161,8 @@
 
 .tenant-name,
 .tenant-owing-amount,
-.tenant-gender {
+.tenant-gender,
+.tenant-pays-monthly {
   font-size: 14px;
 }
 

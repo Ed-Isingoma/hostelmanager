@@ -11,7 +11,7 @@ async function showCards() {
     { title: "Payments for this semester", icon: "payment", number: window.totals.totalPayments, func: collectedMoneys },
     { title: "Uncollected Amount this semester", icon: "balance", number: window.totals.totalOutstanding, func: uncollectedMoneys },
     { title: "Misc. Expenses for this semester", icon: "expenses", number: window.totals.totalMisc, func: miscExpenses },
-    { title: "Past Tenants", icon: "past-tenants", number: window.totals.totalPastTenants, func: olderTenants },
+    { title: "Previous Semester Tenants", icon: "past-tenants", number: window.totals.totalPastTenants, func: olderTenants },
   ];
 
   const cardContainer = document.createElement("div");
@@ -148,7 +148,7 @@ function displayRooms(levelsData) {
 
     const levelTitle = document.createElement('div');
     levelTitle.classList.add('rooms-level-title');
-    levelTitle.innerHTML = `Level ${levelData[0].levelNumber}`;
+    levelTitle.innerHTML = `Level ${levelData[0]?.levelNumber || "unnamed"}`;
     levelBox.appendChild(levelTitle);
 
     const roomsContainer = document.createElement('div');
@@ -164,6 +164,7 @@ function displayRooms(levelsData) {
       roomBox.appendChild(roomNameBox);
 
       const occupancyContainer = document.createElement('div');
+      // occupancyContainer.setAttribute("data-roomId", room.roomId)
       occupancyContainer.classList.add('rooms-occupancy-container');
 
       for (let i = 0; i < 2; i++) {
@@ -181,7 +182,7 @@ function displayRooms(levelsData) {
           const tenants = await window.electron.call('getTenantsAndOwingAmtByRoom', [room.roomId, selectedPeriodNameId]);
           console.log(tenants.data)
           if (tenants.success) {
-            showTenantsPopUp(tenants.data);
+            showTenantsPopUp(tenants.data, room.roomName);
           } else {
             showToast(tenants.error);
           }
@@ -189,11 +190,7 @@ function displayRooms(levelsData) {
           console.log(e);
           showToast(e);
         }
-      });
-
-      occupancyContainer.addEventListener("mouseleave", () => {
-        hideTenantsPopUp();
-      });
+      }); 
 
       roomBox.appendChild(occupancyContainer);
       roomsContainer.appendChild(roomBox);
@@ -211,8 +208,8 @@ function displayRooms(levelsData) {
     showDashboard();
   };
 
-  dashboardContainer.appendChild(backButton);
   dashboardContainer.appendChild(container);
+  dashboardContainer.appendChild(backButton);
 }
 
 function displayTenants(tenantsData) {
@@ -497,6 +494,7 @@ function displayOlders(oldersData) {
   headerRow.innerHTML = `
     <th>Name</th>
     <th>Gender</th>
+    <th>Present During</th>
     <th>Room</th>
     <th>Pays Monthly</th>
     <th>Contact</th>
@@ -505,7 +503,7 @@ function displayOlders(oldersData) {
   table.appendChild(headerRow);
   if (oldersData.length === 0) {
     const noDataRow = document.createElement('tr');
-    noDataRow.innerHTML = `<td colspan="5">No data older than current semester/ period</td>`;
+    noDataRow.innerHTML = `<td colspan="7">No data older than current semester/ period</td>`;
     table.appendChild(noDataRow);
   } else {
     oldersData.forEach(older => {
@@ -513,6 +511,7 @@ function displayOlders(oldersData) {
       row.innerHTML = `
         <td>${older.name}</td>
         <td>${older.gender}</td>
+        <td>${older.lastSeen}</td>
         <td>${older.roomName}</td>
         <td>${older.paysMonthly}</td>
         <td>${older.ownContact}</td>

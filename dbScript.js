@@ -103,10 +103,14 @@ function errorHandler(err) {
 
 function executeQuery(query, params = []) {
   return new Promise((resolve, reject) => {
+    console.log('executing query:', query)
+    console.log('params are:', params)
     db.run(query, params, function (err) {
       if (err) {
+        console.log('result of query:', err)
         return reject(err.message);
       }
+      console.log('result of query:', this.lastID)
       return resolve(this.lastID);
     });
   });
@@ -114,10 +118,14 @@ function executeQuery(query, params = []) {
 
 function executeSelect(query, params = []) {
   return new Promise((resolve, reject) => {
+    console.log('executing select:', query)
+    console.log('params are:', params)
     db.all(query, params, (err, rows) => {
       if (err) {
+        console.log('result of query:', err)
         return reject(err.message);
       }
+      console.log('result of query:', rows)
       return resolve(rows);
     });
   });
@@ -192,30 +200,14 @@ async function insertDefaultBillingPeriodNames() {
   }
 }
 
-async function createRoom(room) {
-  const query = `INSERT INTO Room (levelNumber, semCostSingle, monthlyCostSingle, recessCostSingle, semCostDouble, monthlyCostDouble, recessCostDouble, roomName, maxUsers) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-  const params = [
-    room.levelNumber,
-    room.semCostSingle,
-    room.monthlyCostSingle,
-    room.recessCostSingle,
-    room.semCostDouble,
-    room.monthlyCostDouble,
-    room.recessCostDouble,
-    room.roomName,
-    room.maxUsers
-  ];
-  return await executeQuery(query, params);
-}
-
 async function createBillingPeriodName(periodName) {
   const query = `INSERT INTO BillingPeriodName (name, startingDate, endDate, costSingle, costDouble) VALUES (?, ?, ?, ?, ?)`;
   const params = [
     periodName.name,
     periodName.startingDate,
     periodName.endDate,
-    periodName.costSingle,
-    periodName.costDouble
+    periodName.costSingle || null,
+    periodName.costDouble || null
   ];
   return await executeQuery(query, params);
 }
@@ -226,11 +218,11 @@ async function createBillingPeriod(billingPeriod, periodNameId, roomId, tenantId
     periodNameId,
     tenantId,
     roomId,
-    billingPeriod.demandNoticeDate,
+    billingPeriod.demandNoticeDate || null,
     billingPeriod.agreedPrice,
     billingPeriod.periodType,
-    billingPeriod.ownStartingDate,
-    billingPeriod.ownEndDate
+    billingPeriod.ownStartingDate || null,
+    billingPeriod.ownEndDate || null
   ];
   return await executeQuery(query, params);
 }
@@ -240,11 +232,11 @@ async function createTenant(tenant) {
   const params = [
     tenant.name,
     tenant.gender,
-    tenant.age,
-    tenant.course,
-    tenant.ownContact,
-    tenant.nextOfKin,
-    tenant.kinContact
+    tenant.age || null,
+    tenant.course || null,
+    tenant.ownContact || null,
+    tenant.nextOfKin || null,
+    tenant.kinContact || null
   ];
   return await executeQuery(query, params);
 }
@@ -442,13 +434,6 @@ function getTransactions(periodId) {
   return executeSelect(query, [periodId]);
 }
 
-function getTransactionsByBillingPeriodName(periodNameId) {
-  let query = 'SELECT Transactionn.* FROM Transactionn JOIN BillingPeriod ON Transactionn.periodId = BillingPeriod.periodId WHERE BillingPeriod.periodNameId = ? AND Transactionn.deleted = 0 AND BillingPeriod.deleted = 0';
-
-  const params = [periodNameId];
-  return executeSelect(query, params);
-}
-
 function getAccountsDeadAndLiving() {
   const query = `SELECT * FROM Account WHERE deleted = 0`;
   return executeSelect(query);
@@ -469,37 +454,6 @@ function getAllRooms() {
   return executeSelect(query);
 }
 
-//postgres
-
-// const pool = new Pool({
-//   user: 'your_username',
-//   host: 'your_host',
-//   database: 'your_database',
-//   password: 'your_password',
-//   port: 5432, // or your PostgreSQL port number
-// });
-
-// async function initDb() {
-//   return new Promise((resolve, reject) => {
-//     pool.query('SELECT NOW()', (err, res) => {
-//       if (err) {
-//         console.error('Error connecting to PostgreSQL:', err);
-//         reject(err);
-//       } else {
-//         console.log('Connected to the PostgreSQL database.');
-//         resolve();
-//       }
-//     });
-//   });
-// }
-
-// pool.connect((err, client, done) => {
-//   if (err) {
-//     return console.error('Error connecting to PostgreSQL:', err);
-//   }
-//   console.log('Connected to the PostgreSQL database.');
-// });
-
 function getBillingPeriodNames() {
   const query = `SELECT * FROM BillingPeriodName WHERE deleted = 0`
   return executeSelect(query);
@@ -517,9 +471,9 @@ async function getRoomsAndOccupancyByLevel(levelNumber, periodNameId) {
     FROM Room
     LEFT JOIN BillingPeriod ON Room.roomId = BillingPeriod.roomId 
       AND BillingPeriod.periodNameId = ? AND (BillingPeriod.ownEndDate IS NULL OR BillingPeriod.ownEndDate >= CURRENT_DATE)
+      AND BillingPeriod.deleted = 0
     WHERE Room.levelNumber = ? 
-    AND Room.deleted = 0 
-    AND BillingPeriod.deleted = 0
+      AND Room.deleted = 0 
     GROUP BY Room.roomId
   `;
   const params = [periodNameId, levelNumber];
@@ -544,7 +498,7 @@ function getTenantsByLevel(levelNumber, periodNameId) {
 async function getTenantsAndOwingAmtByRoom(roomId, periodNameId) {
   const query = `
     SELECT Tenant.name, Tenant.gender,
-      BillingPeriod.agreedPrice - IFNULL(SUM(Transactionn.amount), 0) AS owingAmount
+      BillingPeriod.agreedPrice - IFNULL(SUM(Transactionn.amount), 0) AS owingAmount, CASE WHEN BillingPeriod.ownEndDate IS NOT NULL THEN 'Yes' ELSE 'No' END AS paysMonthly
     FROM Tenant
     JOIN BillingPeriod ON Tenant.tenantId = BillingPeriod.tenantId
     LEFT JOIN Transactionn ON BillingPeriod.periodId = Transactionn.periodId AND Transactionn.deleted = 0
@@ -798,7 +752,7 @@ function getTenantsOfBillingPeriodXButNotY(periodNameId1, periodNameId2) {
 
 function getOlderTenantsThan(periodNameId) {
   let query = `
-    SELECT Tenant.*, Room.roomName, 
+    SELECT Tenant.*, Room.roomName, BillingPeriodName.name as lastSeen,
        BillingPeriod.agreedPrice - IFNULL(SUM(Transactionn.amount), 0) AS owingAmount, CASE WHEN BillingPeriod.ownEndDate IS NOT NULL THEN 'Yes' ELSE 'No' END AS paysMonthly
     FROM Tenant
     JOIN BillingPeriod ON Tenant.tenantId = BillingPeriod.tenantId
@@ -838,7 +792,7 @@ async function getTransactionsByPeriodNameIdWithMetaData(periodNameId) {
       Transactionn.date AS date,
       Transactionn.amount AS amount,
       Tenant.name AS tenantName,
-      Tenant.tenantId AS tenandId,
+      Tenant.tenantId AS tenantId,
       Tenant.ownContact AS contact,
       Room.roomName,
       BillingPeriodName.name AS billingPeriodName,
@@ -856,10 +810,32 @@ async function getTransactionsByPeriodNameIdWithMetaData(periodNameId) {
       AND Room.deleted = 0
       AND BillingPeriodName.deleted = 0
     GROUP BY Transactionn.transactionId
+    ORDER BY date DESC
   `;
 
   const params = [periodNameId];
-  return await executeSelect(query, params);
+  const unbalanced = await executeSelect(query, params);
+  return balanceOwingAmts(unbalanced)
+}
+
+function balanceOwingAmts(transactions) {
+  const y = [];
+
+  transactions.reverse()
+
+  transactions.forEach((transaction) => {
+    const tenantId = transaction.tenantId;
+
+    if (y.includes(tenantId)) {
+      const lastIndex = y.lastIndexOf(tenantId);
+      const previousTransaction = transactions[lastIndex];
+      transaction.owingAmount = previousTransaction.owingAmount - transaction.amount;
+    }
+
+    y.push(tenantId);
+  })
+
+  return transactions.reverse()
 }
 
 async function dashboardTotals(periodNameId) {
@@ -924,7 +900,7 @@ async function dashboardTotals(periodNameId) {
             JOIN 
                 BillingPeriod ON Transactionn.periodId = BillingPeriod.periodId 
             WHERE 
-                transactionn.deleted = 0 
+                Transactionn.deleted = 0 
                 AND BillingPeriod.deleted = 0 
                 AND BillingPeriod.periodNameId = ?
             ), 0) AS totalOutstanding
@@ -978,9 +954,9 @@ async function dashboardTotals(periodNameId) {
   totals.totalTenants = await executeSelect(queries.totalTenants, [periodNameId]);
   totals.totalPayments = await executeSelect(queries.totalPayments, [periodNameId]);
   totals.totalFreeSpaces = await executeSelect(queries.totalFreeSpaces, [periodNameId])
-  totals.totalOutstanding = await executeSelect(queries.totalOutstanding, [periodNameId]);
+  totals.totalOutstanding = await executeSelect(queries.totalOutstanding, [periodNameId, periodNameId]);
   totals.totalMisc = await executeSelect(queries.totalMisc, [periodNameId]);
-  totals.totalPastTenants = await executeSelect(queries.totalPastTenants, [periodNameId, periodNameId]);
+  totals.totalPastTenants = await executeSelect(queries.totalPastTenants, [periodNameId, periodNameId, periodNameId]);
   
   totals.totalTenants = totals.totalTenants[0].totalTenants
   totals.totalPayments = totals.totalPayments[0].totalPayments
@@ -1089,7 +1065,6 @@ module.exports = {
   createBillingPeriodName,
   createDefaultRooms,
   createMiscExpense,
-  createRoom,
   createTenant,
   createTransaction,
   dashboardTotals,
@@ -1121,7 +1096,6 @@ module.exports = {
   getTenantsPlusOutstandingBalanceAll,
   getTransactionById,
   getTransactions,
-  getTransactionsByBillingPeriodName,
   getTransactionsByPeriodNameIdWithMetaData,
   getUnapprovedAccounts,
   initDb,

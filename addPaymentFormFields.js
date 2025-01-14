@@ -1,4 +1,5 @@
-import { formatDateRange } from "./getIcon.js";
+import { doTotals, formatDateRange } from "./getIcon.js";
+import { updateCardNumbers } from "./showDashboard.js";
 import showToast from "./showToast.js";
 
 export async function addPaymentFormFields(formContent) {
@@ -106,7 +107,7 @@ export async function addPaymentFormFields(formContent) {
       const agreedPriceInput = formContent.querySelector('input[name="agreedPrice"]');
       const periodType = periodTypeDropdown.value;
       const periodNameRecord = semesters.find(semester => semester.periodNameId == semesterDropdown.value);
-      agreedPriceInput.value = periodType === "single" ? periodNameRecord.costSingle : periodNameRecord.costDouble;
+      agreedPriceInput.value = periodNameRecord ? (periodType === "single" ? periodNameRecord.costSingle : periodNameRecord.costDouble) : 0;
     };
 
     let selectedPeriodId;
@@ -114,6 +115,7 @@ export async function addPaymentFormFields(formContent) {
 
     //these above and below go together if youre shifting them
     const billingDataRefresh = async () => {
+      if (!semesterDropdown.value) return
       contentLowerArea.innerHTML = ''
       selectedPeriodId = null
       chosenBillingPeriod = {}
@@ -233,7 +235,9 @@ export async function addPaymentFormFields(formContent) {
         }
       });
 
-      const monthlies = await window.electron.call('getMonthliesFor', [tenantInput.value]);
+      const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
+
+      const monthlies = await window.electron.call('getMonthliesFor', [selectedTenantOption.dataset.id]);
       if (!monthlies.success) showToast('Error getting some billing periods');
 
       monthlies.data.forEach((rec) => {
@@ -256,10 +260,11 @@ export async function addPaymentFormFields(formContent) {
 
     submitButton.onclick = async (event) => {
       event.preventDefault();
-
       try {
-        const dateInput = formContent.querySelector("input[name='date']").value || null;
-        const amountInput = formContent.querySelector("input[name='amount']").value || null;
+        const dateInput = formContent.querySelector("input[name='date']").value;
+        const amountInput = formContent.querySelector("input[name='amount']").value;
+
+        if (!dateInput || !amountInput) return showToast('Please fill both date and amount fields')
 
         let transactionData = {
           date: dateInput,
@@ -301,12 +306,16 @@ export async function addPaymentFormFields(formContent) {
         if (createTransactionResponse.success) {
           showToast('Transaction added successfully');
           closeForm();
+          await doTotals()
+          updateCardNumbers()
         } else {
           if (!Object.keys(chosenBillingPeriod).length) {
             await window.electron.call('updateBillingPeriod', [selectedPeriodId, {deleted: 1}])
+            billingDataRefresh()
           }
           showToast(createTransactionResponse.error);
         }
+
       } catch (error) {
         console.error(error);
         showToast(error);

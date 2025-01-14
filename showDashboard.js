@@ -13,7 +13,7 @@ export default async function showDashboard() {
   const navbar = document.createElement("nav");
   navbar.className = "navbar";
 
-  const menuItems = ["Log Out", "Add New Tenant", "Record Money Received", "Update Tenant", "Billing Periods"];
+  const menuItems = ["Log Out", "Add New Tenant", "Record Money Received", "Search Tenant", "Billing Periods"];
   if (user.role == 'admin') menuItems.unshift('Users');
   menuItems.forEach(item => {
     const menuOption = document.createElement("button");
@@ -137,7 +137,7 @@ function getCurrentBillingPeriodName(semesters) {
   return currentPeriodName
 }
 
-function updateCardNumbers() {
+export function updateCardNumbers() {
   const cards = document.querySelectorAll(".dash-card");
   for (let card of cards) {
     const titleDiv = card.querySelector(".dash-card-title");
@@ -166,7 +166,7 @@ function updateCardNumbers() {
       if (numberDiv) {
         numberDiv.textContent = formatNumber(Number(window.totals.totalMisc)) 
       }
-    } else if (titleDiv && titleDiv.textContent === "Past Tenants") {
+    } else if (titleDiv && titleDiv.textContent === "Previous Semester Tenants") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
         numberDiv.textContent = formatNumber(Number(window.totals.totalPastTenants)) 

@@ -14,7 +14,6 @@ const createWindow = () => {
   win.loadFile('index.html')
 }
 
-
 app.whenReady().then(() => {
   createWindow()
 
@@ -33,10 +32,11 @@ ipcMain.handle("call", async (event, funcName, params) => {
       const resp = await dbScript[funcName].apply(null, params);
       return { success: true, data: resp };      
     } else {
-      throw new Error("Function not found");
+      console.error("Function not found:", funcName)
+      return { success: false, error: "Function not found"}
     }
   } catch (error) {
-    console.error("Error in function call:", error);
+    console.error(error.message || error);
     console.log('variables:', params)
     return { success: false, error: error };
   }
