@@ -5,6 +5,10 @@ async function showLoginPrompt() {
   const loginContainer = document.createElement("div");
   loginContainer.className = "login-container";
 
+  // Set body class to apply specific styling to the login page
+  document.body.className = 'login-page';  // Add this line to apply the background styles
+
+
   const title = document.createElement("h2");
   title.className = "login-title";
   title.textContent = "Login";
