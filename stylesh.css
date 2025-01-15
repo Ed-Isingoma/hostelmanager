@@ -188,18 +188,20 @@ body {
 .btn {
   width: 100%;
   padding: 10px;
-  background-color: #2ecc71;
+  background-color: rgba(96, 46, 204, 0.7); /* Apply the color with transparency */
   color: #fff;
   border: none;
   border-radius: 4px;
   font-size: 1.1em;
   cursor: pointer;
   transition: background-color 0.3s;
+  font-family: 'Libre Baskerville', serif;
 }
 
 .btn:hover {
-  background-color: #27ae60;
+  background-color: rgba(96, 46, 204, 1); /* Fully opaque on hover */
 }
+
 
 .switch-text {
   margin-top: 20px;
