@@ -16,11 +16,11 @@ body {
 
 /* Only for the login page */
 .login-page {
-   background-image: url('https://images.pexels.com/photos/4907189/pexels-photo-4907189.jpeg'); /* Image URL from Pexels */
+  background-image: url('https://images.pexels.com/photos/4907189/pexels-photo-4907189.jpeg');
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
-  height: 100vh; /* Ensure the background covers the full viewport */
+  height: 100vh; 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -31,12 +31,23 @@ body {
   width: 80%;
   max-width: 400px;
   padding: 20px;
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.5); 
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   text-align: center;
 }
 
+.signup-container {
+  width: 80%;
+  max-width: 400px;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.5); 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Flex container styles */
 .welcome-message,
 .login-container,
 .signup-container {
@@ -44,12 +55,6 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  background-image: url('https://example.com/hostel-image.jpg'); /* Replace with your image URL */
-  background-size: cover; /* Ensure the image covers the entire background */
-  background-position: center center; /* Center the image */
-  background-repeat: no-repeat; /* Prevent the image from repeating */
-  position: relative;
 }
 
 .menu-item {
@@ -149,7 +154,7 @@ body {
   width: 80%;
   max-width: 400px;
   padding: 20px;
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent background */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   text-align: center;
