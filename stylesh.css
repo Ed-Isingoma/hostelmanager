@@ -171,12 +171,19 @@ body {
   width: 100%;
   padding: 10px;
   margin: 10px 0;
-  border: 1px solid #ddd;
+  border: 1px solid transparent; /* Make the border transparent */
   border-radius: 4px;
   font-size: 1em;
   font-family: 'Times New Roman', Times, serif;
   font-style: italic;
+  background-color: rgba(255, 255, 255, 0.6); /* Optional: Slightly transparent background */
 }
+
+.input-field:focus {
+  outline: none;
+  border: 1px solid rgba(96, 46, 204, 0.5); /* Add a semi-transparent border on focus */
+}
+
 
 .btn {
   width: 100%;
