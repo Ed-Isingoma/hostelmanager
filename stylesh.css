@@ -154,7 +154,7 @@ body {
   width: 80%;
   max-width: 400px;
   padding: 20px;
-  background-color: rgba(255, 255, 255, 0.5); 
+  background-color: rgba(255, 255, 255, 0.6); 
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   text-align: center;
@@ -164,7 +164,7 @@ body {
   font-size: 2em;
   color: #602ecc;
   margin-bottom: 20px;
-  font-family: 'Libre Baskerville', serif;
+  font-family: 'Roboto Flex', sans-serif; 
 }
 
 .input-field {
@@ -174,7 +174,7 @@ body {
   border: 1px solid transparent; /* Make the border transparent */
   border-radius: 4px;
   font-size: 1em;
-  font-family: 'Times New Roman', Times, serif;
+  font-family: 'Roboto Flex', sans-serif; 
   font-style: italic;
   background-color: rgba(255, 255, 255, 0.6); /* Optional: Slightly transparent background */
 }
@@ -195,7 +195,7 @@ body {
   font-size: 1.1em;
   cursor: pointer;
   transition: background-color 0.3s;
-  font-family: 'Libre Baskerville', serif;
+  font-family: 'Roboto Flex', sans-serif; 
 }
 
 .btn:hover {
@@ -205,10 +205,11 @@ body {
 
 .switch-text {
   margin-top: 20px;
-  color: #27ae60;
+  color: #602ecc;
   font-size: 0.9em;
   cursor: pointer;
   text-decoration: underline;
+  font-family: 'Roboto Flex', sans-serif; 
 }
 
 .switch-text:hover {
