@@ -8,7 +8,6 @@ async function showLoginPrompt() {
   // Set body class to apply specific styling to the login page
   document.body.className = 'login-page';  
 
-
   const title = document.createElement("h2");
   title.className = "login-title";
   title.textContent = "Login";
@@ -52,10 +51,16 @@ async function showLoginPrompt() {
         if (response.success && response.data.length > 0) {
           showToast("Login successful");
           loginContainer.remove();
-          window.dashboardContainer = document.createElement('div')
-          document.body.appendChild(dashboardContainer)
-          window.user = response.data[0]
-          showDashboard()
+
+          // Create the dashboard container and add it to the body
+          window.dashboardContainer = document.createElement('div');
+          document.body.appendChild(window.dashboardContainer);
+
+          // Show the dashboard
+          showDashboard();
+
+          // Store the logged-in user info globally
+          window.user = response.data[0];
         } else {
           showToast("Invalid username or password.");
         }
@@ -154,6 +159,7 @@ function showWelcomeMessage() {
   }, 3000);
 }
 
-showWelcomeMessage()
+showWelcomeMessage();
 
 export { showLoginPrompt, showSignupPrompt };
+

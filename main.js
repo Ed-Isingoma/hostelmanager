@@ -1,43 +1,47 @@
-const { app, BrowserWindow, ipcMain } = require('electron')
-const path = require('node:path')
-const dbScript = require('./dbScript');
+const { app, BrowserWindow, ipcMain } = require('electron');
+const path = require('node:path');
+const dbScript = require('./dbScript'); // Assuming this has your DB functions
 
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 1200,
     height: 700,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'), // Ensure preload.js is correctly set up
+      nodeIntegration: false, // Should be false for security reasons
+      contextIsolation: true, // Secure context
     }
-  })
+  });
 
-  win.loadFile('index.html')
-}
+  win.loadFile('index.html');
+};
 
 app.whenReady().then(() => {
-  createWindow()
+  createWindow();
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-})
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
-})
+  if (process.platform !== 'darwin') app.quit();
+});
 
-ipcMain.handle("call", async (event, funcName, params) => {
+// Handle login (or any other specific functions)
+ipcMain.handle("login", async (event, username, password) => {
   try {
-    if (typeof dbScript[funcName] === "function") {
-      const resp = await dbScript[funcName].apply(null, params);
-      return { success: true, data: resp };      
+    // Check if dbScript has a function called 'login'
+    if (typeof dbScript.login === "function") {
+      const resp = await dbScript.login(username, password); // Assume login is a function in dbScript
+      return { success: true, data: resp };
     } else {
-      console.error("Function not found:", funcName)
-      return { success: false, error: "Function not found"}
+      console.error("Login function not found in dbScript.");
+      return { success: false, error: "Login function not found" };
     }
   } catch (error) {
-    console.error(error.message || error);
-    console.log('variables:', params)
-    return { success: false, error: error };
+    console.error("Login failed:", error.message || error);
+    return { success: false, error: error.message };
   }
 });
+
