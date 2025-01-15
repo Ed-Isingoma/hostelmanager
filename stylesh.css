@@ -16,7 +16,7 @@ body {
 
 /* Only for the login page */
 .login-page {
-  background-image: url('https://images.pexels.com/photos/4907189/pexels-photo-4907189.jpeg'); /* Image URL from Pexels */
+   background-image: url('https://images.pexels.com/photos/4907189/pexels-photo-4907189.jpeg'); /* Image URL from Pexels */
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
