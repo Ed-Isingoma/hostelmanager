@@ -1,49 +1,68 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
-const dbScript = require('./dbScript'); // Assuming this has your DB functions
+const dbScript = require('./dbScript'); // Assuming dbScript contains your database functions
+
+let mainWindow;
 
 const createWindow = () => {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 700,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'), // Ensure preload.js is correctly set up
       nodeIntegration: false, // For security reasons
-      contextIsolation: true, // Secure context
-    }
+      contextIsolation: true, // Isolate renderer and main process
+    },
   });
 
-  win.loadFile('index.html'); // Assuming you have an index.html
+  mainWindow.loadFile('index.html'); // Load the login page
 };
 
-// Register the 'call' event handler to listen for function calls from renderer process
+// Event listener for `call` requests from the renderer process
 ipcMain.handle('call', async (event, funcName, params) => {
-  console.log(`Received function name: ${funcName}`);
-  console.log(`Received parameters:`, params);
+  console.log(`Function: ${funcName}`);
+  console.log(`Parameters:`, params);
 
-  // Call respective functions based on `funcName`
-  if (funcName === 'login') {
-    // Handle login functionality
-    return await handleLogin(params.username, params.password);
-  } else {
-    console.error(`Unknown function: ${funcName}`);
-    return { error: `Unknown function: ${funcName}` };
+  try {
+    if (funcName === 'login') {
+      return await handleLogin(params[0], params[1]); // Pass username and password
+    } else if (funcName === 'createAccount') {
+      return await handleCreateAccount(params[0], params[1]); // Pass username and password
+    } else {
+      throw new Error(`Unknown function: ${funcName}`);
+    }
+  } catch (error) {
+    console.error('Error handling call:', error.message || error);
+    return { success: false, error: error.message || error };
   }
 });
 
-// Handle the login functionality
+// Login handler
 async function handleLogin(username, password) {
   try {
-    // Assuming dbScript has a login function that checks credentials
-    const result = await dbScript.login(username, password);
-    
-    if (result) {
-      return { success: true, message: 'Login successful' };
+    const user = await dbScript.login(username, password); // Assume dbScript.login validates credentials
+    if (user) {
+      return { success: true, data: user };
     } else {
       return { success: false, message: 'Invalid username or password' };
     }
   } catch (error) {
     console.error('Login failed:', error.message || error);
+    return { success: false, message: error.message || error };
+  }
+}
+
+// Account creation handler
+async function handleCreateAccount(username, password) {
+  try {
+    const result = await dbScript.createAccount(username, password); // dbScript.createAccount handles account creation
+    if (result) {
+      return { success: true, message: 'Account created successfully' };
+    } else {
+      return { success: false, message: 'Account creation failed' };
+    }
+  } catch (error) {
+    console.error('Account creation failed:', error.message || error);
     return { success: false, message: error.message || error };
   }
 }
