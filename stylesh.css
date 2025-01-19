@@ -14,6 +14,40 @@ body {
   font-family: Arial, sans-serif;
 }
 
+/* Only for the login page */
+.login-page {
+  background-image: url('https://images.pexels.com/photos/4907189/pexels-photo-4907189.jpeg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  height: 100vh; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Other styles for the login page container */
+.login-container {
+  width: 80%;
+  max-width: 400px;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.5); 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.signup-container {
+  width: 80%;
+  max-width: 400px;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.5); 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Flex container styles */
 .welcome-message,
 .login-container,
 .signup-container {
@@ -120,7 +154,7 @@ body {
   width: 80%;
   max-width: 400px;
   padding: 20px;
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.6); 
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   text-align: center;
@@ -128,55 +162,77 @@ body {
 
 .login-title, .signup-title {
   font-size: 2em;
-  color: #2ecc71;
+  color: #602ecc;
   margin-bottom: 20px;
+  font-family: 'Roboto Flex', sans-serif; 
 }
 
 .input-field {
   width: 100%;
   padding: 10px;
   margin: 10px 0;
-  border: 1px solid #ddd;
+  border: 1px solid transparent; /* Make the border transparent */
   border-radius: 4px;
   font-size: 1em;
+  font-family: 'Roboto Flex', sans-serif; 
+  background-color: rgba(255, 255, 255, 0.6); /* Optional: Slightly transparent background */
 }
+
+.input-field::placeholder {
+  font-style: italic; 
+}
+
+.input-field:focus {
+  outline: none;
+  border: 1px solid rgba(96, 46, 204, 0.5); /* Add a semi-transparent border on focus */
+}
+
 
 .btn {
   width: 100%;
   padding: 10px;
-  background-color: #2ecc71;
+  background-color: rgba(96, 46, 204, 0.7); /* Apply the color with transparency */
   color: #fff;
   border: none;
   border-radius: 4px;
   font-size: 1.1em;
   cursor: pointer;
   transition: background-color 0.3s;
+  font-family: 'Roboto Flex', sans-serif; 
 }
 
 .btn:hover {
-  background-color: #27ae60;
+  background-color: rgba(96, 46, 204, 1); /* Fully opaque on hover */
 }
+
 
 .switch-text {
   margin-top: 20px;
-  color: #27ae60;
+  color: #602ecc;
   font-size: 0.9em;
   cursor: pointer;
   text-decoration: underline;
+  font-family: 'Roboto Flex', sans-serif; 
 }
 
 .switch-text:hover {
   color: #0505c9;
 }
 
+
+/* dashboard ................ */
 footer {
-  margin-top: auto;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   padding: 20px;
-  background-color: #f4f4f4;
-  color: #666;
+  background-color: #602ecc;
+  color: white;
   font-size: 14px;
   text-align: center;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .dash-card-container {
