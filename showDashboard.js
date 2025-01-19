@@ -9,7 +9,6 @@ export default async function showDashboard() {
   header.textContent = "Kann Hostel Management";
   dashboardContainer.appendChild(header);
 
-  // Create the navbar
   const navbar = document.createElement("nav");
   navbar.className = "navbar";
 
@@ -23,13 +22,6 @@ export default async function showDashboard() {
     navbar.appendChild(menuOption);
   });
 
-  // Create the search field
-  // const searchField = document.createElement("input");
-  // searchField.type = "text";
-  // searchField.placeholder = "Search";
-  // searchField.className = "search-field";
-  // navbar.appendChild(searchField);
-
   await showSemesters(navbar)
 
   dashboardContainer.appendChild(navbar);
@@ -38,22 +30,12 @@ export default async function showDashboard() {
   const cardContainer = document.createElement("div");
   cardContainer.className = "card-container";
 
-  // Ensure showCards appends to this container
   await showCards(cardContainer);
-
-  // Add the card container to the body
   document.body.appendChild(cardContainer);
 
-  // Create and append the footer
   const footer = document.createElement("footer");
   footer.textContent = "(c) 2024 Kann Hostel. All Rights Reserved";
   dashboardContainer.appendChild(footer);
-
-  // Close form functionality
-  window.closeForm = function () {
-    document.querySelector(".overlay")?.remove();
-    document.querySelector(".modal-form")?.remove();
-  };
 }
 
 async function showSemesters(navbar) {
@@ -123,14 +105,16 @@ function getCurrentBillingPeriodName(semesters) {
   let currentPeriodName = null;
 
   for (let i = 0; i < semesters.length; i++) {
-      const currentSemesterDate = new Date(semesters[i].startingDate);
+      const currentSemesterStart = new Date(semesters[i].startingDate);
 
-      if (currentSemesterDate <= now) {
+      if (currentSemesterStart <= now) {
           const nextSemester = semesters[i + 1];
           if (!nextSemester || new Date(nextSemester.startingDate) > now) {
               currentPeriodName = semesters[i];
               break;
           }
+      } else {
+        currentPeriodName = semesters[0]
       }
   }
 

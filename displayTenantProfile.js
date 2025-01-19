@@ -1,4 +1,3 @@
-import showToast from "./showToast.js";
 import { formatDateRange } from "./getIcon.js";
 
 export function displayTenantProfile(profile, formContent) {
@@ -348,6 +347,9 @@ export function displayTenantProfile(profile, formContent) {
   const cancelBtn = document.createElement("button");
   cancelBtn.className = "add-tenant-submit";
   cancelBtn.textContent = "Back";
-  cancelBtn.onclick = closeForm;
+  cancelBtn.onclick = (event)=> {
+    event.preventDefault()
+    closeForm()
+  } 
   formContent.appendChild(cancelBtn)
 }

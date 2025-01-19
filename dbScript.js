@@ -608,7 +608,7 @@ function getOnlyTenantsWithOwingAmt(periodNameId) {
 function getTenantsPlusOutstandingBalanceAll(periodNameId) {
   const query = `
     SELECT Tenant.*, Room.roomName,
-      BillingPeriod.agreedPrice - IFNULL(SUM(Transactionn.amount), 0) AS owingAmount
+      BillingPeriod.agreedPrice - IFNULL(SUM(Transactionn.amount), 0) AS owingAmount, BillingPeriod.ownEndDate
     FROM Tenant
     JOIN BillingPeriod ON Tenant.tenantId = BillingPeriod.tenantId
     JOIN Room on BillingPeriod.roomId = Room.roomId
@@ -711,17 +711,6 @@ function searchTenantByName(name) {
 }
 
 function searchTenantNameAndId(name) {
-  const query = `
-    SELECT 
-      t.tenantId, 
-      t.name
-    FROM Tenant t
-    WHERE t.name LIKE ? AND t.deleted = 0
-  `;
-  return executeSelect(query, [`%${name}%`]);
-}
-
-function searchTenantNameAndIdMeta(name) {
   const query = `
     SELECT 
       t.tenantId, 
@@ -1114,7 +1103,6 @@ module.exports = {
   moveMonthlyBillingPeriods,
   searchTenantByName,
   searchTenantNameAndId,
-  searchTenantNameAndIdMeta,
   searchRoomByNamePart,
   updateAccount,
   updateBillingPeriod,

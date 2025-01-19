@@ -1,9 +1,10 @@
 import { addPaymentFormFields } from './addPaymentFormFields.js';
 import { displayTenantProfile } from './displayTenantProfile.js';
-import { approveAccount, deleteAccount } from './getIcon.js';
+import { approveAccount, assignPeriodNameId, deleteAccount, doTotals } from './getIcon.js';
 import { showLoginPrompt } from './logins.js';
 import { showBillingPeriods } from './showBillingPeriods.js';
 import { miscExpenses } from './showCards.js';
+import { updateCardNumbers } from './showDashboard.js';
 import showToast from './showToast.js'
 
 export default function openForm(title) {
@@ -243,7 +244,7 @@ async function addTenantFormFields(formContent) {
     formContent.appendChild(periodTypeDropdown);
 
     const agreedPriceLabel = document.createElement("label");
-    agreedPriceLabel.textContent = "Room Amount Per Month/Semester";
+    agreedPriceLabel.textContent = "Total Rent for this period/Semester";
     formContent.appendChild(agreedPriceLabel);
 
     const agreedPriceInput = document.createElement("input");
@@ -253,8 +254,8 @@ async function addTenantFormFields(formContent) {
 
     const setDefaultAgreedPrice = async () => {
       const periodType = periodTypeDropdown.value;
-      const periodNameRecord = semesters.find(semester => semester.periodNameId === semesterDropdown.value)
-      agreedPriceInput.value = periodType === "single" ? periodNameRecord.costSingle : periodNameRecord.costDouble;
+      const periodNameRecord = semesters.find(semester => semester.periodNameId == semesterDropdown.value)
+      agreedPriceInput.value = periodType === "single" ? periodNameRecord?.costSingle : periodNameRecord?.costDouble;
     };
 
     periodTypeDropdown.addEventListener("change", setDefaultAgreedPrice);
@@ -288,17 +289,16 @@ async function addTenantFormFields(formContent) {
         (option) => option.value === roomInput.value
       );
 
+      const thePeriodNameId = semesterDropdown.value == 'custom' ? assignPeriodNameId(endDateInput.value) || currentPeriodNameId : semesterDropdown.value
+
       const billingPeriodData = {
-        tenantId,
-        periodNameId: semesterDropdown.value == 'custom' ? currentPeriodNameId : semesterDropdown.value,
         startingDate: semesterDropdown.value === "custom" ? startDateInput.value : null,
         endingDate: semesterDropdown.value === "custom" ? endDateInput.value : null,
-        roomId: selectedRoomOption.dataset.id,
         periodType: periodTypeDropdown.value,
         agreedPrice: parseInt(agreedPriceInput.value || 0, 10),
       };
 
-      const billingResult = await window.electron.call('createBillingPeriod', [billingPeriodData]);
+      const billingResult = await window.electron.call('createBillingPeriod', [billingPeriodData, thePeriodNameId, selectedRoomOption.dataset.id, tenantId]);
 
       if (!billingResult.success) {
         await window.electron.call('updateTenant', [tenantId, { deleted: 1 }])
@@ -307,9 +307,12 @@ async function addTenantFormFields(formContent) {
           input.value = tenantData[field.name]
         });
         return showToast(billingResult.error);
+      } else {
+        showToast('New tenant added')
+        closeForm()
+        await doTotals()
+        updateCardNumbers()
       }
-
-      console.log("Billing period created successfully.");
     };
 
     const cancelBtn = document.createElement("button");
@@ -328,7 +331,7 @@ async function addTenantFormFields(formContent) {
 async function addTenantSearch(formContent) {
   try {
     const searchLabel = document.createElement("label");
-    searchLabel.textContent = "Select Tenant";
+    searchLabel.textContent = "Type name to find tenant";
     formContent.appendChild(searchLabel);
 
     const tenantInput = document.createElement("input");
@@ -344,7 +347,7 @@ async function addTenantSearch(formContent) {
 
     tenantInput.addEventListener("input", async () => {
       if (tenantInput.value.split(' (')[1]) return
-      const tenants = await window.electron.call("searchTenantNameAndIdMeta", [tenantInput.value]);
+      const tenants = await window.electron.call("searchTenantNameAndId", [tenantInput.value]);
       //that split is because the option value is intertwined
       if (tenants.success) {
         tenantDatalist.innerHTML = "";
@@ -357,44 +360,12 @@ async function addTenantSearch(formContent) {
       } else showToast(tenants.error);
     });
 
-    const tableArea = document.createElement('div')
-    formContent.appendChild(tableArea)
-
     tenantInput.addEventListener("change", async () => {
       const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
-      tableArea.innerHTML = ''
-
-      const table = document.createElement('table');
-      table.className = 'modal-show-table';
-
-      const headerRow = document.createElement('tr');
-      headerRow.innerHTML = `
-          <th>Name</th>
-          <th>Room</th>
-          <th>Most Recent Semester</th>
-          <th>Pays Monthly</th>
-        `;
-      table.appendChild(headerRow);
-
-      if (!selectedTenantOption) {
-        const noDataRow = document.createElement('tr');
-        noDataRow.innerHTML = `<td colspan="4">No tenant in search query</td>`;
-        table.appendChild(noDataRow);
-      } else {
-        const row = document.createElement('tr');
-
-        row.innerHTML = `
-            <td>${selectedTenantOption.name}</td>
-            <td>${selectedTenantOption.roomName}</td>
-            <td>${selectedTenantOption.lastSemName}</td>
-            <td>${selectedTenantOption.paysMonthly}</td>
-            `;
-
-        row.querySelector('td:first-of-type').onclick = () => openForm(`tenant-${selectedTenantOption.tenantId}-${selectedTenantOption.name}`);
-        table.appendChild(row);
+      if (selectedTenantOption) {
+        closeForm()
+        openForm(`tenant-${selectedTenantOption.dataset.id}-${selectedTenantOption.value.split(' (')[0]}`)
       }
-
-      tableArea.appendChild(table);
     });
 
     const backButton = document.createElement('button');
@@ -433,7 +404,7 @@ async function showTenant(formContent, splicedTitle) {
     };
     displayTenantProfile(transformedProfile, formContent)
   } catch (e) {
-    console.log('Error fetching tenant:', e);
+    console.log('Error displaying tenant:', e);
     showToast(e)
   }
 }
