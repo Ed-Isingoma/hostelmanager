@@ -14,15 +14,16 @@ body {
     display: flex;
     gap: 8px;
     /* Reduced gap between buttons */
-    justify-content: center;
+    justify-content: left;
     background-color: #cdeee1;
     /* Updated to match the card and header backgrounds */
     padding: 12px 42px;
     /* Slightly wider padding */
     border-radius: 12px;
     margin-bottom: 20px;
-    width: 92%;
+    width: 100%;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+    
 }
 
 .navbar button {
@@ -33,7 +34,7 @@ body {
     border-radius: 6px;
     cursor: pointer;
     font-size: 16px;
-    transition: background-color 0.3s;
+    transition: background-color 0.5s;
 }
 
 .navbar button:hover {
