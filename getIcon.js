@@ -147,3 +147,28 @@ export function formatDateRange(rec) {
   return `${startingDate} - ${endDate}`;
 }
 
+export function assignPeriodNameId(dateStr) {
+  semesters.sort((a, b) => new Date(a.startingDate) - new Date(b.startingDate));
+  const theDate = new Date(dateStr).setHours(0, 0, 0);
+  let theId = null;
+  for (let i = 0; i < semesters.length; i++) {
+    const currentSemesterStart = new Date(semesters[i].startingDate);
+
+    if (currentSemesterStart <= theDate) {
+      const nextSemester = semesters[i + 1];
+      if (!nextSemester || new Date(nextSemester.startingDate) > theDate) {
+        theId = semesters[i].periodNameId;
+        break;
+      }
+    } else {
+      theId = semesters[0].periodNameId;
+    }
+  }
+  return theId;
+}
+
+window.closeForm = function () {
+  document.querySelector(".overlay")?.remove();
+  document.querySelector(".modal-form")?.remove();
+};
+

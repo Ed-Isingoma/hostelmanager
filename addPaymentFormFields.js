@@ -1,4 +1,4 @@
-import { doTotals, formatDateRange } from "./getIcon.js";
+import { assignPeriodNameId, doTotals, formatDateRange } from "./getIcon.js";
 import { updateCardNumbers } from "./showDashboard.js";
 import showToast from "./showToast.js";
 
@@ -119,6 +119,7 @@ export async function addPaymentFormFields(formContent) {
       contentLowerArea.innerHTML = ''
       selectedPeriodId = null
       chosenBillingPeriod = {}
+
       if (semesterDropdown.value === "custom") {
         startDateLabel.style.display = "";
         startDateInput.style.display = "";
@@ -133,9 +134,9 @@ export async function addPaymentFormFields(formContent) {
 
       if (!tenantInput.value) return;
       if (semesterDropdown.value != 'custom') {
-        if (semesterDropdown.options[semesterDropdown.selectedIndex].dataset.isPeriodId) {
+        if (semesterDropdown.options[semesterDropdown.selectedIndex].getAttribute("isperiodid")) {
           chosenBillingPeriod = {
-            ...JSON.parse(semesterDropdown.options[semesterDropdown.selectedIndex].dataset.isPeriodId)
+            ...JSON.parse(semesterDropdown.options[semesterDropdown.selectedIndex].getAttribute("isperiodid"))
           }
           selectedPeriodId = chosenBillingPeriod.periodId
           subheadingPayForm.textContent = 'Tenant data for selected billing period'
@@ -230,9 +231,7 @@ export async function addPaymentFormFields(formContent) {
 
     tenantInput.addEventListener("change", async () => {
       Array.from(semesterDropdown.options).forEach((option) => {
-        if (option.getAttribute("isPeriodId") === "true") {
-          option.remove();
-        }
+        if (option.getAttribute("isperiodid")) option.remove();
       });
 
       const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
@@ -244,7 +243,7 @@ export async function addPaymentFormFields(formContent) {
         const option = document.createElement("option");
         option.value = rec.periodId;
         option.textContent = formatDateRange(rec);
-        option.setAttribute('isPeriodId', rec);
+        option.setAttribute('isperiodid', JSON.stringify(rec));
         semesterDropdown.appendChild(option);
       });
 
@@ -282,7 +281,7 @@ export async function addPaymentFormFields(formContent) {
           const periodNameIdInput = formContent.querySelector(".semester-dropdown").value
           const startDateInput = formContent.querySelector("input[name='startDate']").value || null;
           const endDateInput = formContent.querySelector("input[name='endDate']").value || null;
-          const theBillingPeriodName = periodNameIdInput === 'custom' ? window.currentPeriodNameId : periodNameIdInput
+          const theBillingPeriodName = periodNameIdInput === 'custom' ? assignPeriodNameId(endDateInput) || window.currentPeriodNameId : periodNameIdInput
 
           const billingPeriodData = {
             ownStartingDate: startDateInput,
@@ -334,3 +333,4 @@ export async function addPaymentFormFields(formContent) {
     return showToast(e);
   }
 }
+
