@@ -11,20 +11,40 @@ export default async function showDashboard() {
 
   const navbar = document.createElement("nav");
   navbar.className = "navbar";
-
-  const menuItems = ["Log Out", "Add New Tenant", "Record Money Received", "Search Tenant", "Billing Periods"];
-  if (user.role == 'admin') menuItems.unshift('Users');
-  menuItems.forEach(item => {
+  
+  /* ...........................................................................20th ..............*/
+  const menuItems = [
+    { text: "Users", icon: "fas fa-users" },
+    { text: "Log Out", icon: "fas fa-sign-out-alt" },
+    { text: "Add New Tenant", icon: "fas fa-user-plus" },
+    { text: "Record Money Received", icon: "fas fa-dollar-sign" },
+    { text: "Search Tenant", icon: "fas fa-search" },
+    { text: "Billing Periods", icon: "fas fa-calendar" },
+  ];
+  
+  if (user.role !== "admin") menuItems.shift();
+  
+  menuItems.forEach(({ text, icon }) => {
     const menuOption = document.createElement("button");
     menuOption.className = "menu-item";
-    menuOption.textContent = item;
-    menuOption.onclick = () => openForm(item);
+  
+    const iconElement = document.createElement("i");
+    iconElement.className = icon;
+    menuOption.appendChild(iconElement);
+  
+    const textElement = document.createElement("span");
+    textElement.textContent = text;
+    menuOption.appendChild(textElement);
+  
+    menuOption.onclick = () => openForm(text);
     navbar.appendChild(menuOption);
   });
-
-  await showSemesters(navbar)
-
+  
+  await showSemesters(navbar);
+  
   dashboardContainer.appendChild(navbar);
+   /* ...........................................................................20th ..............*/
+  
 
   // Create the container for cards and pass it to showCards
   const cardContainer = document.createElement("div");
