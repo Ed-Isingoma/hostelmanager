@@ -15,12 +15,12 @@ async function showCards() {
   ];
 
   const cardContainer = document.createElement("div");
-  cardContainer.className = "dash-card-container";
+  cardContainer.className = "card-container";  // Updated class name here
 
   cardData.forEach(data => {
     const card = document.createElement("div");
     card.className = "dash-card";
-    card.onclick = data.func
+    card.onclick = data.func;
 
     const icon = document.createElement("div");
     icon.className = "dash-card-icon";
@@ -42,6 +42,7 @@ async function showCards() {
 
   dashboardContainer.appendChild(cardContainer);
 }
+
 
 async function numOfTenants() {
   try {

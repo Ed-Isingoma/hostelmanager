@@ -15,11 +15,11 @@ export default async function showDashboard() {
   /* ...........................................................................20th ..............*/
   const menuItems = [
     { text: "Users", icon: "fas fa-users" },
-    { text: "Log Out", icon: "fas fa-sign-out-alt" },
     { text: "Add New Tenant", icon: "fas fa-user-plus" },
     { text: "Record Money Received", icon: "fas fa-dollar-sign" },
     { text: "Search Tenant", icon: "fas fa-search" },
     { text: "Billing Periods", icon: "fas fa-calendar" },
+    { text: "Log Out", icon: "fas fa-sign-out-alt" },
   ];
   
   if (user.role !== "admin") menuItems.shift();
