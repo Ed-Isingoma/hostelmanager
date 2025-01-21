@@ -46,12 +46,16 @@ export default async function showDashboard() {
    /* ...........................................................................20th ..............*/
   
 
-  // Create the container for cards and pass it to showCards
-  const cardContainer = document.createElement("div");
-  cardContainer.className = "card-container";
+  // Create the container for cards
+const cardContainer = document.createElement("div");
+cardContainer.className = "card-container";  // Apply the class for styling
 
-  await showCards(cardContainer);
-  document.body.appendChild(cardContainer);
+// Pass the container to showCards
+await showCards(cardContainer);
+
+// Append the container to the body (only once)
+document.body.appendChild(cardContainer);
+
 
   const footer = document.createElement("footer");
   footer.textContent = "(c) 2024 Kann Hostel. All Rights Reserved";

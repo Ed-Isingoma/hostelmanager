@@ -92,36 +92,45 @@ body {
     left: 0;
     margin-right: 0;
     position: fixed;
-    top: 0;
+    top: 0; /* Adjusted to ensure the header is at the top */
     z-index: 1000;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+
 /* Card Container */
 .card-container {
-    margin-top: 0;
-    margin-left: 250px; /* Ensure the cards are positioned to the right of the navbar */
+    background-color: #efdcdc;
+    margin-top: 100px; /* Increase margin to push the card container further down */
+    margin-left: 250px; /* Position cards to the right of the navbar */
     display: grid; /* Activate CSS Grid layout */
-    grid-template-columns: repeat(2, 1fr); /* Create two equal-width columns */
-    gap: 20px; /* Space between cards */
-    padding: 20px;
+    grid-template-columns: repeat(2, 1fr); /* Two equal-width columns */
+    gap: 30px; /* Space between cards */
+    padding: 30px; /* Padding around the card container */
     width: calc(100% - 250px); /* Adjust width to leave space for the navbar */
     box-sizing: border-box; /* Include padding in the width calculation */
+    overflow-x: auto;
+    overflow-y: auto;
+    height: auto;
+    top: 35px;
+    border-radius: 8px;
+
 }
 
 /* Cards */
 .dash-card {
     background-color: #ffffff;
-    padding: 20px;
+    padding: 40px; /* Increase padding inside the card */
     border-radius: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15); /* Shadow for a raised effect */
     text-align: center;
     transition: transform 0.3s ease;
+    margin-top: 20px; /* Add margin to create space between cards */
 }
 
 /* Hover Effect */
 .dash-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-8px); /* Slightly larger hover effect */
 }
 
 /* Responsive Design: Adjust for Small Screens */
@@ -131,7 +140,11 @@ body {
         margin-left: 60px; /* Adjust margin for smaller navbar widths */
         width: calc(100% - 60px);
     }
+    .dash-card {
+        padding: 20px; /* Adjust padding for small screens */
+    }
 }
+
 
 /* Footer Styling */
 footer {
