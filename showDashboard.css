@@ -12,42 +12,74 @@ body {
 /* Navbar Styling */
 .navbar {
     position: fixed;
-    top: 0;
+    top: 55px;
     left: 0;
-    height: 78%;
+    height: 73%;
     width: 250px;
     background-color: #42a196;
     padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 8px;
     transition: width 0.3s ease;
     box-shadow: 2px 0px 16px rgba(0, 0, 0, 0.3);
     border-radius: 0 10px 10px 0;
     bottom: 30px;
+    overflow: hidden;
 }
 
+/* Navbar Buttons */
 .navbar button {
     background-color: #ffffff;
     color: #1b5e20;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px;
+    gap: 5px;
+    padding: 8px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    overflow: hidden; /* Prevent text overflow */
 }
 
-.navbar button:hover {
-    background-color: #1b5e20;
-    color: #ffffff;
-}
-
+/* Button Icons */
 .navbar button i {
     font-size: 18px;
+    transition: font-size 0.3s ease;
 }
+
+/* Button Text */
+.navbar button span {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: opacity 0.3s ease, width 0.3s ease;
+}
+
+/* Media Query: Icons Only for Small Screens */
+@media screen and (max-width: 768px) {
+    .navbar {
+        width: 60px; /* Smaller width for small screens */
+        padding: 10px; /* Adjust padding */
+    }
+
+    .navbar button {
+        justify-content: center; /* Center-align icons */
+        padding: 10px;
+    }
+
+    .navbar button span {
+        opacity: 0; /* Hide text */
+        width: 0; /* Remove space taken by text */
+    }
+
+    .navbar button i {
+        font-size: 24px; /* Slightly increase icon size for visibility */
+    }
+}
+
+
 
 /* Header Styling */
 .dashboard-head {
@@ -56,24 +88,25 @@ body {
     text-align: center;
     padding: 20px;
     background-color: #42a196;
-    width: calc(100% - 260px);
-    margin-left: 200px;
+    width: 100%;
+    left: 0;
+    margin-right: 0;
     position: fixed;
     top: 0;
     z-index: 1000;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 0 0 10px 10px;
 }
 
 /* Card Container */
 .card-container {
-    margin-top: 125px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
+    margin-top: 0;
+    margin-left: 250px; /* Ensure the cards are positioned to the right of the navbar */
+    display: grid; /* Activate CSS Grid layout */
+    grid-template-columns: repeat(2, 1fr); /* Create two equal-width columns */
+    gap: 20px; /* Space between cards */
     padding: 20px;
-    width: 100%;
-    max-width: 1200px;
+    width: calc(100% - 250px); /* Adjust width to leave space for the navbar */
+    box-sizing: border-box; /* Include padding in the width calculation */
 }
 
 /* Cards */
@@ -84,22 +117,21 @@ body {
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
     transition: transform 0.3s ease;
+    
 }
 
+/* Hover Effect */
 .dash-card:hover {
     transform: translateY(-5px);
 }
 
-.dash-card-title {
-    font-size: 16px;
-    color: #555;
-    margin-bottom: 10px;
-}
-
-.dash-card-number {
-    font-size: 28px;
-    color: #1b5e20;
-    font-weight: bold;
+/* Responsive Design: Adjust for Small Screens */
+@media screen and (max-width: 768px) {
+    .card-container {
+        grid-template-columns: 1fr; /* Switch to a single column for smaller screens */
+        margin-left: 60px; /* Adjust margin for smaller navbar widths */
+        width: calc(100% - 60px);
+    }
 }
 
 /* Footer Styling */

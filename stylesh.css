@@ -68,7 +68,7 @@ body {
 }
 
 .dashboard-head {
-  margin: 20px 0;
+  margin: 0;
   font-size: 24px;
   color: #333;
 }
@@ -233,41 +233,6 @@ footer {
   text-align: center;
   width: 100%;
   box-sizing: border-box;
-}
-
-.dash-card-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  max-width: 1000px;
-  width: 100%;
-  padding: 20px;
-}
-
-.dash-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: #e8f5e9;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  text-align: center;
-}
-
-.dash-card-icon {
-  margin-bottom: 10px;
-}
-
-.dash-card-number {
-  font-size: 1.5em;
-  font-weight: bold;
-  color: #388e3c;
-}
-
-.dash-card-title {
-  font-size: 1em;
-  color: #555;
 }
 
 
@@ -567,9 +532,6 @@ footer {
   .navbar {
     flex-direction: column;
     align-items: flex-start;
-  }
-  .dash-card-container {
-    grid-template-columns: 1fr;
   }
   .accounts-list {
     padding: 0.5rem;
