@@ -135,7 +135,7 @@ body {
 
 .modal-form button {
   padding: 5px 10px;
-  background-color: #e74c3c;
+  background-color: #42a196;
   color: white;
   border: none;
   border-radius: 5px;
@@ -303,7 +303,7 @@ footer {
 
 /* Button styles */
 .edit-button {
-  background-color: #4caf50;
+  background-color: #42a196;
   color: #ffffff;
 }
 
@@ -313,7 +313,7 @@ footer {
 }
 
 .delete-button {
-  background-color: #ff4136;
+  background-color: #42a196;
   color: #ffffff;
 }
 
@@ -342,7 +342,7 @@ footer {
 /*add-tenant*/
 .add-tenant-submit {
   padding: 10px 20px;
-  background-color: green;
+  background-color: #42a196;
   color: white;
   border: none;
   border-radius: 5px;
@@ -398,7 +398,7 @@ footer {
 }
 
 .orangebg {
-  background-color: #e74d3cc0;
+  background-color: #42a196;
 }
 
 .modal-show-table th,
@@ -409,7 +409,7 @@ footer {
 .modal-show-back {
   margin-top: 15px;
   padding: 8px 16px;
-  background-color: #007bff;
+  background-color: #42a196;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -417,7 +417,7 @@ footer {
 }
 
 .modal-show-back:hover {
-  background-color: #0056b3;
+  background-color: green;
 }
 
 .rooms-levels-container {
@@ -474,7 +474,7 @@ footer {
 }
 
 .rooms-occupancy-box.occupied {
-  background-color: blue;
+  background-color: #42a196;
 }
 
 .rooms-occupancy-box.empty {
@@ -501,16 +501,16 @@ footer {
 }
 
 .tenants-popup-container {
-  position: relative; /* Ensure the container is positioned correctly within the overlay */
+  position: flex; /* Ensure the container is positioned correctly within the overlay */
   background-color: #aff3de;
   border: 2px solid #e7cc9a;
   padding: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 1;
+  z-index: 1001;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-width: 250px;
+  max-width: 350px;
 }
 
 .tenant-box {
@@ -529,6 +529,9 @@ input[type="text"],
 input[type="number"],
 input[type="email"],
 input[type="password"],
+input[type="submit"],
+input[type="date"],
+input[type="tel"],
 textarea,
 select {
   width: 100%;
