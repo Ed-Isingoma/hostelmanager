@@ -31,8 +31,8 @@ body {
   width: 80%;
   max-width: 400px;
   padding: 20px;
-  background-color: rgba(255, 255, 255, 0.5); 
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.7); 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   text-align: center;
 }
@@ -41,8 +41,8 @@ body {
   width: 80%;
   max-width: 400px;
   padding: 20px;
-  background-color: rgba(255, 255, 255, 0.5); 
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.7); 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   text-align: center;
 }
@@ -154,8 +154,8 @@ body {
   width: 80%;
   max-width: 400px;
   padding: 20px;
-  background-color: rgba(255, 255, 255, 0.6); 
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.7); 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   text-align: center;
 }
@@ -502,15 +502,15 @@ footer {
 
 .tenants-popup-container {
   position: relative; /* Ensure the container is positioned correctly within the overlay */
-  background-color: #d7d890;
+  background-color: #aff3de;
   border: 2px solid #e7cc9a;
   padding: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 4;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-width: 200px;
+  max-width: 250px;
 }
 
 .tenant-box {
@@ -522,67 +522,27 @@ footer {
   background-color: #f9f9f9;
 }
 
-.tenant-name,
-.tenant-owing-amount,
-.tenant-gender,
-.tenant-pays-monthly {
-  font-size: 14px;
+
+/* ........................ TODO .................*/
+/* General input field styles */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 1em;
+  font-family: 'Roboto Flex', sans-serif;
+  background-color: rgba(255, 255, 255, 0.6);
+  color: #333;
+  font-weight: normal; /* Ensure text is not bold */
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
 }
-
-.tenant-name {
-  font-weight: bold;
-}
-
-.tenant-owing-amount {
-  color: #e74c3c; /* Red for owing amounts */
-}
-
-.tenant-gender {
-  font-style: italic;
-}
-
-
-
-
-
-
-
-
-
-
-
-@keyframes fadeOut {
-  0% { opacity: 1; }
-  100% { opacity: 0; display: none; }
-}
-
-@media (max-width: 600px) {
-  .welcome-message {
-    font-size: 2em;
-  }
-  
-  .login-title, .signup-title {
-    font-size: 1.5em;
-  }
-  
-  .input-field, .btn {
-    font-size: 0.9em;
-  }
-  .navbar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .accounts-list {
-    padding: 0.5rem;
-  }
-  
-  .account-item {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .edit-button, .approve-button, .delete-button {
-    width: 100%;
-  }
-}
-

@@ -52,13 +52,35 @@ async function showUserAccounts(formContent) {
   try {
     const accounts = await window.electron.call('getAccountsDeadAndLiving');
     if (!accounts.success) {
-      showToast(accounts.error)
-      return
+      showToast(accounts.error);
+      return;
     }
-    const accountsListContainer = document.createElement('div');
-    accountsListContainer.className = 'accounts-list';
+
+    // Clear existing accounts if the container already exists
+    let accountsListContainer = formContent.querySelector('.accounts-list');
+    if (!accountsListContainer) {
+      accountsListContainer = document.createElement('div');
+      accountsListContainer.className = 'accounts-list';
+      formContent.appendChild(accountsListContainer);
+    } else {
+      accountsListContainer.innerHTML = ''; // Clear existing content
+    }
+
+    if (accounts.data.length === 0) {
+      // Handle empty state
+      const emptyMessage = document.createElement('div');
+      emptyMessage.textContent = 'No accounts found.';
+      emptyMessage.style.textAlign = 'center';
+      emptyMessage.style.padding = '1rem';
+      emptyMessage.style.color = '#888';
+      accountsListContainer.appendChild(emptyMessage);
+      return;
+    }
+
+    // Loop through accounts and populate the list
     accounts.data.forEach(account => {
-      if (account.role == 'admin') return
+      if (account.role === 'admin') return; // Skip admin accounts
+
       const accountItem = document.createElement('div');
       accountItem.className = 'account-item';
 
@@ -81,21 +103,22 @@ async function showUserAccounts(formContent) {
       deleteButton.textContent = 'Delete';
       deleteButton.onclick = async (event) => await deleteAccount(account.accountId, event, accountItem);
 
+      // Append elements to the account item
       accountItem.appendChild(accountName);
       accountItem.appendChild(approvalStatus);
       accountItem.appendChild(approveButton);
       accountItem.appendChild(deleteButton);
 
+      // Append account item to the list
       accountsListContainer.appendChild(accountItem);
     });
-
-    // Append the accounts list container to formContent
-    formContent.appendChild(accountsListContainer);
   } catch (e) {
     console.log('Error fetching accounts:', e);
-    showToast(e)
+    showToast(e);
   }
 }
+
+
 
 async function addTenantFormFields(formContent) {
   try {
