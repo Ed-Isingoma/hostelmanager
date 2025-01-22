@@ -348,7 +348,7 @@ footer {
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: normal;
   transition: background-color 0.3s ease;
 }
 

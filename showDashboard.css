@@ -94,6 +94,26 @@ body {
     position: fixed;
     top: 0; /* Adjusted to ensure the header is at the top */
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Prevent text from going outside the container */
+}
+
+/* Moving text animation */
+.moving-text {
+    display: inline-block; /* Make the text animatable */
+    animation: move-text left-right 18s linear infinite; /* Slower animation */
+}
+
+/* Keyframes for the text movement */
+@keyframes move-text {
+    0% {
+        transform: translateX(100%); /* Start off-screen to the right */
+    }
+    50% {
+        transform: translateX(0); /* Centered */
+    }
+    100% {
+        transform: translateX(-100%); /* Move off-screen to the left */
+    }
 }
 
 *,

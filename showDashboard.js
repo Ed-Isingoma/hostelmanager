@@ -5,7 +5,7 @@ import showToast from "./showToast.js";
 
 export default async function showDashboard() {
   const header = document.createElement("h2");
-  header.className = 'dashboard-head';
+  header.className = 'dashboard-head moving-text';
   header.textContent = "Kann Hostel Management";
   dashboardContainer.appendChild(header);
 
