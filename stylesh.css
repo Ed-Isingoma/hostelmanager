@@ -555,3 +555,94 @@ select {
   -webkit-appearance: none;
   -moz-appearance: textfield;
 }
+
+
+/********Table*************/
+/* General table styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 1em;
+  font-family: Arial, sans-serif;
+  text-align: left;
+  background-color: #ffffff;
+  border-radius: 10px;
+  overflow: hidden; /* To keep border-radius consistent */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Table headers */
+th {
+  background-color: #6c91c2; /* Soft blue color */
+  color: #ffffff; /* White text for better visibility */
+  padding: 12px;
+  text-transform: uppercase;
+  border: 1px solid #dddddd;
+  font-weight: bold;
+}
+
+/* Table rows */
+td {
+  padding: 10px 12px;
+  border: 1px solid #dddddd;
+  color: #333333; /* Dark gray for better readability */
+}
+
+/* Zebra striping */
+tr:nth-child(even) {
+  background-color: #f3f8ff; /* Light blue for contrast */
+}
+
+tr:nth-child(odd) {
+  background-color: #ffffff; /* White for a clean look */
+}
+
+/* Hover effect */
+tr:hover {
+  background-color: #d9e8ff; /* Slightly darker light blue for hover */
+  cursor: pointer;
+}
+
+/* Add border-radius to the entire table */
+table {
+  border: 1px solid #cccccc;
+  border-radius: 10px;
+}
+
+/* Responsive table */
+@media screen and (max-width: 600px) {
+  table {
+    border: 0;
+  }
+
+  table thead {
+    display: none;
+  }
+
+  table tr {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  table td {
+    display: block;
+    text-align: right;
+    font-size: 0.9em;
+    border: 0;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+    padding-left: 50%;
+  }
+
+  table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 50%;
+    padding-left: 10px;
+    font-weight: bold;
+    text-align: left;
+    color: #6c91c2; /* Match the header color */
+  }
+}
