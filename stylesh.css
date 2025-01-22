@@ -567,82 +567,77 @@ table {
   font-family: Arial, sans-serif;
   text-align: left;
   background-color: #ffffff;
-  border-radius: 10px;
-  overflow: hidden; /* To keep border-radius consistent */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px !important;
+  overflow: hidden !important; /* To keep border-radius consistent */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid #cccccc !important;
 }
 
 /* Table headers */
 th {
-  background-color: #6c91c2; /* Soft blue color */
-  color: #ffffff; /* White text for better visibility */
-  padding: 12px;
-  text-transform: uppercase;
-  border: 1px solid #dddddd;
-  font-weight: bold;
+  background-color: #b28dd9 !important; /* Soft lavender color */
+  color: #ffffff !important; /* White text for better visibility */
+  padding: 12px !important;
+  text-transform: uppercase !important;
+  border: 1px solid #dddddd !important;
+  font-weight: bold !important;
 }
 
 /* Table rows */
 td {
-  padding: 10px 12px;
-  border: 1px solid #dddddd;
-  color: #333333; /* Dark gray for better readability */
+  padding: 10px 12px !important;
+  border: 1px solid #dddddd !important;
+  color: #333333 !important; /* Dark gray for better readability */
 }
 
 /* Zebra striping */
 tr:nth-child(even) {
-  background-color: #f3f8ff; /* Light blue for contrast */
+  background-color: #f3f8ff !important; /* Light blue for contrast */
 }
 
 tr:nth-child(odd) {
-  background-color: #ffffff; /* White for a clean look */
+  background-color: #ffffff !important; /* White for a clean look */
 }
 
 /* Hover effect */
 tr:hover {
-  background-color: #d9e8ff; /* Slightly darker light blue for hover */
-  cursor: pointer;
-}
-
-/* Add border-radius to the entire table */
-table {
-  border: 1px solid #cccccc;
-  border-radius: 10px;
+  background-color: #d9e8ff !important; /* Slightly darker light blue for hover */
+  cursor: pointer !important;
 }
 
 /* Responsive table */
 @media screen and (max-width: 600px) {
   table {
-    border: 0;
+    border: 0 !important;
   }
 
   table thead {
-    display: none;
+    display: none !important;
   }
 
   table tr {
-    display: block;
-    margin-bottom: 10px;
+    display: block !important;
+    margin-bottom: 10px !important;
   }
 
   table td {
-    display: block;
-    text-align: right;
-    font-size: 0.9em;
-    border: 0;
-    border-bottom: 1px solid #ddd;
-    position: relative;
-    padding-left: 50%;
+    display: block !important;
+    text-align: right !important;
+    font-size: 0.9em !important;
+    border: 0 !important;
+    border-bottom: 1px solid #ddd !important;
+    position: relative !important;
+    padding-left: 50% !important;
   }
 
   table td::before {
-    content: attr(data-label);
-    position: absolute;
-    left: 0;
-    width: 50%;
-    padding-left: 10px;
-    font-weight: bold;
-    text-align: left;
-    color: #6c91c2; /* Match the header color */
+    content: attr(data-label) !important;
+    position: absolute !important;
+    left: 0 !important;
+    width: 50% !important;
+    padding-left: 10px !important;
+    font-weight: bold !important;
+    text-align: left !important;
+    color: #b28dd9 !important; /* Match the header color */
   }
 }
