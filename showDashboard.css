@@ -97,36 +97,9 @@ body {
     overflow: hidden; /* Prevent text from going outside the container */
 }
 
-/* Moving text animation */
-.moving-text {
-    display: inline-block; /* Make the text animatable */
-    animation: move-text left-right 18s linear infinite; /* Slower animation */
-}
-
-/* Keyframes for the text movement */
-@keyframes move-text {
-    0% {
-        transform: translateX(100%); /* Start off-screen to the right */
-    }
-    50% {
-        transform: translateX(0); /* Centered */
-    }
-    100% {
-        transform: translateX(-100%); /* Move off-screen to the left */
-    }
-}
-
-*,
-*::before,
-*::after {
-    box-sizing: border-box; /* Ensure that all elements follow this */
-}
-
-
 .card-container {
     background-color: rgba(255, 255, 255, 0.8);
     margin-left: 175px;
-    
     display: grid;
     grid-template-columns: repeat(2, minmax(175px, 1fr)); /* Flexible columns */
     gap: 20px;
@@ -135,20 +108,12 @@ body {
     box-sizing: border-box;
     height: auto;
     position: relative;
-    top: 150px; /* Adjust the vertical position */
+    top: 100px; /* Adjust vertical position */
     border-radius: 8px;
     overflow-x: hidden;
     overflow-y: hidden;
-    z-index: -1000;
+    z-index: 10; /* Bring the cards above other elements */
 }
-
-
-@media (max-width: 768px) {
-    .card-container {
-        grid-template-columns: repeat(1, 1fr); /* Switch to one column on smaller screens */
-    }
-}
-
 
 /* Cards */
 .dash-card {
@@ -159,11 +124,17 @@ body {
     text-align: center;
     transition: transform 0.5s ease;
     margin-top: 15px; /* Add margin to create space between cards */
+    cursor: pointer; /* Indicate clickability */
 }
 
 /* Hover Effect */
 .dash-card:hover {
     transform: translateY(-10px); /* Slightly larger hover effect */
+}
+
+/* Ensure cards float above footer */
+.card-container {
+    margin-bottom: 100px; /* Push the container away from the footer */
 }
 
 /* Responsive Design: Adjust for Small Screens */

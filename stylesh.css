@@ -500,19 +500,7 @@ footer {
   margin-bottom: 10px;
 }
 
-.tenants-popup-container {
-  position: relative;
-  top: 50%; /* Center vertically */
-  transform: translateY(-50%); /* Adjust for exact centering */
-  background-color: rgba(175, 243, 222, 0.9);
-  border: 2px solid #e7cc9a;
-  padding: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  z-index: 1001;
-  max-width: 400px;
-  max-height: 90%;
-  overflow-y: auto;
-}
+
 
 .tenant-box {
   display: flex;
@@ -521,11 +509,6 @@ footer {
   padding: 10px;
   border: 1px solid #ddd;
   background-color: rgba(249, 249, 249, 0.8); /* Slight transparency */
-}
-
-/* Additional CSS to prevent top overflow */
-.tenants-popup-container:first-of-type {
-  margin-top: 10px; /* Adds space at the top for visibility */
 }
 
 
