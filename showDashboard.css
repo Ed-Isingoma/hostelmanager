@@ -166,32 +166,6 @@ body {
 }
 
 
-/* Popup */
-.popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
-    z-index: 20;
-    animation: popup-in 0.3s ease-out;
-}
-
-/* Popup Animation */
-@keyframes popup-in {
-    from {
-        opacity: 0;
-        transform: translate(-50%, -60%);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-50%, -50%);
-    }
-}
-
 /* Popup Overlay */
 .popup-overlay {
     position: fixed;
@@ -199,9 +173,61 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 15;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    z-index: 1000; /* Bring it to the front of everything, including dash-head */
+    display: none; /* Hidden by default */
+    justify-content: center;
+    align-items: center;
 }
+
+/* Popup Container */
+.popup-container {
+    background: #ffffff; /* White background */
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+    width: 400px; /* Set width */
+    text-align: center;
+    position: relative;
+    animation: popupFadeIn 0.5s ease;
+}
+
+/* Close Button */
+.popup-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #e57373; /* Red background for close */
+    color: #ffffff;
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+
+.popup-close:hover {
+    background: #c62828; /* Darker red on hover */
+}
+
+/* Popup Animation */
+@keyframes popupFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 
 /* Footer Styling */
 footer {

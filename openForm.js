@@ -132,7 +132,7 @@ async function addTenantFormFields(formContent) {
       { label: "Kin's Contact", type: "tel", name: "kinContact", placeholder: "Enter kin's contact" },
     ];
 
-    const subheadingTenant = document.createElement("h3");
+    const subheadingTenant = document.createElement("h4");
     subheadingTenant.textContent = "Tenant Details";
     formContent.appendChild(subheadingTenant);
 
@@ -160,7 +160,7 @@ async function addTenantFormFields(formContent) {
       }
     });
 
-    const subheadingRoom = document.createElement("h3");
+    const subheadingRoom = document.createElement("h4");
     subheadingRoom.textContent = "Room Details";
     formContent.appendChild(subheadingRoom);
 
