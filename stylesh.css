@@ -10,7 +10,6 @@ body {
   align-items: center;
   flex-direction: column;
   height: 100vh;
-  background-color: #f0f0f0;
   font-family: Arial, sans-serif;
 }
 
@@ -74,7 +73,7 @@ body {
 }
 
 .menu-item:hover {
-  background-color: #2980b9;
+  background-color: #42a166;
 }
 
 .search-field {
@@ -202,7 +201,7 @@ body {
 }
 
 .btn:hover {
-  background-color: rgb(21, 193, 113); /* Fully opaque on hover */
+  background-color: #42a166; /* Fully opaque on hover */
 }
 
 
@@ -216,7 +215,7 @@ body {
 }
 
 .switch-text:hover {
-  color: #42a196;
+  color: #42a166;
 }
 
 
@@ -353,11 +352,11 @@ footer {
 }
 
 .add-tenant-submit:hover {
-  background-color: darkgreen;
+  background-color: #42a166;
 }
 
 .add-tenant-submit:active {
-  background-color: #004d00;
+  background-color: #42a166;
 }
 
 
@@ -417,7 +416,7 @@ footer {
 }
 
 .modal-show-back:hover {
-  background-color: green;
+  background-color: #42a166;
 }
 
 .rooms-levels-container {

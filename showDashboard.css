@@ -97,6 +97,7 @@ body {
     overflow: hidden; /* Prevent text from going outside the container */
 }
 
+/* Card Container */
 .card-container {
     background-color: rgba(255, 255, 255, 0.8);
     margin-left: 175px;
@@ -112,7 +113,7 @@ body {
     border-radius: 8px;
     overflow-x: hidden;
     overflow-y: hidden;
-    z-index: 10; /* Bring the cards above other elements */
+    z-index: 5; /* Lowered to avoid overlapping the popup */
 }
 
 /* Cards */
@@ -132,12 +133,31 @@ body {
     transform: translateY(-10px); /* Slightly larger hover effect */
 }
 
-/* Ensure cards float above footer */
-.card-container {
-    margin-bottom: 100px; /* Push the container away from the footer */
+/* Popup Styling */
+.popup {
+    position: fixed; /* Fixed position for popup */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    z-index: 20; /* Ensure popup appears above the card container */
 }
 
-/* Responsive Design: Adjust for Small Screens */
+/* Popup Overlay (if needed) */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    z-index: 15; /* Below the popup but above the card container */
+}
+
+/* Responsive Design */
 @media screen and (max-width: 768px) {
     .card-container {
         grid-template-columns: 1fr; /* Switch to a single column for smaller screens */
