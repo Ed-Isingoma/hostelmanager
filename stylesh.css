@@ -161,7 +161,7 @@ body {
 
 .login-title, .signup-title {
   font-size: 2em;
-  color: #42a196;
+  color: #42a166;
   margin-bottom: 20px;
   font-family: 'Roboto Flex', sans-serif; 
 }
@@ -207,7 +207,7 @@ body {
 
 .switch-text {
   margin-top: 20px;
-  color: #42a196;
+  color: #42a166;
   font-size: 0.9em;
   cursor: pointer;
   text-decoration: underline;
@@ -284,7 +284,7 @@ footer {
 /* Button section */
 .button-group {
   display: flex;
-  gap: 0.5rem; /* Space between buttons */
+  gap: 3rem; /* Space between buttons */
 }
 
 .button-group button {
@@ -406,78 +406,146 @@ footer {
 }
 
 .modal-show-back {
-  margin-top: 15px;
-  padding: 8px 16px;
+  padding: 10px 20px;
   background-color: #42a196;
-  color: #fff;
+  color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
+  font-size: 16px;
+  font-weight: normal;
+  transition: background-color 0.3s ease;
+  margin-left: 50px;
 }
 
 .modal-show-back:hover {
   background-color: #42a166;
 }
 
+
+/* Main Container Styling */
 .rooms-levels-container {
   display: flex;
   flex-direction: column;
   gap: 20px;
-}
-
-.rooms-level-box {
-  border: 2px solid #ccc;
   padding: 20px;
-  background-color: #f4f4f4;
+  background-color: #f9fafb; /* Subtle background color */
+  border-radius: 10px; /* Rounded edges */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+  height: 90vh; /* Fit the viewport height */
+  overflow-y: auto; /* Enable scrolling if content exceeds height */
 }
 
+/* Individual Level Box */
+.rooms-level-box {
+  border: none;
+  padding: 15px;
+  background: linear-gradient(to bottom, #ffffff, #f1f4f9); /* Gradient background */
+  border-radius: 8px; /* Rounded edges */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); /* Subtle shadow */
+  transition: transform 0.3s ease;
+}
+
+.rooms-level-box:hover {
+  transform: translateY(-5px); /* Slight lift on hover */
+}
+
+/* Level Title Styling */
 .rooms-level-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
   margin-bottom: 15px;
+  color: #1a202c; /* Dark text color */
+  text-align: center; /* Center the title */
+  text-transform: uppercase; /* Uppercase letters for better emphasis */
 }
 
+/* Rooms Container */
 .rooms-rooms-container {
   display: flex;
-  gap: 15px;
   flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center; /* Center-align the room boxes */
 }
 
+/* Individual Room Box */
 .rooms-room-box {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 10px;
-  width: 120px;
-  height: 120px;
-  border: 2px solid #ddd;
-  text-align: center;
-  background-color: #fff;
+  align-items: center;
+  padding: 15px;
+  width: 140px;
+  height: 140px;
+  border-radius: 10px;
+  background: linear-gradient(to bottom right, #e0f7fa, #ffffff); /* Subtle gradient */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Elevated effect */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer; /* Indicate clickability */
 }
 
+.rooms-room-box:hover {
+  transform: scale(1.05); /* Slight zoom-in on hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+}
+
+/* Room Name Styling */
 .rooms-room-name {
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #0d47a1; /* Deep blue for contrast */
   margin-bottom: 10px;
 }
 
+/* Occupancy Container */
 .rooms-occupancy-container {
   display: flex;
-  gap: 5px;
+  gap: 8px; /* Spacing between boxes */
 }
 
+/* Occupancy Box */
 .rooms-occupancy-box {
-  width: 40px;
-  height: 40px;
-  border-radius: 5px;
-  background-color: #ddd;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%; /* Circular boxes */
+  background-color: #e0e0e0; /* Neutral background */
+  border: 2px solid #ccc; /* Light border */
+  transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
+/* Occupied Rooms */
 .rooms-occupancy-box.occupied {
-  background-color: #42a196;
+  background-color: #4caf50; /* Green for occupied */
+  border-color: #388e3c; /* Darker border */
 }
 
+/* Empty Rooms */
 .rooms-occupancy-box.empty {
-  background-color: lightgrey;
+  background-color: #ffccbc; /* Light red for empty */
+  border-color: #d32f2f; /* Darker border */
+}
+
+/* Occupancy Hover Effect */
+.rooms-occupancy-box:hover {
+  transform: scale(1.1); /* Slight zoom on hover */
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .rooms-levels-container {
+    padding: 10px;
+    height: auto; /* Adjust height for smaller screens */
+  }
+  
+  .rooms-room-box {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .rooms-occupancy-box {
+    width: 35px;
+    height: 35px;
+  }
 }
 
 .tenants-popup-overlay {
@@ -557,7 +625,7 @@ table {
 
 /* Table headers */
 th {
-  background-color: #b28dd9 !important; /* Soft lavender color */
+  background-color: #42a166 !important; /* Soft lavender color */
   color: #ffffff !important; /* White text for better visibility */
   padding: 12px !important;
   text-transform: uppercase !important;
@@ -620,6 +688,20 @@ tr:hover {
     padding-left: 10px !important;
     font-weight: bold !important;
     text-align: left !important;
-    color: #b28dd9 !important; /* Match the header color */
+    color: #42a166 !important; /* Match the header color */
   }
+}
+
+/* Center the heading and style it */
+h3 {
+  text-align: center; /* Center the text */
+  background-color: #42a166; /* Nice green background */
+  color: white; /* White text for contrast */
+  padding: 15px 20px; /* Add padding for a better appearance */
+  border-radius: 8px; /* Round the corners */
+  margin: 20px auto; /* Center the heading with auto margins */
+  width: fit-content; /* Adjust width based on content */
+  font-size: 1.5rem; /* Adjust font size for better visibility */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
+  font-family: Arial, sans-serif; /* Optional font for better aesthetics */
 }

@@ -133,18 +133,19 @@ body {
     transform: translateY(-10px); /* Slightly larger hover effect */
 }
 
-/* Popup Styling */
 .popup {
-    position: fixed; /* Fixed position for popup */
-    top: 50%;
+    position: fixed;
+    top: 30%; /* Reduced from 50% to 30% to bring the popup down */
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -30%); /* Adjust to match the new top value */
     background-color: white;
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     z-index: 20; /* Ensure popup appears above the card container */
 }
+
+
 
 /* Popup Overlay (if needed) */
 .popup-overlay {
@@ -155,19 +156,18 @@ body {
     height: 100%;
     background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
     z-index: 15; /* Below the popup but above the card container */
+    overflow: hidden; /* Prevent unintended scrolling in the background */
 }
+
 
 /* Responsive Design */
 @media screen and (max-width: 768px) {
-    .card-container {
-        grid-template-columns: 1fr; /* Switch to a single column for smaller screens */
-        margin-left: 60px; /* Adjust margin for smaller navbar widths */
-        width: calc(100% - 60px);
-    }
-    .dash-card {
-        padding: 20px; /* Adjust padding for small screens */
+    .popup {
+        width: 90%; /* Reduce width for smaller screens */
+        max-height: 80vh; /* Reduce height for better usability */
     }
 }
+
 
 
 /* Footer Styling */
