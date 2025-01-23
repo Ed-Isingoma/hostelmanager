@@ -106,40 +106,107 @@ body {
   z-index: 5;
 }
 
+/* Modal Container */
 .modal-form {
-  position: absolute;
+  position: fixed; /* Keeps it fixed in the viewport */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #cec4c4;
-  padding: 20px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
-  z-index: 6;
-  width: 80%;
-  max-width: 400px;
-  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.95); /* Slight transparency added to the background */
+  padding: 30px;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+  z-index: 999;
+  width: 85%;
+  max-width: 500px;
+  border-radius: 12px;
   text-align: center;
   box-sizing: border-box;
+  overflow-y: auto; /* Allow scrolling if content overflows */
+  max-height: 80vh; /* Ensure the modal height doesn't exceed 80% of the viewport height */
+  transition: transform 0.3s ease-in-out;
 }
 
+/* Modal Title */
 .modal-form h2 {
   margin-top: 0;
+  font-size: 24px;
+  color: #333333;
+  font-weight: 600;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
+/* Modal Form Styling */
 .modal-form form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
 }
 
+/* Inputs & Textarea */
+.modal-form input,
+.modal-form select,
+.modal-form textarea {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.modal-form input:focus,
+.modal-form select:focus,
+.modal-form textarea:focus {
+  border-color: #42a196;
+  outline: none;
+  box-shadow: 0 0 5px rgba(66, 161, 150, 0.5);
+}
+
+/* Submit Button */
 .modal-form button {
-  padding: 5px 10px;
+  padding: 12px 20px;
   background-color: #42a196;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  margin: 2px;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  margin-top: 15px;
+}
+
+.modal-form button:hover {
+  background-color: #368d7a;
+}
+
+.modal-form button:active {
+  transform: scale(0.98);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .modal-form {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .modal-form h2 {
+    font-size: 20px;
+  }
+
+  .modal-form button {
+    font-size: 14px;
+    padding: 10px 18px;
+  }
+
+  .modal-form input,
+  .modal-form select,
+  .modal-form textarea {
+    font-size: 14px;
+  }
 }
 
 .welcome-message {
@@ -338,26 +405,60 @@ footer {
 }
 
 
-/*add-tenant*/
+/* Enhanced Add Tenant Button */
 .add-tenant-submit {
-  padding: 10px 20px;
-  background-color: #42a196;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: normal;
-  transition: background-color 0.3s ease;
+  padding: 12px 24px; /* Slightly larger padding for better touch targets */
+  background-color: #42a196; /* Primary color */
+  color: white; /* Text color */
+  border: none; /* No border */
+  border-radius: 25px; /* Rounded button for modern UX */
+  cursor: pointer; /* Pointer cursor for interactivity */
+  font-size: 16px; /* Readable font size */
+  font-weight: bold; /* Make the text stand out */
+  transition: all 0.3s ease; /* Smooth transitions */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for elevation */
 }
 
 .add-tenant-submit:hover {
-  background-color: #42a166;
+  background-color: #42a166; /* Slightly darker green for hover */
+  transform: translateY(-2px); /* Lift effect on hover */
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
 }
 
 .add-tenant-submit:active {
-  background-color: #42a166;
+  background-color: #42a166; /* Active state color */
+  transform: translateY(0); /* Reset lift effect */
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Reduced shadow */
 }
+
+.add-tenant-submit:focus {
+  outline: 2px solid #88d9cc; /* Accessible focus outline */
+  outline-offset: 2px; /* Spacing around the outline */
+}
+
+/* Disabled state */
+.add-tenant-submit:disabled {
+  background-color: #cfd9d6; /* Light gray for disabled state */
+  color: #8c9d96; /* Muted text color */
+  cursor: not-allowed; /* Indicate it's not clickable */
+  box-shadow: none; /* No shadow for disabled state */
+}
+
+/* Keyframes for subtle pulsating animation */
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Add pulsating animation to the button */
+.add-tenant-submit:hover {
+  animation: pulse 1s infinite ease-in-out;
+}
+
 
 
 #tenants-container {
@@ -785,3 +886,57 @@ h3 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
   font-family: Arial, sans-serif; /* Optional font for better aesthetics */
 }
+
+
+/* POPUP */
+.popup {
+  position: fixed;
+  top: 50%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Offset by 50% of its width and height */
+  max-height: 90%; /* Prevent overflow if the content is too large */
+  overflow-y: auto; /* Add scrolling if the content exceeds the viewport height */
+  z-index: 9999; /* Ensure it appears above other elements */
+  background-color: #f9f9f9; /* Adjust background to match input fields */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 80%; /* Adjust width as needed */
+  box-sizing: border-box;
+}
+
+form .form-content {
+  background-color: #ffffff; /* Match the input fields' color scheme */
+  padding: 20px; /* Add padding to separate fields from edges */
+  border-radius: 8px; /* Smooth edges for a better look */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+form .form-content label,
+form .form-content input,
+form .form-content select {
+  display: block; /* Ensure elements stack vertically */
+  margin-bottom: 10px; /* Space between form fields */
+  font-size: 14px;
+}
+
+form .form-content input,
+form .form-content select {
+  width: 100%; /* Full width */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+@media (max-width: 768px) {
+  .popup {
+    width: 95%; /* Adjust to fit smaller screens */
+    top: 5%; /* Add space from the top */
+    transform: translate(-50%, 0); /* Center horizontally, not vertically */
+  }
+
+  form .form-content {
+    padding: 10px; /* Reduce padding */
+  }
+}
+
