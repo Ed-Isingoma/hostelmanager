@@ -71,30 +71,30 @@ body {
 /* Card Container - Make Background Invisible */
 /* Card Container - Adjusted Position */
 .card-container {
-    background: transparent; /* Background remains invisible */
-    margin-left: 265px; /* Move the rows to the right */
+    background: transparent; /* Keep the background invisible */
+    margin-left: 265px; /* Keep shifting the container to the right */
     display: grid;
     grid-template-columns: repeat(3, 1fr); /* Three cards per row */
     gap: 20px; /* Space between cards */
     padding: 20px 25px; /* Adjust padding */
     width: calc(100% - 240px); /* Adjust width to balance the shift */
     box-sizing: border-box;
-    height: auto;
+    max-height: 600px; /* Set a fixed max height */
+    overflow-y: auto; /* Allow scrolling when the content exceeds the max height */
     position: relative;
-    top: 100px; /* Move the rows slightly upward */
+    top: 100px; /* Slightly move the container up */
     border-radius: 12px;
     z-index: 5;
     animation: fadeIn 1s ease-in-out; /* Fade-in animation */
-    overflow: hidden;
 }
 
 /* Dash Cards - Slightly Rectangular Styling */
 .dash-card {
-    background: linear-gradient(135deg, #ffffff, #e0f2f1); /* Gradient color */
-    padding: 20px; /* Padding to ensure content fits well */
-    border-radius: 15px; /* Maintain the border radius */
-    height: 180px; /* Adjust width to make it more rectangular */
-    width: 220px; /* Adjust height to balance the rectangular shape */
+    background: rgba(255, 255, 255, 0.8); /* Slight transparency */
+    padding: 15px; /* Reduce padding */
+    border-radius: 15px; /* Border radius remains the same */
+    height: 160px; /* Reduced height */
+    width: 200px; /* Reduced width */
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1), 0px 4px 6px rgba(0, 0, 0, 0.05);
     text-align: center;
     transition: transform 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
@@ -104,7 +104,6 @@ body {
     justify-content: center;
     align-items: center;
 }
-
 
 /* Dash Card Title - Adjust Font Size */
 .dash-card-title {
@@ -125,9 +124,9 @@ body {
 
 /* Card Icon Styling */
 .dash-card i {
-    font-size: 30px; /* Slightly smaller icon */
+    font-size: 20px; /* Slightly smaller icon */
     color: #42a196;
-    margin-bottom: 10px; /* Reduce margin */
+    margin-bottom: 20px; /* Reduce margin */
     transition: transform 0.3s ease, color 0.3s ease;
 }
 

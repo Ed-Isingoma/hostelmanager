@@ -459,8 +459,6 @@ footer {
   animation: pulse 1s infinite ease-in-out;
 }
 
-
-
 #tenants-container {
   padding: 20px;
   overflow-x: auto;
@@ -528,45 +526,45 @@ footer {
 .rooms-levels-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 20px;
-  background-color: #f9fafb; /* Subtle background color */
-  border-radius: 10px; /* Rounded edges */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
-  height: 90vh; /* Fit the viewport height */
-  overflow-y: auto; /* Enable scrolling if content exceeds height */
+  gap: 8px;
+  padding: 20px; /* Added more padding around the container */
+  background-color: rgba(249, 249, 251, 0.5); /* Increased transparency */
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  height: 75vh;
+  overflow-y: auto;
 }
 
 /* Individual Level Box */
 .rooms-level-box {
   border: none;
-  padding: 15px;
-  background: linear-gradient(to bottom, #ffffff, #f1f4f9); /* Gradient background */
-  border-radius: 8px; /* Rounded edges */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); /* Subtle shadow */
+  padding: 8px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), rgba(241, 244, 249, 0.5)); /* Increased transparency */
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   transition: transform 0.3s ease;
 }
 
 .rooms-level-box:hover {
-  transform: translateY(-5px); /* Slight lift on hover */
+  transform: translateY(-2px);
 }
 
 /* Level Title Styling */
 .rooms-level-title {
-  font-size: 20px;
+  font-size: 14px;
   font-weight: bold;
-  margin-bottom: 15px;
-  color: #1a202c; /* Dark text color */
-  text-align: center; /* Center the title */
-  text-transform: uppercase; /* Uppercase letters for better emphasis */
+  margin-bottom: 8px;
+  color: #1a202c;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 /* Rooms Container */
 .rooms-rooms-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
-  justify-content: center; /* Center-align the room boxes */
+  gap: 8px;
+  justify-content: center;
 }
 
 /* Individual Room Box */
@@ -575,77 +573,77 @@ footer {
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
-  width: 140px;
-  height: 140px;
-  border-radius: 10px;
-  background: linear-gradient(to bottom right, #e0f7fa, #ffffff); /* Subtle gradient */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Elevated effect */
+  padding: 8px;
+  width: 80px;
+  height: 80px;
+  border-radius: 4px;
+  background: linear-gradient(to bottom right, rgba(224, 247, 250, 0.5), rgba(255, 255, 255, 0.5)); /* Increased transparency */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer; /* Indicate clickability */
+  cursor: pointer;
 }
 
 .rooms-room-box:hover {
-  transform: scale(1.05); /* Slight zoom-in on hover */
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+  transform: scale(1.02);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* Room Name Styling */
 .rooms-room-name {
-  font-size: 16px;
+  font-size: 10px;
   font-weight: bold;
-  color: #0d47a1; /* Deep blue for contrast */
-  margin-bottom: 10px;
+  color: #0d47a1;
+  margin-bottom: 5px;
 }
 
 /* Occupancy Container */
 .rooms-occupancy-container {
   display: flex;
-  gap: 8px; /* Spacing between boxes */
+  gap: 3px;
 }
 
 /* Occupancy Box */
 .rooms-occupancy-box {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%; /* Circular boxes */
-  background-color: #e0e0e0; /* Neutral background */
-  border: 2px solid #ccc; /* Light border */
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: rgba(224, 224, 224, 0.5); /* Increased transparency */
+  border: 2px solid #ccc;
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 /* Occupied Rooms */
 .rooms-occupancy-box.occupied {
-  background-color: #4caf50; /* Green for occupied */
-  border-color: #388e3c; /* Darker border */
+  background-color: rgba(76, 175, 80, 0.5); /* Increased transparency for green */
+  border-color: rgba(56, 142, 60, 0.5); /* Darker green */
 }
 
 /* Empty Rooms */
 .rooms-occupancy-box.empty {
-  background-color: #ffccbc; /* Light red for empty */
-  border-color: #d32f2f; /* Darker border */
+  background-color: rgba(255, 204, 188, 0.5); /* Increased transparency for red */
+  border-color: rgba(211, 47, 47, 0.5); /* Darker red */
 }
 
 /* Occupancy Hover Effect */
 .rooms-occupancy-box:hover {
-  transform: scale(1.1); /* Slight zoom on hover */
+  transform: scale(1.05);
 }
 
 /* Responsive Design */
 @media screen and (max-width: 768px) {
   .rooms-levels-container {
     padding: 10px;
-    height: auto; /* Adjust height for smaller screens */
+    height: auto;
   }
   
   .rooms-room-box {
-    width: 120px;
-    height: 120px;
+    width: 70px;
+    height: 70px;
   }
   
   .rooms-occupancy-box {
-    width: 35px;
-    height: 35px;
+    width: 20px;
+    height: 20px;
   }
 }
 
@@ -655,7 +653,7 @@ footer {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(167, 167, 167, 0.507); /* Translucent grey */
+  background-color: rgba(167, 167, 167, 0.507);
   z-index: 9999;
   display: flex;
   justify-content: center;
@@ -663,22 +661,19 @@ footer {
 }
 
 .tenants-popup-title {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
-
-
 
 .tenant-box {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 10px;
+  gap: 2px;
+  padding: 5px;
   border: 1px solid #ddd;
-  background-color: rgba(249, 249, 249, 0.8); /* Slight transparency */
+  background-color: rgba(249, 249, 249, 0.5); /* Increased transparency */
 }
-
 
 /* ........................ TODO .................*/
 /* General input field styles */
