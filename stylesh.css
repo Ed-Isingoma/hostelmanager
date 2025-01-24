@@ -1,5 +1,6 @@
+/* Reset box-sizing for consistent layout behavior */
 * {
-  box-sizing: content-box;
+  box-sizing: border-box; /* Changed to border-box for better layout management */
 }
 
 body {
@@ -9,8 +10,28 @@ body {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh; /* Ensures the body fills the viewport */
+  overflow-x: hidden; /* Hides horizontal overflow */
+  overflow-y: auto; /* Keeps vertical scrolling enabled */
   font-family: Arial, sans-serif;
+}
+
+/* Additional styles for testing */
+.container {
+  width: 80%; /* Adjusted width to avoid exceeding viewport */
+  max-width: 1200px; /* Cap container width */
+  margin: 20px auto;
+  background-color: #f5f5f5;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.content {
+  height: 150vh; /* Simulating vertical scroll with tall content */
+  background: linear-gradient(to bottom, #42a166, #f3f8ff);
+  padding: 20px;
+  color: #333;
 }
 
 /* Only for the login page */
@@ -786,27 +807,31 @@ input[type="submit"]:active {
 /********Table*************/
 /* General table styles */
 table {
-  width: 100%;
+  width: 90%; /* Reduced width to leave margins around */
+  max-width: 1200px; /* Prevent tables from being too wide */
+  margin: 20px auto; /* Center the table and leave margins all around */
   border-collapse: collapse;
-  margin: 20px 0;
   font-size: 1em;
   font-family: Arial, sans-serif;
   text-align: left;
   background-color: #ffffff;
   border-radius: 10px !important;
-  overflow: hidden !important; /* To keep border-radius consistent */
+  overflow: hidden !important; /* Keep border-radius consistent */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
   border: 1px solid #cccccc !important;
 }
 
 /* Table headers */
 th {
-  background-color: #42a166 !important; /* Soft lavender color */
+  background-color: #42a166 !important; /* Soft green color */
   color: #ffffff !important; /* White text for better visibility */
   padding: 12px !important;
   text-transform: uppercase !important;
   border: 1px solid #dddddd !important;
   font-weight: bold !important;
+  position: sticky;
+  top: 0;
+  z-index: 1; /* Keep header on top */
 }
 
 /* Table rows */
@@ -827,14 +852,15 @@ tr:nth-child(odd) {
 
 /* Hover effect */
 tr:hover {
-  background-color: #d9e8ff !important; /* Slightly darker light blue for hover */
-  cursor: pointer !important;
+  background-color: #e3f2f7 !important; /* Light color on hover for better focus */
 }
 
 /* Responsive table */
 @media screen and (max-width: 600px) {
   table {
     border: 0 !important;
+    width: 100%; /* Ensure the table takes full width on small screens */
+    margin: 0; /* Remove extra margins on small devices */
   }
 
   table thead {
@@ -868,19 +894,40 @@ tr:hover {
   }
 }
 
+/* Scrollbars */
+.table-container {
+  overflow-x: auto;
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #42a166 #f1f1f1; /* For Firefox */
+}
+
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background-color: #42a166;
+  border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
 /* Center the heading and style it */
 h3 {
-  text-align: center; /* Center the text */
-  background-color: #42a166; /* Nice green background */
-  color: white; /* White text for contrast */
-  padding: 15px 20px; /* Add padding for a better appearance */
-  border-radius: 8px; /* Round the corners */
-  margin: 20px auto; /* Center the heading with auto margins */
-  width: fit-content; /* Adjust width based on content */
-  font-size: 1.5rem; /* Adjust font size for better visibility */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
-  font-family: Arial, sans-serif; /* Optional font for better aesthetics */
+  text-align: center;
+  background-color: #42a166;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin: 20px auto;
+  width: fit-content;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-family: Arial, sans-serif;
 }
+
 
 
 /* POPUP */
