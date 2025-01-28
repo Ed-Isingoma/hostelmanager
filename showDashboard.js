@@ -64,7 +64,7 @@ document.body.appendChild(cardContainer);
 
 async function showSemesters(navbar) {
   try {
-    const periodNames = await window.electron.call('getBillingPeriodNames');
+    const periodNames = await caller('getBillingPeriodNames');
     const semesterDropdown = document.createElement("select");
     semesterDropdown.className = "semester-dropdown";
 
