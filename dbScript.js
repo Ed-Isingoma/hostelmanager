@@ -1,4 +1,11 @@
 const sqlite3 = require('sqlite3').verbose();
+require('dotenv').config();
+
+const credentials = {
+  apiKey: AFRSTK_API,
+  username: USRNAME
+}
+const AfricasTalking = require('africastalking')(credentials)
 
 let db = new sqlite3.Database('./hostelMgr.db', (err) => {
   if (err) {
@@ -838,6 +845,73 @@ function balanceOwingAmts(transactions) {
   return transactions.reverse()
 }
 
+async function sendReceipt(transactionId) {
+  const detailsQuery = `SELECT 
+      t.ownContact,
+      tr.periodId,
+      bp.agreedPrice,
+      tr.amount,
+      bpn.name AS periodName,
+      bp.ownEndDate
+    FROM Transactionn tr
+    INNER JOIN BillingPeriod bp ON tr.periodId = bp.periodId
+    INNER JOIN Tenant t ON bp.tenantId = t.tenantId
+    INNER JOIN BillingPeriodName bpn ON bp.periodNameId = bpn.periodNameId
+    WHERE tr.transactionId = ?`;
+
+  const sumQuery = `SELECT 
+      SUM(tr.amount) AS totalAmount
+    FROM Transactionn tr
+    WHERE tr.periodId = ?`;
+
+  try {
+    const details = await executeQuery(detailsQuery, [transactionId]);
+    if (!details.length) {
+      console.log("No details found for transactionId:", transactionId);
+      return false;
+    }
+
+    const periodId = details[0].periodId;
+    const sum = await executeQuery(sumQuery, [periodId]);
+
+    function formatNumber(num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    let ownContact = details[0].ownContact.trim();
+
+    if (/^0\d{9}$/.test(ownContact)) {
+      ownContact = "+256" + ownContact.slice(1);
+    }
+
+    const validPrefixes = ["+25677", "+25678", "+25675", "+25670", "+25674", "+25676"];
+    if (!validPrefixes.some(prefix => ownContact.startsWith(prefix))) {
+      console.log("Invalid phone number format:", ownContact);
+      return false;
+    }
+
+    const sms = AfricasTalking.SMS;
+    const options = {
+      // to: [ownContact],
+      to: ['+256783103587'],
+      message: `Hello, We have received your payment of UGX ${formatNumber(details[0].amount)} to Kann Hostel for ${details[0].ownEndDate ? `the period ending on ${details[0].ownEndDate}` : details[0].periodName}. Your outstanding balance is UGX ${formatNumber(details[0].agreedPrice - (sum[0].totalAmount || 0))}. Transaction ID: KN${transactionId}. Thank you.`,
+      from: 'ATEducTech'
+    };
+
+    await sms.send(options)
+      .then(response => console.log("SMS sent:", response))
+      .catch(error => {
+        console.error("Error sending SMS:", error);
+        throw error;
+      });
+
+    return true;
+  } catch (error) {
+    console.error("Error in sendReceipt:", error);
+    return false;
+  }
+}
+
 async function dashboardTotals(periodNameId) {
 
   const totals = {
@@ -1104,6 +1178,7 @@ module.exports = {
   searchTenantByName,
   searchTenantNameAndId,
   searchRoomByNamePart,
+  sendReceipt,
   updateAccount,
   updateBillingPeriod,
   updateBillingPeriodName,

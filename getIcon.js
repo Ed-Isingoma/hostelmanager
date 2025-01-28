@@ -40,7 +40,7 @@ export function showTenantsPopUp(tenants, roomName) {
 
     const owingAmount = document.createElement('div');
     owingAmount.classList.add('tenant-owing-amount');
-    owingAmount.innerHTML = `Owing: $${tenant.owingAmount.toFixed(2)}`;
+    owingAmount.innerHTML = `Owing: UGX${tenant.owingAmount.toFixed(2)}`;
 
     const gender = document.createElement('div');
     gender.classList.add('tenant-gender');

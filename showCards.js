@@ -181,7 +181,6 @@ function displayRooms(levelsData) {
       occupancyContainer.addEventListener("click", async () => {
         try {
           const tenants = await window.electron.call('getTenantsAndOwingAmtByRoom', [room.roomId, selectedPeriodNameId]);
-          console.log(tenants.data)
           if (tenants.success) {
             showTenantsPopUp(tenants.data, room.roomName);
           } else {
@@ -253,7 +252,7 @@ function displayTenants(tenantsData) {
       <td>${tenant.roomName}</td>
       <td>${tenant.ownContact}</td>
       <td>${tenant.ownEndDate ? 'Yes' : 'No'}</td>
-      <td>${tenant.owingAmount}</td>
+      <td>${formatNumber(tenant.owingAmount)}</td>
       `;
 
       if (tenant.ownEndDate) {
@@ -316,10 +315,10 @@ function displayPayments(moneysData) {
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${money.date}</td>
-        <td>${money.amount}</td>
+        <td>${formatNumber(money.amount)}</td>
         <td>${money.tenantName}</td>
         <td>${money.roomName}</td>
-        <td>${money.owingAmount}</td>
+        <td>${formatNumber(money.owingAmount)}</td>
         <td>K${money.transactionId}</td>
       `;
       row.querySelector('td:nth-of-type(3)').onclick = () => openForm(`tenant-${money.tenantId}-${money.tenantName}`);
@@ -399,12 +398,12 @@ function displayMoneys(moneysData) {
       row.innerHTML = `
         <td>${money.name}</td>
         <td>${money.roomName}</td>
-        <td>${money.agreedPrice - money.owingAmount}</td>
-        <td>${money.owingAmount}</td>
+        <td>${formatNumber(money.agreedPrice - money.owingAmount)}</td>
+        <td>${formatNumber(money.owingAmount)}</td>
         <td class=${money.demandNoticeDate && new Date(money.demandNoticeDate).setHours(0, 0, 0, 0) == globalNow ? 'orangebg': ''}>${money.demandNoticeDate || '<i>unset</i>'}</td>
         <td>${money.paysMonthly || '<i>unset</i>'}</td>
         <td>${money.date}</td>
-        <td>${money.agreedPrice}</td>
+        <td>${formatNumber(money.agreedPrice)}</td>
         <td>${money.ownContact}</td>
       `;
       row.querySelector('td:nth-of-type(1)').onclick = () => openForm(`tenant-${money.tenantId}-${money.name}`);
@@ -454,7 +453,7 @@ function displayExpenses(expensesData) {
         <td>${expense.date}</td>
         <td>${expense.description}</td>
         <td>${expense.quantity}</td>
-        <td>${expense.amount}</td>
+        <td>${formatNumber(expense.amount)}</td>
         <td>${expense.operatorName}</td>
       `;
       table.appendChild(row);
@@ -516,7 +515,7 @@ function displayOlders(oldersData) {
         <td>${older.roomName}</td>
         <td>${older.paysMonthly}</td>
         <td>${older.ownContact}</td>
-        <td>${older.owingAmount}</td>
+        <td>${formatNumber(older.owingAmount)}</td>
       `;
       row.querySelector('td:nth-of-type(1)').onclick = () => openForm(`tenant-${older.tenantId}-${older.tenantName}`);
 

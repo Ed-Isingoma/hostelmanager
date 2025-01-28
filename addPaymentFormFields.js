@@ -299,10 +299,14 @@ export async function addPaymentFormFields(formContent) {
           selectedPeriodId = createBillingPeriodResponse.data;
         }
 
-        const createTransactionResponse = await window.electron.call('createTransaction', [transactionData, selectedPeriodId]);
+        const transResp = await window.electron.call('createTransaction', [transactionData, selectedPeriodId]);
 
-        if (createTransactionResponse.success) {
+        if (transResp.success) {
           showToast('Transaction added successfully');
+
+          // const receipt = await window.electron.call('sendReceipt', [transResp.data])
+          // if (!receipt.success) showToast(receipt.error)
+          
           await doTotals()
           updateCardNumbers()
           closeForm();
@@ -311,7 +315,7 @@ export async function addPaymentFormFields(formContent) {
             await window.electron.call('updateBillingPeriod', [selectedPeriodId, {deleted: 1}])
             billingDataRefresh()
           }
-          showToast(createTransactionResponse.error);
+          showToast(transResp.error);
         }
 
       } catch (error) {

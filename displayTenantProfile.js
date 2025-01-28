@@ -2,7 +2,6 @@ import { formatDateRange } from "./getIcon.js";
 import showToast from "./showToast.js";
 
 export function displayTenantProfile(profile, formContent) {
-  // console.log(profile)
   const tenantSection = document.createElement("div");
   tenantSection.style.border = "1px solid grey";
   tenantSection.style.padding = "10px";
@@ -38,9 +37,10 @@ export function displayTenantProfile(profile, formContent) {
     label.style.marginRight = "10px";
 
     const input = document.createElement("input");
-    input.type = "text";
+    input.type = key == 'Age' ? "number" : "text";
     input.value = value;
     input.disabled = true;
+    input.className = `${key.replace(/ /g, '-')}`;
     input.style.marginBottom = "10px";
 
     tenantDetails.appendChild(label);
@@ -62,11 +62,30 @@ export function displayTenantProfile(profile, formContent) {
   const saveTenantButton = document.createElement("button");
   saveTenantButton.textContent = "Save";
   saveTenantButton.style.display = "none";
-  saveTenantButton.onclick = (event) => {
-    // Add save logic here
+  saveTenantButton.onclick = async (event) => {
     event.preventDefault()
     const inputs = [...tenantDetails.querySelectorAll("input"), genderDropdown];
-    inputs.forEach(input => (input.disabled = true));
+
+    const gender = document.querySelector('select[name="gender"]').value
+    const age = parseInt(document.querySelector('.Age').value) || 0
+    const course = document.querySelector('.Course').value || null
+    const ownContact = document.querySelector('.Contact').value || null
+    const nextOfKin = document.querySelector('.Next-of-Kin').value || null
+    const kinContact = document.querySelector('.Next-of-Kin-Contact').value || null
+
+    const payload = {
+      gender, age, course, ownContact, nextOfKin, kinContact
+    }
+
+    try {
+      const response = await window.electron.call('updateTenant', [profile.tenantId, payload])
+      if (!response.success) showToast(response.error)
+      inputs.forEach(input => (input.disabled = true));
+      showToast('Tenant Data Updated')
+    } catch (e) {
+      return showToast(e)
+    }
+
     editTenantButton.style.display = "inline";
     saveTenantButton.style.display = "none";
     deleteButton1.style.display = "none"
@@ -87,11 +106,22 @@ export function displayTenantProfile(profile, formContent) {
   confirmDeleteLabel1.textContent = "I understand the loss of this data";
   confirmDeleteLabel1.style.display = "none";
 
-  deleteButton1.onclick = (event) => {
+  deleteButton1.onclick = async (event) => {
     event.preventDefault()
-    deleteButton1.style.display = "none";
-    confirmDeleteCheckbox1.style.display = "inline";
-    confirmDeleteLabel1.style.display = "inline";
+      if (deleteButton1.textContent === "Confirm Delete") {
+        try {
+          const resp = await window.electron.call('updateTenant', [profile.tenantId, { deleted : 1 }])
+          if (!resp.success) return showToast(resp.error)
+          showToast('Tenant Deleted')
+          closeForm()
+        } catch(e) {
+          return showToast(e)
+        }
+      } else {
+        deleteButton1.style.display = "none";
+        confirmDeleteCheckbox1.style.display = "inline";
+        confirmDeleteLabel1.style.display = "inline";
+    }
   };
 
   confirmDeleteCheckbox1.onclick = (event) => {
@@ -155,15 +185,15 @@ export function displayTenantProfile(profile, formContent) {
 
     const roomDatalist = document.createElement('datalist');
     roomDatalist.id = `room-datalist-${period.periodId}`;
-    
+
     periodSection.appendChild(roomLabel);
     periodSection.appendChild(roomInput);
     periodSection.appendChild(roomDatalist);
     periodSection.appendChild(document.createElement("br"))
-    
+
     roomInput.addEventListener('input', async () => {
       // if (roomInput.value.length == 4) return  //add this when you know the length of a room string, to prevent that extra last search on datalist select of the wanted room
-      if(!roomInput.value) return
+      if (!roomInput.value) return
       const rooms = await window.electron.call('searchRoomByNamePart', [roomInput.value]);
       if (rooms.success) {
         const roomDatalist = document.getElementById(`room-datalist-${period.periodId}`)
@@ -298,25 +328,24 @@ export function displayTenantProfile(profile, formContent) {
       editPeriodButton.style.display = inputs[0].disabled ? "inline" : "none";
       savePeriodButton.style.display = inputs[0].disabled ? "none" : "inline";
       deleteButton.style.display = inputs[0].disabled ? "none" : "inline";
-
     };
 
     deleteButton.onclick = async (event) => {
       event.preventDefault()
       if (deleteButton.textContent === "Confirm Delete") {
         try {
-          const resp = await window.electron.call('updateBillingPeriod', [period.periodId, { deleted : 1 }])
+          const resp = await window.electron.call('updateBillingPeriod', [period.periodId, { deleted: 1 }])
           if (!resp.success) return showToast(resp.error)
           showToast('Billing Period Deleted')
           periodSection.remove()
-        } catch(e) {
+        } catch (e) {
           return showToast(e)
         }
       } else {
         deleteButton.style.display = "none";
         confirmDeleteCheckbox.style.display = "inline";
         confirmDeleteLabel.style.display = "inline";
-    }
+      }
     };
 
     confirmDeleteCheckbox.onclick = (event) => {
@@ -333,16 +362,14 @@ export function displayTenantProfile(profile, formContent) {
       event.preventDefault()
 
       const inputs = [periodSelect, roomInput, periodTypeDropdown, priceInput, startInput, endInput, demandInput]
-      
+
       const realInputs = [document.querySelector(`#period-${period.periodId}`).value, document.querySelector(`#room-input-${period.periodId}`).value, document.querySelector(`#periodtype-${period.periodId}`).value, document.querySelector(`#price-input-${period.periodId}`).value, document.querySelector(`#start-input-${period.periodId}`).value, document.querySelector(`#end-input-${period.periodId}`).value, document.querySelector(`#demand-input-${period.periodId}`).value]
       //refer the above to the inputs array
 
-      // console.log(realInputs)
-
       const selectedRoomOption = Array.from(document.querySelector(`#room-datalist-${period.periodId}`).options).find((option) => option.value === realInputs[1])
-      
+
       const hiddens = [startLabel, startInput, endLabel, endInput]
-      if(!realInputs[4] && !realInputs[5]) {
+      if (!realInputs[4] && !realInputs[5]) {
         hiddens.forEach((hidden) => hidden.style.display = "none")
       }
       if ((realInputs[4] && !realInputs[5]) || (realInputs[5] && !realInputs[4])) {
@@ -351,7 +378,7 @@ export function displayTenantProfile(profile, formContent) {
 
       const payload = {
         ...(realInputs[0] != 'custom' && { periodNameId: realInputs[0] }),
-        ...(selectedRoomOption && { roomId: selectedRoomOption.getAttribute('data-id')}),
+        ...(selectedRoomOption && { roomId: selectedRoomOption.getAttribute('data-id') }),
         periodType: realInputs[2],
         agreedPrice: realInputs[3],
         ownStartingDate: realInputs[4] || null,
@@ -362,10 +389,10 @@ export function displayTenantProfile(profile, formContent) {
       try {
         const response = await window.electron.call('updateBillingPeriod', [period.periodId, payload])
         if (!response.success) return showToast(response.error)
-        
+
         inputs.forEach(input => (input.disabled = true));
         showToast('Billing Period Updated')
-      } catch(e) {
+      } catch (e) {
         return showToast(e)
       }
       editPeriodButton.style.display = "inline";
