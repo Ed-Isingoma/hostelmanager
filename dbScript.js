@@ -2,8 +2,8 @@ const sqlite3 = require('sqlite3').verbose();
 require('dotenv').config();
 
 const credentials = {
-  apiKey: AFRSTK_API,
-  username: USRNAME
+  apiKey: process.env.AFRSTK_API,
+  username: process.env.USRNAME
 }
 const AfricasTalking = require('africastalking')(credentials)
 
