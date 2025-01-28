@@ -39,7 +39,7 @@ export async function addPaymentFormFields(formContent) {
 
     tenantInput.addEventListener("input", async () => {
       if (tenantInput.value.split(' (')[1]) return
-      const tenants = await window.electron.call("searchTenantNameAndId", [tenantInput.value]);
+      const tenants = await caller("searchTenantNameAndId", [tenantInput.value]);
       //that split is because the option value is intertwined
       if (tenants.success) {
         tenantDatalist.innerHTML = "";
@@ -144,7 +144,7 @@ export async function addPaymentFormFields(formContent) {
           try {
             const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
 
-            const periodTherein = await window.electron.call('getBillingPeriodBeingPaidFor', [selectedTenantOption.dataset.id, semesterDropdown.value])
+            const periodTherein = await caller('getBillingPeriodBeingPaidFor', [selectedTenantOption.dataset.id, semesterDropdown.value])
 
             if (!periodTherein.success) {
               return showToast(periodNames.error);
@@ -181,7 +181,7 @@ export async function addPaymentFormFields(formContent) {
 
       roomInput.addEventListener('input', async () => {
         // if (roomInput.value.length == 4) return  //add this when you know the length of a room string, to prevent that extra last search on datalist select of the wanted room
-        const rooms = await window.electron.call('searchRoomByNamePart', [roomInput.value]);
+        const rooms = await caller('searchRoomByNamePart', [roomInput.value]);
         if (rooms.success) {
           roomDatalist.innerHTML = '';
           for (let item of rooms.data) {
@@ -236,7 +236,7 @@ export async function addPaymentFormFields(formContent) {
 
       const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
 
-      const monthlies = await window.electron.call('getMonthliesFor', [selectedTenantOption.dataset.id]);
+      const monthlies = await caller('getMonthliesFor', [selectedTenantOption.dataset.id]);
       if (!monthlies.success) showToast('Error getting some billing periods');
 
       monthlies.data.forEach((rec) => {
@@ -290,7 +290,7 @@ export async function addPaymentFormFields(formContent) {
             agreedPrice: parseInt(agreedPriceInput)
           };
 
-          const createBillingPeriodResponse = await window.electron.call('createBillingPeriod', [billingPeriodData, theBillingPeriodName, selectedRoomOption.dataset.id, selectedTenantOption.dataset.id]);
+          const createBillingPeriodResponse = await caller('createBillingPeriod', [billingPeriodData, theBillingPeriodName, selectedRoomOption.dataset.id, selectedTenantOption.dataset.id]);
 
           if (!createBillingPeriodResponse.success) {
             showToast(createBillingPeriodResponse.error);
@@ -299,12 +299,12 @@ export async function addPaymentFormFields(formContent) {
           selectedPeriodId = createBillingPeriodResponse.data;
         }
 
-        const transResp = await window.electron.call('createTransaction', [transactionData, selectedPeriodId]);
+        const transResp = await caller('createTransaction', [transactionData, selectedPeriodId]);
 
         if (transResp.success) {
           showToast('Transaction added successfully');
 
-          // const receipt = await window.electron.call('sendReceipt', [transResp.data])
+          // const receipt = await caller('sendReceipt', [transResp.data])
           // if (!receipt.success) showToast(receipt.error)
           
           await doTotals()
@@ -312,7 +312,7 @@ export async function addPaymentFormFields(formContent) {
           closeForm();
         } else {
           if (!Object.keys(chosenBillingPeriod).length) {
-            await window.electron.call('updateBillingPeriod', [selectedPeriodId, {deleted: 1}])
+            await caller('updateBillingPeriod', [selectedPeriodId, {deleted: true}])
             billingDataRefresh()
           }
           showToast(transResp.error);

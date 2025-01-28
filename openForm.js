@@ -51,7 +51,7 @@ export default function openForm(title) {
 async function showUserAccounts(formContent) {
   try {
     // Fetch accounts
-    const accounts = await window.electron.call('getAccountsDeadAndLiving');
+    const accounts = await caller('getAccountsDeadAndLiving');
     console.log('Fetched Accounts:', accounts);  // Check if we got a valid response
 
     if (!accounts.success) {
@@ -241,7 +241,7 @@ async function addTenantFormFields(formContent) {
 
     roomInput.addEventListener('input', async () => {
       // if (roomInput.value.length == 4) return  //add this when you know the length of a room string, to prevent that extra last search on datalist select of the wanted room
-      const rooms = await window.electron.call('searchRoomByNamePart', [roomInput.value])
+      const rooms = await caller('searchRoomByNamePart', [roomInput.value])
       if (rooms.success) {
         roomDatalist.innerHTML = ''
         for (let item of rooms.data) {
@@ -307,7 +307,7 @@ async function addTenantFormFields(formContent) {
         return showToast("Tenant name is required.");
       }
 
-      const tenantResult = await window.electron.call('createTenant', [tenantData]);
+      const tenantResult = await caller('createTenant', [tenantData]);
       if (!tenantResult.success) return showToast(tenantResult.error);
 
       const tenantId = tenantResult.data;
@@ -325,10 +325,10 @@ async function addTenantFormFields(formContent) {
         agreedPrice: parseInt(agreedPriceInput.value || 0, 10),
       };
 
-      const billingResult = await window.electron.call('createBillingPeriod', [billingPeriodData, thePeriodNameId, selectedRoomOption.dataset.id, tenantId]);
+      const billingResult = await caller('createBillingPeriod', [billingPeriodData, thePeriodNameId, selectedRoomOption.dataset.id, tenantId]);
 
       if (!billingResult.success) {
-        await window.electron.call('updateTenant', [tenantId, { deleted: 1 }])
+        await caller('updateTenant', [tenantId, { deleted: true }])
         fields.forEach(field => {
           const input = formContent.querySelector(`[name="${field.name}"]`);
           input.value = tenantData[field.name]
@@ -374,7 +374,7 @@ async function addTenantSearch(formContent) {
 
     tenantInput.addEventListener("input", async () => {
       if (tenantInput.value.split(' (')[1]) return
-      const tenants = await window.electron.call("searchTenantNameAndId", [tenantInput.value]);
+      const tenants = await caller("searchTenantNameAndId", [tenantInput.value]);
       //that split is because the option value is intertwined
       if (tenants.success) {
         tenantDatalist.innerHTML = "";
@@ -413,7 +413,7 @@ async function addTenantSearch(formContent) {
 
 async function showTenant(formContent, splicedTitle) {
   try {
-    const profile = await window.electron.call('getFullTenantProfile', [splicedTitle[1]])
+    const profile = await caller('getFullTenantProfile', [splicedTitle[1]])
     if (!profile.success) {
       showToast(profile.error)
       return
@@ -489,7 +489,7 @@ function addMiscsFormFields(formContent) {
     const sem = formContent.querySelector(`select[name=billingPeriod]`).value
 
     try {
-      const response = await window.electron.call('createMiscExpense', [formData, user.accountId, sem]);
+      const response = await caller('createMiscExpense', [formData, user.accountId, sem]);
       if (response.success) {
         showToast('Added Miscellaneous Expense');
         closeForm()

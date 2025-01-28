@@ -46,7 +46,7 @@ async function showCards() {
 
 async function numOfTenants() {
   try {
-    const tenants = await window.electron.call('getTenantsPlusOutstandingBalanceAll', [selectedPeriodNameId]);
+    const tenants = await caller('getTenantsPlusOutstandingBalanceAll', [selectedPeriodNameId]);
     if (tenants.success) {
       displayTenants(tenants.data);
     } else {
@@ -60,11 +60,11 @@ async function numOfTenants() {
 
 async function showRooms() {
   try {
-    const levels = await window.electron.call('getLevels');
+    const levels = await caller('getLevels');
     if (levels.success) {
       const levelsData = []
       for (let level of levels.data) {
-        const cardData = await window.electron.call('getRoomsAndOccupancyByLevel', [level.levelNumber, selectedPeriodNameId])
+        const cardData = await caller('getRoomsAndOccupancyByLevel', [level.levelNumber, selectedPeriodNameId])
         if (cardData.success) {
           levelsData.push(cardData.data)
         } else {
@@ -83,7 +83,7 @@ async function showRooms() {
 
 async function miscExpenses() {
   try {
-    const expenses = await window.electron.call('getMiscExpensesForBillingPeriodName', [window.selectedPeriodNameId]);
+    const expenses = await caller('getMiscExpensesForBillingPeriodName', [window.selectedPeriodNameId]);
     if (expenses.success) {
       displayExpenses(expenses.data);
     } else {
@@ -97,7 +97,7 @@ async function miscExpenses() {
 
 async function uncollectedMoneys() {
   try {
-    const moneys = await window.electron.call('getOnlyTenantsWithOwingAmt', [window.selectedPeriodNameId]);
+    const moneys = await caller('getOnlyTenantsWithOwingAmt', [window.selectedPeriodNameId]);
     if (moneys.success) {
       displayMoneys(moneys.data);
     } else {
@@ -111,7 +111,7 @@ async function uncollectedMoneys() {
 
 async function collectedMoneys() {
   try {
-    const moneys = await window.electron.call('getTransactionsByPeriodNameIdWithMetaData', [selectedPeriodNameId]);
+    const moneys = await caller('getTransactionsByPeriodNameIdWithMetaData', [selectedPeriodNameId]);
     if (moneys.success) {
       displayPayments(moneys.data);
     } else {
@@ -125,7 +125,7 @@ async function collectedMoneys() {
 
 async function olderTenants() {
   try {
-    const olders = await window.electron.call('getOlderTenantsThan', [selectedPeriodNameId]);
+    const olders = await caller('getOlderTenantsThan', [selectedPeriodNameId]);
     if (olders.success) {
       displayOlders(olders.data);
     } else {
@@ -180,7 +180,7 @@ function displayRooms(levelsData) {
       }
       occupancyContainer.addEventListener("click", async () => {
         try {
-          const tenants = await window.electron.call('getTenantsAndOwingAmtByRoom', [room.roomId, selectedPeriodNameId]);
+          const tenants = await caller('getTenantsAndOwingAmtByRoom', [room.roomId, selectedPeriodNameId]);
           if (tenants.success) {
             showTenantsPopUp(tenants.data, room.roomName);
           } else {

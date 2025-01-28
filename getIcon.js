@@ -91,7 +91,7 @@ export function hideTenantsPopUp() {
 
 export async function doTotals() {
   try {
-    const tot = await window.electron.call('dashboardTotals', [selectedPeriodNameId]);
+    const tot = await caller('dashboardTotals', [selectedPeriodNameId]);
     if (tot.success) {
       window.totals = tot.data;
     } else {
@@ -106,7 +106,7 @@ export async function doTotals() {
 export async function approveAccount(accountId, e, approveButton) {
   e.preventDefault();
   try {
-    const saving = await window.electron.call('updateAccount', [accountId, { approved: 1 }]);
+    const saving = await caller('updateAccount', [accountId, { approved: true }]);
     if (!saving.success) {
       showToast(saving.error);
       return;
@@ -121,7 +121,7 @@ export async function approveAccount(accountId, e, approveButton) {
 export async function deleteAccount(accountId, e, accountItem) {
   e.preventDefault();
   try {
-    const saving = await window.electron.call('updateAccount', [accountId, { deleted: 1 }]);
+    const saving = await caller('updateAccount', [accountId, { deleted: true }]);
     if (saving.success) {
       showToast('Account deleted');
     } else {

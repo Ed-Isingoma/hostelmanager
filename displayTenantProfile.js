@@ -78,7 +78,7 @@ export function displayTenantProfile(profile, formContent) {
     }
 
     try {
-      const response = await window.electron.call('updateTenant', [profile.tenantId, payload])
+      const response = await caller('updateTenant', [profile.tenantId, payload])
       if (!response.success) showToast(response.error)
       inputs.forEach(input => (input.disabled = true));
       showToast('Tenant Data Updated')
@@ -110,7 +110,7 @@ export function displayTenantProfile(profile, formContent) {
     event.preventDefault()
       if (deleteButton1.textContent === "Confirm Delete") {
         try {
-          const resp = await window.electron.call('updateTenant', [profile.tenantId, { deleted : 1 }])
+          const resp = await caller('updateTenant', [profile.tenantId, { deleted : 1 }])
           if (!resp.success) return showToast(resp.error)
           showToast('Tenant Deleted')
           closeForm()
@@ -194,7 +194,7 @@ export function displayTenantProfile(profile, formContent) {
     roomInput.addEventListener('input', async () => {
       // if (roomInput.value.length == 4) return  //add this when you know the length of a room string, to prevent that extra last search on datalist select of the wanted room
       if (!roomInput.value) return
-      const rooms = await window.electron.call('searchRoomByNamePart', [roomInput.value]);
+      const rooms = await caller('searchRoomByNamePart', [roomInput.value]);
       if (rooms.success) {
         const roomDatalist = document.getElementById(`room-datalist-${period.periodId}`)
         roomDatalist.innerHTML = '';
@@ -334,7 +334,7 @@ export function displayTenantProfile(profile, formContent) {
       event.preventDefault()
       if (deleteButton.textContent === "Confirm Delete") {
         try {
-          const resp = await window.electron.call('updateBillingPeriod', [period.periodId, { deleted: 1 }])
+          const resp = await caller('updateBillingPeriod', [period.periodId, { deleted: true }])
           if (!resp.success) return showToast(resp.error)
           showToast('Billing Period Deleted')
           periodSection.remove()
@@ -387,7 +387,7 @@ export function displayTenantProfile(profile, formContent) {
       }
 
       try {
-        const response = await window.electron.call('updateBillingPeriod', [period.periodId, payload])
+        const response = await caller('updateBillingPeriod', [period.periodId, payload])
         if (!response.success) return showToast(response.error)
 
         inputs.forEach(input => (input.disabled = true));

@@ -3,7 +3,7 @@ import showToast from "./showToast.js";
 
 export async function showBillingPeriods() {
   try {
-    const periodNames = await window.electron.call('getBillingPeriodNames');
+    const periodNames = await caller('getBillingPeriodNames');
     if (!periodNames.success) return showToast(periodNames.error);
     window.dashboardContainer.innerHTML = '';
 
@@ -122,7 +122,7 @@ export async function saveNewRow(row) {
   };
 
   try {
-    const saving = await window.electron.call('createBillingPeriodName', [newData]);
+    const saving = await caller('createBillingPeriodName', [newData]);
     if (saving.success) {
       showToast('Billing period created');
 
@@ -183,7 +183,7 @@ export async function saveRow(periodId, row) {
   };
 
   try {
-    const saving = await window.electron.call('updateBillingPeriodName', [periodId, updatedData]);
+    const saving = await caller('updateBillingPeriodName', [periodId, updatedData]);
     if (saving.success) {
       showToast('Billing period updated');
 
@@ -210,7 +210,7 @@ export async function saveRow(periodId, row) {
 
 export async function deleteRow(periodId, item) {
   try {
-    const saving = await window.electron.call('updateBillingPeriodName', [periodId, { deleted: 1 }]);
+    const saving = await caller('updateBillingPeriodName', [periodId, { deleted: true }]);
     if (saving.success) {
       showToast('Billing period deleted');
       item.remove();
