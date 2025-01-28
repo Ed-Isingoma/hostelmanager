@@ -92,7 +92,9 @@ export function hideTenantsPopUp() {
 
 export async function doTotals() {
   try {
-    const tot = await caller('dashboardTotals', [selectedPeriodNameId]);
+    const tott = await caller('dashboardTotals', [selectedPeriodNameId]);
+    const tot = await tott.json()
+
     if (tot.success) {
       window.totals = tot.data;
     } else {
@@ -107,7 +109,9 @@ export async function doTotals() {
 export async function approveAccount(accountId, e, approveButton) {
   e.preventDefault();
   try {
-    const saving = await caller('updateAccount', [accountId, { approved: true }]);
+    const savin = await caller('updateAccount', [accountId, { approved: true }]);
+    const saving = await savin.json()
+
     if (!saving.success) {
       showToast(saving.error);
       return;
@@ -122,7 +126,8 @@ export async function approveAccount(accountId, e, approveButton) {
 export async function deleteAccount(accountId, e, accountItem) {
   e.preventDefault();
   try {
-    const saving = await caller('updateAccount', [accountId, { deleted: true }]);
+    const savin = await caller('updateAccount', [accountId, { deleted: true }]);
+    const saving = await savin.json()
     if (saving.success) {
       showToast('Account deleted');
     } else {

@@ -49,8 +49,8 @@ async function showLoginPrompt() {
 
     if (username && password) {
       try {
-        const response = await caller('login', [username, password]);
-        console.log(response)
+        const respons = await caller('login', [username, password]);
+        const response = await respons.json()
         if (response.success && response.data.length > 0) {
           showToast("Login successful");
           loginContainer.remove();
@@ -130,7 +130,8 @@ async function showSignupPrompt() {
     }
 
     try {
-      const response = await caller('createAccount', [username, password]);
+      const respons = await caller('createAccount', [username, password]);
+      const response = await respons.json()
       if (response.success) {
         showToast("Account created, pending Admin approval.");
         signupContainer.remove();
