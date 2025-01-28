@@ -1,5 +1,6 @@
 import showDashboard from "./showDashboard.js";
 import showToast from "./showToast.js";
+import { caller } from "./caller.js";
 
 async function showLoginPrompt() {
   const loginContainer = document.createElement("div");

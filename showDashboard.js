@@ -2,6 +2,7 @@ import { showCards } from "./showCards.js";
 import { doTotals, formatNumber } from "./getIcon.js";
 import openForm from "./openForm.js";
 import showToast from "./showToast.js";
+import { caller } from "./caller.js";
 
 export default async function showDashboard() {
   const header = document.createElement("h2");
