@@ -50,7 +50,10 @@ export default function openForm(title) {
 
 async function showUserAccounts(formContent) {
   try {
+    // Fetch accounts
     const accounts = await window.electron.call('getAccountsDeadAndLiving');
+    console.log('Fetched Accounts:', accounts);  // Check if we got a valid response
+
     if (!accounts.success) {
       showToast(accounts.error);
       return;
@@ -66,8 +69,9 @@ async function showUserAccounts(formContent) {
       accountsListContainer.innerHTML = ''; // Clear existing content
     }
 
-    if (accounts.data.length === 0) {
-      // Handle empty state
+    // Handle empty data
+    if (!accounts.data || accounts.data.length === 0) {
+      console.log('No accounts found.');
       const emptyMessage = document.createElement('div');
       emptyMessage.textContent = 'No accounts found.';
       emptyMessage.style.textAlign = 'center';

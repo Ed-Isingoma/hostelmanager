@@ -1,5 +1,6 @@
+/* Reset box-sizing for consistent layout behavior */
 * {
-  box-sizing: content-box;
+  box-sizing: border-box; /* Changed to border-box for better layout management */
 }
 
 body {
@@ -9,8 +10,28 @@ body {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh; /* Ensures the body fills the viewport */
+  overflow-x: hidden; /* Hides horizontal overflow */
+  overflow-y: auto; /* Keeps vertical scrolling enabled */
   font-family: Arial, sans-serif;
+}
+
+/* Additional styles for testing */
+.container {
+  width: 80%; /* Adjusted width to avoid exceeding viewport */
+  max-width: 1200px; /* Cap container width */
+  margin: 20px auto;
+  background-color: #f5f5f5;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.content {
+  height: 150vh; /* Simulating vertical scroll with tall content */
+  background: linear-gradient(to bottom, #42a166, #f3f8ff);
+  padding: 20px;
+  color: #333;
 }
 
 /* Only for the login page */
@@ -106,40 +127,107 @@ body {
   z-index: 5;
 }
 
+/* Modal Container */
 .modal-form {
-  position: absolute;
+  position: fixed; /* Keeps it fixed in the viewport */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #cec4c4;
-  padding: 20px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
-  z-index: 6;
-  width: 80%;
-  max-width: 400px;
-  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.9); /* Slight transparency added to the background */
+  padding: 30px;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+  z-index: 999;
+  width: 85%;
+  max-width: 500px;
+  border-radius: 12px;
   text-align: center;
   box-sizing: border-box;
+  overflow-y: auto; /* Allow scrolling if content overflows */
+  max-height: 80vh; /* Ensure the modal height doesn't exceed 80% of the viewport height */
+  transition: transform 0.3s ease-in-out;
 }
 
+/* Modal Title */
 .modal-form h2 {
   margin-top: 0;
+  font-size: 24px;
+  color: #333333;
+  font-weight: 600;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
+/* Modal Form Styling */
 .modal-form form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
 }
 
+/* Inputs & Textarea */
+.modal-form input,
+.modal-form select,
+.modal-form textarea {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.modal-form input:focus,
+.modal-form select:focus,
+.modal-form textarea:focus {
+  border-color: #42a196;
+  outline: none;
+  box-shadow: 0 0 5px rgba(66, 161, 150, 0.5);
+}
+
+/* Submit Button */
 .modal-form button {
-  padding: 5px 10px;
+  padding: 12px 20px;
   background-color: #42a196;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  margin: 2px;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  margin-top: 15px;
+}
+
+.modal-form button:hover {
+  background-color: #368d7a;
+}
+
+.modal-form button:active {
+  transform: scale(0.98);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .modal-form {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .modal-form h2 {
+    font-size: 20px;
+  }
+
+  .modal-form button {
+    font-size: 14px;
+    padding: 10px 18px;
+  }
+
+  .modal-form input,
+  .modal-form select,
+  .modal-form textarea {
+    font-size: 14px;
+  }
 }
 
 .welcome-message {
@@ -338,27 +426,59 @@ footer {
 }
 
 
-/*add-tenant*/
+/* Enhanced Add Tenant Button */
 .add-tenant-submit {
-  padding: 10px 20px;
-  background-color: #42a196;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: normal;
-  transition: background-color 0.3s ease;
+  padding: 12px 24px; /* Slightly larger padding for better touch targets */
+  background-color: #42a196; /* Primary color */
+  color: white; /* Text color */
+  border: none; /* No border */
+  border-radius: 25px; /* Rounded button for modern UX */
+  cursor: pointer; /* Pointer cursor for interactivity */
+  font-size: 16px; /* Readable font size */
+  font-weight: bold; /* Make the text stand out */
+  transition: all 0.3s ease; /* Smooth transitions */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for elevation */
 }
 
 .add-tenant-submit:hover {
-  background-color: #42a166;
+  background-color: #42a166; /* Slightly darker green for hover */
+  transform: translateY(-2px); /* Lift effect on hover */
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
 }
 
 .add-tenant-submit:active {
-  background-color: #42a166;
+  background-color: #42a166; /* Active state color */
+  transform: translateY(0); /* Reset lift effect */
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Reduced shadow */
 }
 
+.add-tenant-submit:focus {
+  outline: 2px solid #88d9cc; /* Accessible focus outline */
+  outline-offset: 2px; /* Spacing around the outline */
+}
+
+/* Disabled state */
+.add-tenant-submit:disabled {
+  background-color: #cfd9d6; /* Light gray for disabled state */
+  color: #8c9d96; /* Muted text color */
+  cursor: not-allowed; /* Indicate it's not clickable */
+  box-shadow: none; /* No shadow for disabled state */
+}
+
+/* Keyframes for subtle pulsating animation */
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Add pulsating animation to the button */
+.add-tenant-submit:hover {
+  animation: pulse 1s infinite ease-in-out;
+}
 
 #tenants-container {
   padding: 20px;
@@ -427,45 +547,45 @@ footer {
 .rooms-levels-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 20px;
-  background-color: #f9fafb; /* Subtle background color */
-  border-radius: 10px; /* Rounded edges */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
-  height: 90vh; /* Fit the viewport height */
-  overflow-y: auto; /* Enable scrolling if content exceeds height */
+  gap: 8px;
+  padding: 20px; /* Added more padding around the container */
+  background-color: rgba(249, 249, 251, 0.5); /* Increased transparency */
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  height: 75vh;
+  overflow-y: auto;
 }
 
 /* Individual Level Box */
 .rooms-level-box {
   border: none;
-  padding: 15px;
-  background: linear-gradient(to bottom, #ffffff, #f1f4f9); /* Gradient background */
-  border-radius: 8px; /* Rounded edges */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); /* Subtle shadow */
+  padding: 8px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), rgba(241, 244, 249, 0.5)); /* Increased transparency */
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   transition: transform 0.3s ease;
 }
 
 .rooms-level-box:hover {
-  transform: translateY(-5px); /* Slight lift on hover */
+  transform: translateY(-2px);
 }
 
 /* Level Title Styling */
 .rooms-level-title {
-  font-size: 20px;
+  font-size: 14px;
   font-weight: bold;
-  margin-bottom: 15px;
-  color: #1a202c; /* Dark text color */
-  text-align: center; /* Center the title */
-  text-transform: uppercase; /* Uppercase letters for better emphasis */
+  margin-bottom: 8px;
+  color: #1a202c;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 /* Rooms Container */
 .rooms-rooms-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
-  justify-content: center; /* Center-align the room boxes */
+  gap: 8px;
+  justify-content: center;
 }
 
 /* Individual Room Box */
@@ -474,77 +594,77 @@ footer {
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
-  width: 140px;
-  height: 140px;
-  border-radius: 10px;
-  background: linear-gradient(to bottom right, #e0f7fa, #ffffff); /* Subtle gradient */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Elevated effect */
+  padding: 8px;
+  width: 80px;
+  height: 80px;
+  border-radius: 4px;
+  background: linear-gradient(to bottom right, rgba(224, 247, 250, 0.5), rgba(255, 255, 255, 0.5)); /* Increased transparency */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer; /* Indicate clickability */
+  cursor: pointer;
 }
 
 .rooms-room-box:hover {
-  transform: scale(1.05); /* Slight zoom-in on hover */
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+  transform: scale(1.02);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* Room Name Styling */
 .rooms-room-name {
-  font-size: 16px;
+  font-size: 10px;
   font-weight: bold;
-  color: #0d47a1; /* Deep blue for contrast */
-  margin-bottom: 10px;
+  color: #0d47a1;
+  margin-bottom: 5px;
 }
 
 /* Occupancy Container */
 .rooms-occupancy-container {
   display: flex;
-  gap: 8px; /* Spacing between boxes */
+  gap: 3px;
 }
 
 /* Occupancy Box */
 .rooms-occupancy-box {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%; /* Circular boxes */
-  background-color: #e0e0e0; /* Neutral background */
-  border: 2px solid #ccc; /* Light border */
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: rgba(224, 224, 224, 0.5); /* Increased transparency */
+  border: 2px solid #ccc;
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 /* Occupied Rooms */
 .rooms-occupancy-box.occupied {
-  background-color: #4caf50; /* Green for occupied */
-  border-color: #388e3c; /* Darker border */
+  background-color: rgba(76, 175, 80, 0.5); /* Increased transparency for green */
+  border-color: rgba(56, 142, 60, 0.5); /* Darker green */
 }
 
 /* Empty Rooms */
 .rooms-occupancy-box.empty {
-  background-color: #ffccbc; /* Light red for empty */
-  border-color: #d32f2f; /* Darker border */
+  background-color: rgba(255, 204, 188, 0.5); /* Increased transparency for red */
+  border-color: rgba(211, 47, 47, 0.5); /* Darker red */
 }
 
 /* Occupancy Hover Effect */
 .rooms-occupancy-box:hover {
-  transform: scale(1.1); /* Slight zoom on hover */
+  transform: scale(1.05);
 }
 
 /* Responsive Design */
 @media screen and (max-width: 768px) {
   .rooms-levels-container {
     padding: 10px;
-    height: auto; /* Adjust height for smaller screens */
+    height: auto;
   }
   
   .rooms-room-box {
-    width: 120px;
-    height: 120px;
+    width: 70px;
+    height: 70px;
   }
   
   .rooms-occupancy-box {
-    width: 35px;
-    height: 35px;
+    width: 20px;
+    height: 20px;
   }
 }
 
@@ -554,7 +674,7 @@ footer {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(167, 167, 167, 0.507); /* Translucent grey */
+  background-color: rgba(167, 167, 167, 0.507);
   z-index: 9999;
   display: flex;
   justify-content: center;
@@ -562,22 +682,19 @@ footer {
 }
 
 .tenants-popup-title {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
-
-
 
 .tenant-box {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 10px;
+  gap: 2px;
+  padding: 5px;
   border: 1px solid #ddd;
-  background-color: rgba(249, 249, 249, 0.8); /* Slight transparency */
+  background-color: rgba(249, 249, 249, 0.5); /* Increased transparency */
 }
-
 
 /* ........................ TODO .................*/
 /* General input field styles */
@@ -690,27 +807,31 @@ input[type="submit"]:active {
 /********Table*************/
 /* General table styles */
 table {
-  width: 100%;
+  width: 90%; /* Reduced width to leave margins around */
+  max-width: 1200px; /* Prevent tables from being too wide */
+  margin: 20px auto; /* Center the table and leave margins all around */
   border-collapse: collapse;
-  margin: 20px 0;
   font-size: 1em;
   font-family: Arial, sans-serif;
   text-align: left;
   background-color: #ffffff;
   border-radius: 10px !important;
-  overflow: hidden !important; /* To keep border-radius consistent */
+  overflow: hidden !important; /* Keep border-radius consistent */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
   border: 1px solid #cccccc !important;
 }
 
 /* Table headers */
 th {
-  background-color: #42a166 !important; /* Soft lavender color */
+  background-color: #42a166 !important; /* Soft green color */
   color: #ffffff !important; /* White text for better visibility */
   padding: 12px !important;
   text-transform: uppercase !important;
   border: 1px solid #dddddd !important;
   font-weight: bold !important;
+  position: sticky;
+  top: 0;
+  z-index: 1; /* Keep header on top */
 }
 
 /* Table rows */
@@ -731,14 +852,15 @@ tr:nth-child(odd) {
 
 /* Hover effect */
 tr:hover {
-  background-color: #d9e8ff !important; /* Slightly darker light blue for hover */
-  cursor: pointer !important;
+  background-color: #e3f2f7 !important; /* Light color on hover for better focus */
 }
 
 /* Responsive table */
 @media screen and (max-width: 600px) {
   table {
     border: 0 !important;
+    width: 100%; /* Ensure the table takes full width on small screens */
+    margin: 0; /* Remove extra margins on small devices */
   }
 
   table thead {
@@ -772,16 +894,91 @@ tr:hover {
   }
 }
 
+/* Scrollbars */
+.table-container {
+  overflow-x: auto;
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #42a166 #f1f1f1; /* For Firefox */
+}
+
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background-color: #42a166;
+  border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
 /* Center the heading and style it */
 h3 {
-  text-align: center; /* Center the text */
-  background-color: #42a166; /* Nice green background */
-  color: white; /* White text for contrast */
-  padding: 15px 20px; /* Add padding for a better appearance */
-  border-radius: 8px; /* Round the corners */
-  margin: 20px auto; /* Center the heading with auto margins */
-  width: fit-content; /* Adjust width based on content */
-  font-size: 1.5rem; /* Adjust font size for better visibility */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
-  font-family: Arial, sans-serif; /* Optional font for better aesthetics */
+  text-align: center;
+  background-color: #42a166;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin: 20px auto;
+  width: fit-content;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-family: Arial, sans-serif;
 }
+
+
+
+/* POPUP */
+.popup {
+  position: fixed;
+  top: 50%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Offset by 50% of its width and height */
+  max-height: 90%; /* Prevent overflow if the content is too large */
+  overflow-y: auto; /* Add scrolling if the content exceeds the viewport height */
+  z-index: 9999; /* Ensure it appears above other elements */
+  background-color: #f9f9f9; /* Adjust background to match input fields */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 80%; /* Adjust width as needed */
+  box-sizing: border-box;
+}
+
+form .form-content {
+  background-color: #ffffff; /* Match the input fields' color scheme */
+  padding: 20px; /* Add padding to separate fields from edges */
+  border-radius: 8px; /* Smooth edges for a better look */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+form .form-content label,
+form .form-content input,
+form .form-content select {
+  display: block; /* Ensure elements stack vertically */
+  margin-bottom: 10px; /* Space between form fields */
+  font-size: 14px;
+}
+
+form .form-content input,
+form .form-content select {
+  width: 100%; /* Full width */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+@media (max-width: 768px) {
+  .popup {
+    width: 95%; /* Adjust to fit smaller screens */
+    top: 5%; /* Add space from the top */
+    transform: translate(-50%, 0); /* Center horizontally, not vertically */
+  }
+
+  form .form-content {
+    padding: 10px; /* Reduce padding */
+  }
+}
+
