@@ -296,7 +296,6 @@ export async function addPaymentFormFields(formContent) {
             showToast(createBillingPeriodResponse.error);
             return;
           }
-          console.log('the returned new periodid:', createBillingPeriodResponse.data)
           selectedPeriodId = createBillingPeriodResponse.data;
         }
 
@@ -304,9 +303,9 @@ export async function addPaymentFormFields(formContent) {
 
         if (createTransactionResponse.success) {
           showToast('Transaction added successfully');
-          closeForm();
           await doTotals()
           updateCardNumbers()
+          closeForm();
         } else {
           if (!Object.keys(chosenBillingPeriod).length) {
             await window.electron.call('updateBillingPeriod', [selectedPeriodId, {deleted: 1}])

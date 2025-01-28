@@ -1,4 +1,5 @@
 import { formatDateRange } from "./getIcon.js";
+import showToast from "./showToast.js";
 
 export function displayTenantProfile(profile, formContent) {
   // console.log(profile)
@@ -107,7 +108,7 @@ export function displayTenantProfile(profile, formContent) {
   tenantSection.appendChild(confirmDeleteCheckbox1);
   tenantSection.appendChild(confirmDeleteLabel1);
 
-  // Billing Periods Section
+  // Billing Periods Section 
   profile.billingPeriods.forEach(period => {
     const periodSection = document.createElement("div");
     periodSection.style.border = "1px solid grey";
@@ -119,6 +120,7 @@ export function displayTenantProfile(profile, formContent) {
     periodLabel.style.marginRight = "10px";
 
     const periodSelect = document.createElement("select");
+    periodSelect.id = `period-${period.periodId}`
     periodSelect.disabled = true;
     periodSelect.style.marginBottom = "10px";
 
@@ -147,11 +149,33 @@ export function displayTenantProfile(profile, formContent) {
     const roomInput = document.createElement("input");
     roomInput.type = "text";
     roomInput.value = period.room.roomName;
+    roomInput.id = `room-input-${period.periodId}`
     roomInput.disabled = true;
+    roomInput.setAttribute('list', `room-datalist-${period.periodId}`);
 
+    const roomDatalist = document.createElement('datalist');
+    roomDatalist.id = `room-datalist-${period.periodId}`;
+    
     periodSection.appendChild(roomLabel);
     periodSection.appendChild(roomInput);
+    periodSection.appendChild(roomDatalist);
     periodSection.appendChild(document.createElement("br"))
+    
+    roomInput.addEventListener('input', async () => {
+      // if (roomInput.value.length == 4) return  //add this when you know the length of a room string, to prevent that extra last search on datalist select of the wanted room
+      if(!roomInput.value) return
+      const rooms = await window.electron.call('searchRoomByNamePart', [roomInput.value]);
+      if (rooms.success) {
+        const roomDatalist = document.getElementById(`room-datalist-${period.periodId}`)
+        roomDatalist.innerHTML = '';
+        for (let item of rooms.data) {
+          const option = document.createElement('option');
+          option.value = item.roomName;
+          option.setAttribute('data-id', item.roomId);
+          roomDatalist.appendChild(option);
+        }
+      } else showToast(rooms.error);
+    });
 
     const periodTypeLabel = document.createElement("label");
     periodTypeLabel.textContent = "Single or Double";
@@ -159,6 +183,7 @@ export function displayTenantProfile(profile, formContent) {
 
     const periodTypeDropdown = document.createElement("select");
     periodTypeDropdown.name = "periodType";
+    periodTypeDropdown.id = `periodtype-${period.periodId}`;
     ["single", "double"].forEach(type => {
       const option = document.createElement("option");
       option.value = type;
@@ -178,6 +203,7 @@ export function displayTenantProfile(profile, formContent) {
     const priceInput = document.createElement("input");
     priceInput.type = "number";
     priceInput.value = period.agreedPrice;
+    priceInput.id = `price-input-${period.periodId}`
     priceInput.disabled = true;
     priceInput.style.marginBottom = "10px";
 
@@ -207,6 +233,7 @@ export function displayTenantProfile(profile, formContent) {
     const startInput = document.createElement("input");
     startInput.type = "date";
     startInput.value = period.ownStartingDate;
+    startInput.id = `start-input-${period.periodId}`
     startInput.disabled = true;
     startInput.style.marginBottom = "10px";
     startInput.style.display = period.ownStartingDate ? "inline" : "none"
@@ -223,6 +250,7 @@ export function displayTenantProfile(profile, formContent) {
     const endInput = document.createElement("input");
     endInput.type = "date";
     endInput.value = period.ownEndDate;
+    endInput.id = `end-input-${period.periodId}`
     endInput.disabled = true;
     endInput.style.marginBottom = "10px";
     endInput.style.display = period.ownEndDate ? "inline" : "none"
@@ -237,6 +265,7 @@ export function displayTenantProfile(profile, formContent) {
 
     const demandInput = document.createElement("input");
     demandInput.type = "date";
+    demandInput.id = `demand-input-${period.periodId}`
     demandInput.value = period.demandNoticeDate
     demandInput.disabled = true;
     demandInput.style.marginBottom = "10px";
@@ -269,13 +298,25 @@ export function displayTenantProfile(profile, formContent) {
       editPeriodButton.style.display = inputs[0].disabled ? "inline" : "none";
       savePeriodButton.style.display = inputs[0].disabled ? "none" : "inline";
       deleteButton.style.display = inputs[0].disabled ? "none" : "inline";
+
     };
 
-    deleteButton.onclick = (event) => {
+    deleteButton.onclick = async (event) => {
       event.preventDefault()
-      deleteButton.style.display = "none";
-      confirmDeleteCheckbox.style.display = "inline";
-      confirmDeleteLabel.style.display = "inline";
+      if (deleteButton.textContent === "Confirm Delete") {
+        try {
+          const resp = await window.electron.call('updateBillingPeriod', [period.periodId, { deleted : 1 }])
+          if (!resp.success) return showToast(resp.error)
+          showToast('Billing Period Deleted')
+          periodSection.remove()
+        } catch(e) {
+          return showToast(e)
+        }
+      } else {
+        deleteButton.style.display = "none";
+        confirmDeleteCheckbox.style.display = "inline";
+        confirmDeleteLabel.style.display = "inline";
+    }
     };
 
     confirmDeleteCheckbox.onclick = (event) => {
@@ -288,13 +329,45 @@ export function displayTenantProfile(profile, formContent) {
       }
     };
 
-    savePeriodButton.onclick = (event) => {
+    savePeriodButton.onclick = async (event) => {
       event.preventDefault()
-      // Add save logic here
+
       const inputs = [periodSelect, roomInput, periodTypeDropdown, priceInput, startInput, endInput, demandInput]
-      inputs.forEach(input => (input.disabled = true));
+      
+      const realInputs = [document.querySelector(`#period-${period.periodId}`).value, document.querySelector(`#room-input-${period.periodId}`).value, document.querySelector(`#periodtype-${period.periodId}`).value, document.querySelector(`#price-input-${period.periodId}`).value, document.querySelector(`#start-input-${period.periodId}`).value, document.querySelector(`#end-input-${period.periodId}`).value, document.querySelector(`#demand-input-${period.periodId}`).value]
+      //refer the above to the inputs array
+
+      // console.log(realInputs)
+
+      const selectedRoomOption = Array.from(document.querySelector(`#room-datalist-${period.periodId}`).options).find((option) => option.value === realInputs[1])
+      
       const hiddens = [startLabel, startInput, endLabel, endInput]
-      hiddens.forEach((hidden) => hidden.style.display = "none")
+      if(!realInputs[4] && !realInputs[5]) {
+        hiddens.forEach((hidden) => hidden.style.display = "none")
+      }
+      if ((realInputs[4] && !realInputs[5]) || (realInputs[5] && !realInputs[4])) {
+        return showToast("Starting Date and End Date for Monthly must be both null or both set")
+      }
+
+      const payload = {
+        ...(realInputs[0] != 'custom' && { periodNameId: realInputs[0] }),
+        ...(selectedRoomOption && { roomId: selectedRoomOption.getAttribute('data-id')}),
+        periodType: realInputs[2],
+        agreedPrice: realInputs[3],
+        ownStartingDate: realInputs[4] || null,
+        ownEndDate: realInputs[5] || null,
+        demandNoticeDate: realInputs[6] || null
+      }
+
+      try {
+        const response = await window.electron.call('updateBillingPeriod', [period.periodId, payload])
+        if (!response.success) return showToast(response.error)
+        
+        inputs.forEach(input => (input.disabled = true));
+        showToast('Billing Period Updated')
+      } catch(e) {
+        return showToast(e)
+      }
       editPeriodButton.style.display = "inline";
       savePeriodButton.style.display = "none";
       deleteButton.style.display = "none";
@@ -347,9 +420,9 @@ export function displayTenantProfile(profile, formContent) {
   const cancelBtn = document.createElement("button");
   cancelBtn.className = "add-tenant-submit";
   cancelBtn.textContent = "Back";
-  cancelBtn.onclick = (event)=> {
+  cancelBtn.onclick = (event) => {
     event.preventDefault()
     closeForm()
-  } 
+  }
   formContent.appendChild(cancelBtn)
 }
