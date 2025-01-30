@@ -47,8 +47,7 @@ async function showCards() {
 
 async function numOfTenants() {
   try {
-    const tenantss = await caller('getTenantsPlusOutstandingBalanceAll', [selectedPeriodNameId]);
-    const tenants = await tenantss.json()
+    const tenants = await caller('getTenantsPlusOutstandingBalanceAll', [selectedPeriodNameId]);
     if (tenants.success) {
       displayTenants(tenants.data);
     } else {
@@ -62,13 +61,11 @@ async function numOfTenants() {
 
 async function showRooms() {
   try {
-    const levelss = await caller('getLevels');
-    const levels = await levelss.json()
+    const levels = await caller('getLevels');
     if (levels.success) {
       const levelsData = []
       for (let level of levels.data) {
-        const cardDataa = await caller('getRoomsAndOccupancyByLevel', [level.levelNumber, selectedPeriodNameId])
-        const cardData = await cardDataa.json()
+        const cardData = await caller('getRoomsAndOccupancyByLevel', [level.levelNumber, selectedPeriodNameId])
         if (cardData.success) {
           levelsData.push(cardData.data)
         } else {
@@ -87,8 +84,7 @@ async function showRooms() {
 
 async function miscExpenses() {
   try {
-    const expensess = await caller('getMiscExpensesForBillingPeriodName', [window.selectedPeriodNameId]);
-    const expenses = await expensess.json()
+    const expenses = await caller('getMiscExpensesForBillingPeriodName', [window.selectedPeriodNameId]);
     if (expenses.success) {
       displayExpenses(expenses.data);
     } else {
@@ -102,8 +98,7 @@ async function miscExpenses() {
 
 async function uncollectedMoneys() {
   try {
-    const moneyss = await caller('getOnlyTenantsWithOwingAmt', [window.selectedPeriodNameId]);
-    const moneys = await moneyss.json()
+    const moneys = await caller('getOnlyTenantsWithOwingAmt', [window.selectedPeriodNameId]);
     if (moneys.success) {
       displayMoneys(moneys.data);
     } else {
@@ -117,8 +112,7 @@ async function uncollectedMoneys() {
 
 async function collectedMoneys() {
   try {
-    const moneyss = await caller('getTransactionsByPeriodNameIdWithMetaData', [selectedPeriodNameId]);
-    const moneys = await moneyss.json()
+    const moneys = await caller('getTransactionsByPeriodNameIdWithMetaData', [selectedPeriodNameId]);
     if (moneys.success) {
       displayPayments(moneys.data);
     } else {
@@ -132,8 +126,7 @@ async function collectedMoneys() {
 
 async function olderTenants() {
   try {
-    const olderss = await caller('getOlderTenantsThan', [selectedPeriodNameId]);
-    const olders = await olderss.json()
+    const olders = await caller('getOlderTenantsThan', [selectedPeriodNameId]);
     if (olders.success) {
       displayOlders(olders.data);
     } else {
@@ -188,8 +181,7 @@ function displayRooms(levelsData) {
       }
       occupancyContainer.addEventListener("click", async () => {
         try {
-          const tenantss = await caller('getTenantsAndOwingAmtByRoom', [room.roomId, selectedPeriodNameId]);
-          const tenants = await tenantss.json()
+          const tenants = await caller('getTenantsAndOwingAmtByRoom', [room.roomId, selectedPeriodNameId]);
           if (tenants.success) {
             showTenantsPopUp(tenants.data, room.roomName);
           } else {

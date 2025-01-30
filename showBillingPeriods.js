@@ -4,8 +4,7 @@ import { caller } from "./caller.js";
 
 export async function showBillingPeriods() {
   try {
-    const periodNamess = await caller('getBillingPeriodNames');
-    const periodNames = await periodNamess.json()
+    const periodNames = await caller('getBillingPeriodNames');
     if (!periodNames.success) return showToast(periodNames.error);
     window.dashboardContainer.innerHTML = '';
 
@@ -124,8 +123,7 @@ export async function saveNewRow(row) {
   };
 
   try {
-    const savin = await caller('createBillingPeriodName', [newData]);
-    const saving = await savin.json()
+    const saving = await caller('createBillingPeriodName', [newData]);
     if (saving.success) {
       showToast('Billing period created');
 
@@ -186,8 +184,7 @@ export async function saveRow(periodId, row) {
   };
 
   try {
-    const savin = await caller('updateBillingPeriodName', [periodId, updatedData]);
-    const saving = await savin.json()
+    const saving = await caller('updateBillingPeriodName', [periodId, updatedData]);
     if (saving.success) {
       showToast('Billing period updated');
 
@@ -214,8 +211,7 @@ export async function saveRow(periodId, row) {
 
 export async function deleteRow(periodId, item) {
   try {
-    const savin = await caller('updateBillingPeriodName', [periodId, { deleted: true }]);
-    const saving = await savin.json()
+    const saving = await caller('updateBillingPeriodName', [periodId, { deleted: true }]);
     if (saving.success) {
       showToast('Billing period deleted');
       item.remove();

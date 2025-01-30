@@ -65,8 +65,7 @@ document.body.appendChild(cardContainer);
 
 async function showSemesters(navbar) {
   try {
-    const periodNamess = await caller('getBillingPeriodNames');
-    const periodNames = await periodNamess.json()
+    const periodNames = await caller('getBillingPeriodNames');
     const semesterDropdown = document.createElement("select");
     semesterDropdown.className = "semester-dropdown";
 
