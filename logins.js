@@ -56,6 +56,7 @@ async function showLoginPrompt() {
           loginContainer.remove();
           window.dashboardContainer = document.createElement('div')
           document.body.appendChild(dashboardContainer)
+          delete response.data[0].password
           window.user = response.data[0]
           showDashboard()
         } else {
