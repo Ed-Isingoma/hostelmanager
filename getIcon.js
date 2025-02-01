@@ -15,6 +15,7 @@ export function getIcon(iconName) {
 }
 
 export function formatNumber(num) {
+  if (num == null) return '##'
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
@@ -41,7 +42,7 @@ export function showTenantsPopUp(tenants, roomName) {
 
     const owingAmount = document.createElement('div');
     owingAmount.classList.add('tenant-owing-amount');
-    owingAmount.innerHTML = `Owing: UGX${tenant.owingAmount.toFixed(2)}`;
+    owingAmount.innerHTML = `Owing: UGX ${tenant.owingAmount}`;
 
     const gender = document.createElement('div');
     gender.classList.add('tenant-gender');

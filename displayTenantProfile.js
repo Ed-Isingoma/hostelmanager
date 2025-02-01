@@ -432,7 +432,7 @@ export function displayTenantProfile(profile, formContent) {
       label2.textContent = "Date of payment"
       const input2 = document.createElement("input");
       input2.type = "date"
-      input2.value = transaction.date
+      input2.value = new Date(transaction.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
       input2.disabled = true
 
       transactionDiv.appendChild(label2)

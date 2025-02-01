@@ -50,7 +50,7 @@ async function showLoginPrompt() {
     if (username && password) {
       try {
         const response = await caller('login', [username, password]);
-        console.log(response)
+        // console.log(response)
         if (response.success && response.data.length > 0) {
           showToast("Login successful");
           loginContainer.remove();

@@ -47,11 +47,22 @@ function convertKeysToCamelCase(array) {
     let newObj = {};
     for (let key in obj) {
       let newKey = keyMappings[key.toLowerCase()] || toCamelCase(key);
-      newObj[newKey] = obj[key];
+      let value = obj[key];
+
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        value = convertKeysToCamelCase([value])[0]; // Convert nested object
+      } else if (Array.isArray(value)) {
+        value = value.map(item => 
+          typeof item === 'object' && item !== null ? convertKeysToCamelCase([item])[0] : item
+        );
+      }
+
+      newObj[newKey] = value;
     }
     return newObj;
   });
 }
+
 
 export async function caller(funcName, params = []) {
   const endpoint = import.meta.env.VITE_API_ENDPOINT;

@@ -53,7 +53,6 @@ async function showUserAccounts(formContent) {
   try {
     // Fetch accounts
     const accounts = await caller('getAccountsDeadAndLiving');
-    console.log('Fetched Accounts:', accounts);  // Check if we got a valid response
 
     if (!accounts.success) {
       showToast(accounts.error);

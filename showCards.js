@@ -315,7 +315,7 @@ function displayPayments(moneysData) {
     moneysData.forEach(money => {
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td>${money.date}</td>
+        <td>${new Date(money.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
         <td>${formatNumber(money.amount)}</td>
         <td>${money.tenantName}</td>
         <td>${money.roomName}</td>
@@ -403,7 +403,7 @@ function displayMoneys(moneysData) {
         <td>${formatNumber(money.owingAmount)}</td>
         <td class=${money.demandNoticeDate && new Date(money.demandNoticeDate).setHours(0, 0, 0, 0) == globalNow ? 'orangebg': ''}>${money.demandNoticeDate || '<i>unset</i>'}</td>
         <td>${money.paysMonthly || '<i>unset</i>'}</td>
-        <td>${money.date}</td>
+        <td>${new Date(money.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
         <td>${formatNumber(money.agreedPrice)}</td>
         <td>${money.ownContact}</td>
       `;
@@ -451,7 +451,7 @@ function displayExpenses(expensesData) {
     expensesData.forEach(expense => {
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td>${expense.date}</td>
+        <td>${new Date(expense.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
         <td>${expense.description}</td>
         <td>${expense.quantity}</td>
         <td>${formatNumber(expense.amount)}</td>
