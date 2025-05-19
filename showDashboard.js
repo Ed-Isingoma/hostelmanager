@@ -150,7 +150,7 @@ export function updateCardNumbers() {
   const cards = document.querySelectorAll(".dash-card");
   for (let card of cards) {
     const titleDiv = card.querySelector(".dash-card-title");
-    if (titleDiv && titleDiv.textContent === "Number of Tenants") {
+    if (titleDiv && titleDiv.textContent === "Number of Present Tenants") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
         numberDiv.textContent = formatNumber(Number(window.totals.totalTenants)) 
