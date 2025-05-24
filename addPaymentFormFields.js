@@ -325,13 +325,16 @@ export async function addPaymentFormFields(formContent) {
 
         if (transResp.success) {
           showToast('Transaction added successfully');
-
-          // const receipt = await caller('sendReceipt', [transResp.data])
-          // if (!receipt.success) showToast(receipt.error)
-          
+          closeForm();
           await doTotals()
           updateCardNumbers()
-          closeForm();
+          
+          // here in front-end so that user can get notified if receipt is not sent
+          const receipt = await caller('sendReceipt', [transResp.data[0].transactionId])
+          // console.log('the receipt saga:', receipt)
+          if (!receipt.success) console.log(receipt.error)
+          showToast(receipt.error || receipt.data)
+          
         } else {
           if (!Object.keys(chosenBillingPeriod).length) {
             await caller('updateBillingPeriod', [selectedPeriodId, {deleted: true}])

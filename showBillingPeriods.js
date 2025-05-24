@@ -40,8 +40,8 @@ export async function showBillingPeriods() {
 
         row.innerHTML = `
             <td><input type="text" value="${period.name}" disabled /></td>
-            <td><input type="date" value="${period.startingDate.split('T')[0]}" disabled /></td>
-            <td><input type="date" value="${period.endDate.split('T')[0]}" disabled /></td>
+            <td><input type="date" value="${period.startingDate}" disabled /></td>
+            <td><input type="date" value="${period.endDate}" disabled /></td>
             <td><input type="number" value="${period.costSingle}" disabled /></td>
             <td><input type="number" value="${period.costDouble}" disabled /></td>
             <td>

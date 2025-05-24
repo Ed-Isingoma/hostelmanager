@@ -84,12 +84,12 @@ async function showSemesters(navbar) {
         semesterDropdown.value = currentPeriodName.periodNameId;
         window.selectedPeriodNameId = currentPeriodName.periodNameId
         window.selectedPeriodNameName = currentPeriodName.name
-        window.globalNow = now >= new Date(currentPeriodName.endDate).setHours(0, 0, 0, 0) ? now : new Date(currentPeriodName.endDate).setHours(0, 0, 0, 0)
+        window.globalNow = now >= new Date(currentPeriodName.endDate) ? now : new Date(currentPeriodName.endDate)
       } else {
         window.selectedPeriodNameId = semesterDropdown.value
         const selectedOption = semesterDropdown.options[semesterDropdown.selectedIndex];
         window.selectedPeriodNameName = selectedOption.text
-        window.globalNow = new Date(selectedOption.dataset.endDate).setHours(0, 0, 0, 0)
+        window.globalNow = new Date(selectedOption.dataset.endDate)
       }
     } else {
       semesterDropdown.value = selectedPeriodNameId
@@ -104,7 +104,7 @@ async function showSemesters(navbar) {
 
       const selectedOption = semesterDropdown.options[semesterDropdown.selectedIndex];
       window.selectedPeriodNameName = selectedOption.text
-      window.globalNow = new Date(selectedOption.dataset.endDate).setHours(0, 0, 0, 0)
+      window.globalNow = new Date(selectedOption.dataset.endDate)
 
       await doTotals()
       updateCardNumbers()

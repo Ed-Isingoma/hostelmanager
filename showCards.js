@@ -402,8 +402,8 @@ function displayMoneys(moneysData) {
   } else {
   
     moneysData.sort((a, b) => {
-      const dateA = a.demandNoticeDate ? new Date(a.demandNoticeDate).setHours(0, 0, 0, 0) : null;
-      const dateB = b.demandNoticeDate ? new Date(b.demandNoticeDate).setHours(0, 0, 0, 0) : null;
+      const dateA = a.demandNoticeDate ? new Date(a.demandNoticeDate) : null;
+      const dateB = b.demandNoticeDate ? new Date(b.demandNoticeDate) : null;
   
       if (dateA === dateB) return 0;
       if (dateA === null) return 1; // Null values go to the end
@@ -424,7 +424,8 @@ function displayMoneys(moneysData) {
         <td>${money.roomName}</td>
         <td>${formatNumber(money.agreedPrice - money.owingAmount)}</td>
         <td>${formatNumber(money.owingAmount)}</td>
-        <td class=${money.demandNoticeDate && new Date(money.demandNoticeDate).setHours(0, 0, 0, 0) == globalNow ? 'orangebg': ''}>${formatDate(money.demandNoticeDate) || '<i>unset</i>'}</td>
+        <td class=${money.demandNoticeDate && new Date(money.demandNoticeDate) == globalNow ?
+           'orangebg': ''}>${formatDate(money.demandNoticeDate) || '<i>unset</i>'}</td>
         <td>${money.paysMonthly || '<i>unset</i>'}</td>
         <td>${formatDate(money.lastPaymentDate) || '<i>N/A</i>'}</td>
         <td>${formatNumber(money.agreedPrice)}</td>
