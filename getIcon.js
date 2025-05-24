@@ -50,7 +50,7 @@ export function showTenantsPopUp(tenants, roomName) {
 
     const paysMonthly = document.createElement('div')
     paysMonthly.classList.add('tenant-pays-monthly')
-    paysMonthly.innerHTML = `Pays Monthly: ${tenant.paysMonthly ? 'Yes' : 'No'}`
+    paysMonthly.innerHTML = `Pays Monthly: ${tenant.paysMonthly}`
 
     tenantBox.appendChild(tenantName);
     tenantBox.appendChild(owingAmount);
@@ -105,7 +105,7 @@ export async function doTotals() {
   }
 }
 
-export async function approveAccount(accountId, e, approveButton) {
+export async function approveAccount(accountId, e, approveButton, approvalStatus) {
   e.preventDefault();
   try {
     const saving = await caller('updateAccount', [accountId, { approved: true }]);
@@ -113,6 +113,7 @@ export async function approveAccount(accountId, e, approveButton) {
       showToast(saving.error);
       return;
     }
+    approvalStatus.textContent = 'Approved: Yes'
     approveButton.disabled = true;
   } catch (e) {
     console.log(e);
@@ -138,16 +139,21 @@ export async function deleteAccount(accountId, e, accountItem) {
 }
 
 export function formatDateRange(rec) {
-  const formatDate = (dateString) => {
-    const [year, month, day] = dateString.split("-");
-    return `${day}/${month}/${year}`;
-  };
-
   const startingDate = formatDate(rec.ownStartingDate);
   const endDate = formatDate(rec.ownEndDate);
 
   return `${startingDate} - ${endDate}`;
 }
+
+export const formatDate = (dateString) => {
+  if (!dateString) return
+  const date = new Date(dateString);
+  date.setHours(date.getHours() + 3);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
 export function assignPeriodNameId(dateStr) {
   semesters.sort((a, b) => new Date(a.startingDate) - new Date(b.startingDate));
@@ -172,5 +178,65 @@ export function assignPeriodNameId(dateStr) {
 window.closeForm = function () {
   document.querySelector(".overlay")?.remove();
   document.querySelector(".modal-form")?.remove();
+};
+
+export function createLoader() {
+  if (!document.getElementById('loader-styles')) {
+    const css = `
+      .loader {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        filter: drop-shadow(0 0 2px red);
+      }
+      .loader span {
+        display: block;
+        width: 12px;
+        height: 12px;
+        margin: 0 4px;
+        border-radius: 50%;
+        background: currentColor;
+        opacity: 0.3;
+        animation: pulse 1s infinite ease-in-out;
+      }
+      .loader span:nth-child(2) { animation-delay: 0.2s; }
+      .loader span:nth-child(3) { animation-delay: 0.4s; }
+      @keyframes pulse {
+        0%,100% { opacity: 0.3 }
+        50%     { opacity: 1   }
+      }
+    `;
+    const style = document.createElement('style');
+    style.id = 'loader-styles';
+    style.textContent = css;
+    document.head.appendChild(style);
+  }
+
+  const loader = document.createElement('div');
+  loader.className = 'loader';
+  for (let i = 0; i < 3; i++) {
+    loader.appendChild(document.createElement('span'));
+  }
+  return loader;
+}
+export const loadWholeScreen = () => {
+
+  const overlay = document.createElement('div');
+  overlay.style.position = 'absolute';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.background = 'rgba(255, 255, 255, 0.3)';
+  overlay.style.zIndex = '999';
+  overlay.style.display = 'flex';
+  overlay.style.justifyContent = 'center';
+  overlay.style.alignItems = 'center';
+  overlay.className = "whiteover"
+
+  const loader = createLoader();
+  overlay.appendChild(loader);
+  dashboardContainer.appendChild(overlay);
 };
 

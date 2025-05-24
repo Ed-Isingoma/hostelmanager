@@ -172,9 +172,9 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-    z-index: 1000; /* Bring it to the front of everything, including dash-head */
-    display: none; /* Hidden by default */
+    background: rgba(0, 0, 0, 0.5); 
+    z-index: 10; 
+    display: none; 
     justify-content: center;
     align-items: center;
 }

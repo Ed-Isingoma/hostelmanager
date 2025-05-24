@@ -1,12 +1,19 @@
 import showDashboard from "./showDashboard.js";
 import showToast from "./showToast.js";
 import { caller } from "./caller.js";
+import { createLoader } from "./getIcon.js";
 
 export async function showBillingPeriods() {
   try {
-    const periodNames = await caller('getBillingPeriodNames');
-    if (!periodNames.success) return showToast(periodNames.error);
     window.dashboardContainer.innerHTML = '';
+    const semsLoader = createLoader()
+    dashboardContainer.appendChild(semsLoader)
+    const periodNames = await caller('getBillingPeriodNames');
+    if (!periodNames.success) {
+      dashboardContainer.removeChild(semsLoader)
+      showDashboard()
+      return showToast(periodNames.error);
+    }
 
     const table = document.createElement('table');
     table.className = 'modal-show-table';
@@ -30,10 +37,11 @@ export async function showBillingPeriods() {
     } else {
       periodNames.data.forEach(period => {
         const row = document.createElement('tr');
+
         row.innerHTML = `
             <td><input type="text" value="${period.name}" disabled /></td>
-            <td><input type="date" value="${period.startingDate}" disabled /></td>
-            <td><input type="date" value="${period.endDate}" disabled /></td>
+            <td><input type="date" value="${period.startingDate.split('T')[0]}" disabled /></td>
+            <td><input type="date" value="${period.endDate.split('T')[0]}" disabled /></td>
             <td><input type="number" value="${period.costSingle}" disabled /></td>
             <td><input type="number" value="${period.costDouble}" disabled /></td>
             <td>
@@ -55,7 +63,12 @@ export async function showBillingPeriods() {
         editIcon.onclick = () => toggleEdit(period.periodNameId, editIcon);
 
         const deleteIcon = row.querySelector('.delete-icon');
-        deleteIcon.addEventListener('click', () => deleteRow(period.periodNameId, row));
+        deleteIcon.addEventListener('click',async () => {
+          const delLoader = createLoader()
+          table.parentNode.insertBefore(delLoader, table.nextSibling)
+          await deleteRow(period.periodNameId, row)
+          table.parentNode.removeChild(delLoader)
+        });
       });
     }
 
@@ -72,6 +85,7 @@ export async function showBillingPeriods() {
     addButton.textContent = 'Add Billing Period';
     addButton.onclick = () => addBillingPeriodRow(table);
 
+    dashboardContainer.removeChild(semsLoader)
     dashboardContainer.appendChild(table);
     dashboardContainer.appendChild(addButton);
     dashboardContainer.appendChild(backButton);
@@ -105,7 +119,12 @@ export async function addBillingPeriodRow(table) {
   table.appendChild(row);
 
   const editIcon = row.querySelector('.edit-icon');
-  editIcon.onclick = () => saveNewRow(row);
+  editIcon.onclick = async () => {
+    const adderLoader = createLoader()
+    table.parentNode.insertBefore(adderLoader, table.nextSibling)
+    await saveNewRow(row);
+    table.parentNode.removeChild(adderLoader)
+  }
 
   const deleteIcon = row.querySelector('.delete-icon');
   deleteIcon.addEventListener('click', () => row.remove());
@@ -161,7 +180,12 @@ export function toggleEdit(periodId, editIcon) {
       <path d="M21 7H3v12h18V7zm-1 10H4v-8h16v8zm-8-3v3h2v-3h3l-4-4-4 4h3z" fill="currentColor"/>
     `;
     // Set the onclick directly to call saveRow
-    editIcon.onclick = () => saveRow(periodId, row);
+    editIcon.onclick = async () => {
+      const editLoader = createLoader()
+      row.parentNode.parentNode.insertBefore(editLoader, row.parentNode.nextSibling)
+      await saveRow(periodId, row);
+      row.parentNode.parentNode.removeChild(editLoader)
+    }
   } else {
     // Revert to edit icon
     editIcon.innerHTML = `

@@ -1,4 +1,4 @@
-import { assignPeriodNameId, doTotals, formatDateRange } from "./getIcon.js";
+import { assignPeriodNameId, createLoader, doTotals, formatDateRange } from "./getIcon.js";
 import { updateCardNumbers } from "./showDashboard.js";
 import showToast from "./showToast.js";
 import { caller } from "./caller.js";
@@ -8,6 +8,7 @@ export async function addPaymentFormFields(formContent) {
     { label: "Add Transaction Date", type: "date", name: "date" },
     { label: "Received Amount", type: "number", name: "amount", placeholder: "Enter amount" }
   ];
+  const billingsLoader = createLoader()
   const contentArea = document.createElement('div')
   fields.forEach(field => {
     const label = document.createElement("label");
@@ -38,10 +39,17 @@ export async function addPaymentFormFields(formContent) {
     tenantDatalist.id = "tenants-datalist";
     contentArea.appendChild(tenantDatalist);
 
+    const searchLoader = createLoader()
     tenantInput.addEventListener("input", async () => {
-      if (tenantInput.value.split(' (')[1]) return
+      if (!tenantInput.value) return
+      if (tenantInput.value.split(' (ID')[1]) {
+        if (contentArea.contains(billingsLoader)) contentArea.removeChild(billingsLoader)
+        return readyToBill()
+      }
+      contentArea.insertBefore(searchLoader, tenantDatalist.nextSibling)
       const tenants = await caller("searchTenantNameAndId", [tenantInput.value]);
       //that split is because the option value is intertwined
+      if (contentArea.contains(searchLoader)) contentArea.removeChild(searchLoader)
       if (tenants.success) {
         tenantDatalist.innerHTML = "";
         for (let item of tenants.data) {
@@ -116,6 +124,7 @@ export async function addPaymentFormFields(formContent) {
 
     //these above and below go together if youre shifting them
     const billingDataRefresh = async () => {
+      contentArea.insertBefore(billingsLoader, subheadingPayForm)
       if (!semesterDropdown.value) return
       contentLowerArea.innerHTML = ''
       selectedPeriodId = null
@@ -140,11 +149,12 @@ export async function addPaymentFormFields(formContent) {
             ...JSON.parse(semesterDropdown.options[semesterDropdown.selectedIndex].getAttribute("isperiodid"))
           }
           selectedPeriodId = chosenBillingPeriod.periodId
+          contentArea.removeChild(billingsLoader)
           subheadingPayForm.textContent = 'Tenant data for selected billing period'
         } else {
           try {
             const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
-
+            if (!selectedTenantOption) return
             const periodTherein = await caller('getBillingPeriodBeingPaidFor', [selectedTenantOption.dataset.id, semesterDropdown.value])
 
             if (!periodTherein.success) {
@@ -159,8 +169,12 @@ export async function addPaymentFormFields(formContent) {
           } catch (e) {
             showToast(e.message);
             console.log(e);
+          } finally {
+            contentArea.removeChild(billingsLoader)
           }
         }
+      } else {
+        contentArea.removeChild(billingsLoader)
       }
 
       const roomLabel = document.createElement("label");
@@ -181,7 +195,8 @@ export async function addPaymentFormFields(formContent) {
       roomInput.value = chosenBillingPeriod['roomName'] || ''
 
       roomInput.addEventListener('input', async () => {
-        // if (roomInput.value.length == 4) return  //add this when you know the length of a room string, to prevent that extra last search on datalist select of the wanted room
+        if (roomInput.value.length === 4 || roomInput.value.length === 0) return;  //add this when you know the length 
+        // of a room string, to prevent that extra last search on datalist select of the wanted room
         const rooms = await caller('searchRoomByNamePart', [roomInput.value]);
         if (rooms.success) {
           roomDatalist.innerHTML = '';
@@ -230,14 +245,18 @@ export async function addPaymentFormFields(formContent) {
 
     semesterDropdown.addEventListener("change", billingDataRefresh);
 
-    tenantInput.addEventListener("change", async () => {
+    const readyToBill = async() => {
       Array.from(semesterDropdown.options).forEach((option) => {
         if (option.getAttribute("isperiodid")) option.remove();
       });
 
       const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
+      if (!selectedTenantOption) return
 
+      const monthliesLoader = createLoader()
+      contentArea.insertBefore(monthliesLoader, subheadingPayForm)
       const monthlies = await caller('getMonthliesFor', [selectedTenantOption.dataset.id]);
+      contentArea.removeChild(monthliesLoader)
       if (!monthlies.success) showToast('Error getting some billing periods');
 
       monthlies.data.forEach((rec) => {
@@ -251,7 +270,7 @@ export async function addPaymentFormFields(formContent) {
       if(semesterDropdown.value) {
         billingDataRefresh()
       }
-    });
+    }
 
     const submitButton = document.createElement("button");
     submitButton.type = "submit";
@@ -260,6 +279,8 @@ export async function addPaymentFormFields(formContent) {
 
     submitButton.onclick = async (event) => {
       event.preventDefault();
+      const payLoader = createLoader()
+      formContent.appendChild(payLoader)
       try {
         const dateInput = formContent.querySelector("input[name='date']").value;
         const amountInput = formContent.querySelector("input[name='amount']").value;
@@ -322,6 +343,8 @@ export async function addPaymentFormFields(formContent) {
       } catch (error) {
         console.error(error);
         showToast(error);
+      } finally {
+        formContent.removeChild(payLoader)
       }
     };
 

@@ -1,6 +1,7 @@
 import showDashboard from "./showDashboard.js";
 import showToast from "./showToast.js";
 import { caller } from "./caller.js";
+import { createLoader } from "./getIcon.js";
 
 async function showLoginPrompt() {
   const loginContainer = document.createElement("div");
@@ -46,9 +47,11 @@ async function showLoginPrompt() {
   loginButton.addEventListener("click", async () => {
     const username = usernameInput.value;
     const password = passwordInput.value;
+    const loginLoader = createLoader()
 
     if (username && password) {
       try {
+        loginButton.parentNode.insertBefore(loginLoader, loginButton.nextSibling)
         const response = await caller('login', [username, password]);
         // console.log(response)
         if (response.success && response.data.length > 0) {
@@ -59,12 +62,16 @@ async function showLoginPrompt() {
           delete response.data[0].password
           window.user = response.data[0]
           showDashboard()
-        } else {
+        } else if (response.success) {
           showToast("Invalid username or password.");
+        } else {
+          showToast("Something went wrong. Try again");
         }
       } catch (error) {
         console.error("Login failed:", error);
         showToast("An error occurred while logging in.");
+      } finally {
+        loginContainer.removeChild(loginLoader)
       }
     } else {
       showToast("Please enter both username and password.");
@@ -131,12 +138,15 @@ async function showSignupPrompt() {
     }
 
     try {
+      const accLoader = createLoader()
+      signupButton.parentNode.insertBefore(accLoader, signupButton.nextSibling);
       const response = await caller('createAccount', [username, password]);
       if (response.success) {
         showToast("Account created, pending Admin approval.");
         signupContainer.remove();
         showLoginPrompt();
       } else {
+        signupContainer.removeChild(accLoader)
         showToast(response.error);
       }
     } catch (error) {

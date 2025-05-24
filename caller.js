@@ -39,7 +39,8 @@ const keyMappings = {
   totalfreespaces: "totalFreeSpaces",
   totalpayments: "totalPayments",
   totalmisc: "totalMisc",
-  totaloutstanding: "totalOutstanding"
+  totaloutstanding: "totalOutstanding",
+  lastpaymentdate: "lastPaymentDate"
 };
 
 function convertKeysToCamelCase(array) {
@@ -83,3 +84,4 @@ export async function caller(funcName, params = []) {
   
   return result;
 }
+

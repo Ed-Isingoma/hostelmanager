@@ -1,4 +1,4 @@
-import { doTotals, formatNumber, getIcon, hideTenantsPopUp, showTenantsPopUp } from "./getIcon.js";
+import { doTotals, formatDate, formatNumber, getIcon, loadWholeScreen, showTenantsPopUp } from "./getIcon.js";
 import openForm from "./openForm.js";
 import showDashboard from "./showDashboard.js";
 import showToast from "./showToast.js";
@@ -44,8 +44,8 @@ async function showCards() {
   dashboardContainer.appendChild(cardContainer);
 }
 
-
 async function numOfTenants() {
+  loadWholeScreen()
   try {
     const tenants = await caller('getTenantsPlusOutstandingBalanceAll', [selectedPeriodNameId]);
     if (tenants.success) {
@@ -56,10 +56,14 @@ async function numOfTenants() {
   } catch (e) {
     console.log(e);
     showToast(e);
+  } finally {
+    const overl = document.querySelector(".whiteover")
+    if (dashboardContainer.contains(overl)) dashboardContainer.removeChild(overl)
   }
 }
 
 async function showRooms() {
+  loadWholeScreen()
   try {
     const levels = await caller('getLevels');
     if (levels.success) {
@@ -79,10 +83,14 @@ async function showRooms() {
   } catch (e) {
     console.log(e);
     showToast(e);
+  } finally {
+    const overl = document.querySelector(".whiteover")
+    if (dashboardContainer.contains(overl)) dashboardContainer.removeChild(overl)
   }
 }
 
 async function miscExpenses() {
+  loadWholeScreen()
   try {
     const expenses = await caller('getMiscExpensesForBillingPeriodName', [window.selectedPeriodNameId]);
     if (expenses.success) {
@@ -93,10 +101,14 @@ async function miscExpenses() {
   } catch (e) {
     console.log(e);
     showToast(e);
+  } finally {
+    const overl = document.querySelector(".whiteover")
+    if (dashboardContainer.contains(overl)) dashboardContainer.removeChild(overl)
   }
 }
 
 async function uncollectedMoneys() {
+  loadWholeScreen()
   try {
     const moneys = await caller('getOnlyTenantsWithOwingAmt', [window.selectedPeriodNameId]);
     if (moneys.success) {
@@ -107,10 +119,14 @@ async function uncollectedMoneys() {
   } catch (e) {
     console.log(e);
     showToast(e);
+  } finally {
+    const overl = document.querySelector(".whiteover")
+    if (dashboardContainer.contains(overl)) dashboardContainer.removeChild(overl)
   }
 }
 
 async function collectedMoneys() {
+  loadWholeScreen()
   try {
     const moneys = await caller('getTransactionsByPeriodNameIdWithMetaData', [selectedPeriodNameId]);
     if (moneys.success) {
@@ -121,10 +137,14 @@ async function collectedMoneys() {
   } catch (e) {
     console.log(e);
     showToast(e);
+  } finally {
+    const overl = document.querySelector(".whiteover")
+    if (dashboardContainer.contains(overl)) dashboardContainer.removeChild(overl)
   }
 }
 
 async function olderTenants() {
+  loadWholeScreen()
   try {
     const olders = await caller('getOlderTenantsThan', [selectedPeriodNameId]);
     if (olders.success) {
@@ -135,11 +155,14 @@ async function olderTenants() {
   } catch (e) {
     console.log(e);
     showToast(e);
+  } finally {
+    const overl = document.querySelector(".whiteover")
+    if (dashboardContainer.contains(overl)) dashboardContainer.removeChild(overl)
   }
 }
 
 function displayRooms(levelsData) {
-  window.dashboardContainer.innerHTML = '';
+  dashboardContainer.innerHTML = '';
 
   const container = document.createElement('div');
   container.classList.add('rooms-levels-container');
@@ -214,7 +237,7 @@ function displayRooms(levelsData) {
 }
 
 function displayTenants(tenantsData) {
-  window.dashboardContainer.innerHTML = '';
+  dashboardContainer.innerHTML = '';
 
   const subHeading = document.createElement("h3");
   subHeading.textContent = "Tenants for billing period: " + selectedPeriodNameName;
@@ -251,7 +274,7 @@ function displayTenants(tenantsData) {
       <td>${tenant.name}</td>
       <td>${tenant.gender.charAt(0).toUpperCase() + tenant.gender.slice(1).toLowerCase()}</td>
       <td>${tenant.roomName}</td>
-      <td>${tenant.ownContact}</td>
+      <td>${tenant.ownContact || '<i>unset</i>'}</td>
       <td>${tenant.ownEndDate ? 'Yes' : 'No'}</td>
       <td>${formatNumber(tenant.owingAmount)}</td>
       `;
@@ -401,11 +424,11 @@ function displayMoneys(moneysData) {
         <td>${money.roomName}</td>
         <td>${formatNumber(money.agreedPrice - money.owingAmount)}</td>
         <td>${formatNumber(money.owingAmount)}</td>
-        <td class=${money.demandNoticeDate && new Date(money.demandNoticeDate).setHours(0, 0, 0, 0) == globalNow ? 'orangebg': ''}>${money.demandNoticeDate || '<i>unset</i>'}</td>
+        <td class=${money.demandNoticeDate && new Date(money.demandNoticeDate).setHours(0, 0, 0, 0) == globalNow ? 'orangebg': ''}>${formatDate(money.demandNoticeDate) || '<i>unset</i>'}</td>
         <td>${money.paysMonthly || '<i>unset</i>'}</td>
-        <td>${new Date(money.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+        <td>${formatDate(money.lastPaymentDate) || '<i>N/A</i>'}</td>
         <td>${formatNumber(money.agreedPrice)}</td>
-        <td>${money.ownContact}</td>
+        <td>${money.ownContact || '<i>unset</i>'}</td>
       `;
       row.querySelector('td:nth-of-type(1)').onclick = () => openForm(`tenant-${money.tenantId}-${money.name}`);
       table.appendChild(row);
@@ -452,7 +475,7 @@ function displayExpenses(expensesData) {
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${new Date(expense.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
-        <td>${expense.description}</td>
+        <td>${expense.description || '<i>unset</i>'}</td>
         <td>${expense.quantity}</td>
         <td>${formatNumber(expense.amount)}</td>
         <td>${expense.operatorName}</td>
@@ -511,11 +534,11 @@ function displayOlders(oldersData) {
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${older.name}</td>
-        <td>${older.gender}</td>
+        <td>${older.gender.charAt(0).toUpperCase() + older.gender.slice(1).toLowerCase()}</td>
         <td>${older.lastSeen}</td>
         <td>${older.roomName}</td>
         <td>${older.paysMonthly}</td>
-        <td>${older.ownContact}</td>
+        <td>${older.ownContact || '<i>unset</i>'}</td>
         <td>${formatNumber(older.owingAmount)}</td>
       `;
       row.querySelector('td:nth-of-type(1)').onclick = () => openForm(`tenant-${older.tenantId}-${older.tenantName}`);

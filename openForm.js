@@ -1,10 +1,10 @@
 import { addPaymentFormFields } from './addPaymentFormFields.js';
 import { displayTenantProfile } from './displayTenantProfile.js';
-import { approveAccount, assignPeriodNameId, deleteAccount, doTotals } from './getIcon.js';
+import { approveAccount, assignPeriodNameId, createLoader, deleteAccount, doTotals } from './getIcon.js';
 import { showLoginPrompt } from './logins.js';
 import { showBillingPeriods } from './showBillingPeriods.js';
 import { miscExpenses } from './showCards.js';
-import { updateCardNumbers } from './showDashboard.js';
+import showDashboard, { updateCardNumbers } from './showDashboard.js';
 import showToast from './showToast.js'
 import { caller } from "./caller.js";
 
@@ -51,26 +51,21 @@ export default function openForm(title) {
 
 async function showUserAccounts(formContent) {
   try {
-    // Fetch accounts
+    const formLoader = createLoader()
+    formContent.appendChild(formLoader)
     const accounts = await caller('getAccountsDeadAndLiving');
 
     if (!accounts.success) {
       showToast(accounts.error);
       return;
     }
+    formContent.innerHTML = ''
 
-    // Clear existing accounts if the container already exists
-    let accountsListContainer = formContent.querySelector('.accounts-list');
-    if (!accountsListContainer) {
-      accountsListContainer = document.createElement('div');
-      accountsListContainer.className = 'accounts-list';
-      formContent.appendChild(accountsListContainer);
-    } else {
-      accountsListContainer.innerHTML = ''; // Clear existing content
-    }
+    const accountsListContainer = document.createElement('div');
+    accountsListContainer.className = 'accounts-list';
+    formContent.appendChild(accountsListContainer);
 
-    // Handle empty data
-    if (!accounts.data || accounts.data.length === 0) {
+    if (accounts.data.length <= 1) {
       console.log('No accounts found.');
       const emptyMessage = document.createElement('div');
       emptyMessage.textContent = 'No accounts found.';
@@ -100,12 +95,21 @@ async function showUserAccounts(formContent) {
       approveButton.className = 'approve-button';
       approveButton.textContent = 'Approve';
       approveButton.disabled = account.approved;
-      approveButton.onclick = async (event) => await approveAccount(account.accountId, event, approveButton);
+      const itemLoader = createLoader()
+      approveButton.onclick = async (event) => {
+        accountItem.appendChild(itemLoader)
+        await approveAccount(account.accountId, event, approveButton, approvalStatus);
+        accountItem.removeChild(itemLoader)
+      }
 
       const deleteButton = document.createElement('button');
       deleteButton.className = 'delete-button';
       deleteButton.textContent = 'Delete';
-      deleteButton.onclick = async (event) => await deleteAccount(account.accountId, event, accountItem);
+      deleteButton.onclick = async (event) => {
+        accountItem.appendChild(itemLoader)
+        await deleteAccount(account.accountId, event, accountItem);
+        accountItem.removeChild(itemLoader)
+      }
 
       // Append elements to the account item
       accountItem.appendChild(accountName);
@@ -121,8 +125,6 @@ async function showUserAccounts(formContent) {
     showToast(e);
   }
 }
-
-
 
 async function addTenantFormFields(formContent) {
   try {
@@ -238,10 +240,15 @@ async function addTenantFormFields(formContent) {
     const roomDatalist = document.createElement('datalist')
     roomDatalist.id = 'room-datalist'
     formContent.appendChild(roomDatalist)
+    const roomerLoader = createLoader()
 
     roomInput.addEventListener('input', async () => {
-      // if (roomInput.value.length == 4) return  //add this when you know the length of a room string, to prevent that extra last search on datalist select of the wanted room
+      if (formContent.contains(roomerLoader)) formContent.removeChild(roomerLoader)
+      if (roomInput.value.length === 4 || roomInput.value.length === 0) return;  //add this when you know the length of
+      //  a room string, to prevent that extra last search on datalist select of the wanted room
+      formContent.insertBefore(roomerLoader, roomDatalist.nextSibling)
       const rooms = await caller('searchRoomByNamePart', [roomInput.value])
+      formContent.removeChild(roomerLoader)
       if (rooms.success) {
         roomDatalist.innerHTML = ''
         for (let item of rooms.data) {
@@ -296,7 +303,8 @@ async function addTenantFormFields(formContent) {
 
     submitButton.onclick = async (event) => {
       event.preventDefault();
-
+      const submLoader = createLoader()
+      formContent.appendChild(submLoader)
       const tenantData = {};
       fields.forEach(field => {
         const input = formContent.querySelector(`[name="${field.name}"]`);
@@ -304,14 +312,23 @@ async function addTenantFormFields(formContent) {
       });
 
       if (!tenantData.name) {
+        formContent.removeChild(submLoader)
         return showToast("Tenant name is required.");
       }
 
-      const tenantResult = await caller('createTenant', [tenantData]);
-      if (!tenantResult.success) return showToast(tenantResult.error);
+      if (semesterDropdown.value == "custom" && (!startDateInput.value || !endDateInput.value)) {
+        formContent.removeChild(submLoader)
+        return showToast("Custom dates both required for selected billing period")
+      }
 
-      const tenantId = tenantResult.data;
-      console.log("created tenantId:", tenantId);
+      const tenantResult = await caller('createTenant', [tenantData]);
+      if (!tenantResult.success) {
+        formContent.removeChild(submLoader)
+        return showToast(tenantResult.error);
+      }
+
+      const tenantId = tenantResult.data[0].tenantId;
+
       const selectedRoomOption = Array.from(roomDatalist.options).find(
         (option) => option.value === roomInput.value
       );
@@ -319,12 +336,12 @@ async function addTenantFormFields(formContent) {
       const thePeriodNameId = semesterDropdown.value == 'custom' ? assignPeriodNameId(endDateInput.value) || currentPeriodNameId : semesterDropdown.value
 
       const billingPeriodData = {
-        startingDate: semesterDropdown.value === "custom" ? startDateInput.value : null,
-        endingDate: semesterDropdown.value === "custom" ? endDateInput.value : null,
+        ownStartingDate: semesterDropdown.value === "custom" ? startDateInput.value : null,
+        ownEndDate: semesterDropdown.value === "custom" ? endDateInput.value : null,
         periodType: periodTypeDropdown.value,
         agreedPrice: parseInt(agreedPriceInput.value || 0, 10),
       };
-
+      
       const billingResult = await caller('createBillingPeriod', [billingPeriodData, thePeriodNameId, selectedRoomOption.dataset.id, tenantId]);
 
       if (!billingResult.success) {
@@ -333,6 +350,7 @@ async function addTenantFormFields(formContent) {
           const input = formContent.querySelector(`[name="${field.name}"]`);
           input.value = tenantData[field.name]
         });
+        formContent.removeChild(submLoader)
         return showToast(billingResult.error);
       } else {
         showToast('New tenant added')
@@ -371,11 +389,13 @@ async function addTenantSearch(formContent) {
     const tenantDatalist = document.createElement("datalist");
     tenantDatalist.id = "tenants-datalist";
     formContent.appendChild(tenantDatalist);
-
+    const searchLoader = createLoader()
     tenantInput.addEventListener("input", async () => {
-      if (tenantInput.value.split(' (')[1]) return
+      if (tenantInput.value.split(' (')[1] || !tenantInput.value) return
+      formContent.insertBefore(searchLoader, tenantDatalist.nextSibling)
       const tenants = await caller("searchTenantNameAndId", [tenantInput.value]);
       //that split is because the option value is intertwined
+      if (formContent.contains(searchLoader)) formContent.removeChild(searchLoader)
       if (tenants.success) {
         tenantDatalist.innerHTML = "";
         for (let item of tenants.data) {
@@ -387,16 +407,19 @@ async function addTenantSearch(formContent) {
       } else showToast(tenants.error);
     });
 
-    tenantInput.addEventListener("change", async () => {
-      const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
-      if (selectedTenantOption) {
-        closeForm()
-        openForm(`tenant-${selectedTenantOption.dataset.id}-${selectedTenantOption.value.split(' (')[0]}`)
+    tenantInput.addEventListener("keydown", async (e) => {
+      if (e.key === "Enter") {
+        const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
+        if (selectedTenantOption) {
+          closeForm()
+          openForm(`tenant-${selectedTenantOption.dataset.id}-${selectedTenantOption.value.split(' (')[0]}`)
+        }
       }
     });
 
     const backButton = document.createElement('button');
     backButton.className = 'modal-show-back';
+    backButton.type = 'button';
     backButton.innerText = 'Back';
     backButton.onclick = (event) => {
       event.preventDefault()
@@ -413,11 +436,15 @@ async function addTenantSearch(formContent) {
 
 async function showTenant(formContent, splicedTitle) {
   try {
+    const tenLoader = createLoader()
+    formContent.appendChild(tenLoader)
     const profile = await caller('getFullTenantProfile', [splicedTitle[1]])
     if (!profile.success) {
       showToast(profile.error)
-      return
+      formContent.removeChild(tenLoader)
+      return showDashboard()
     }
+
     const transformedProfile = {
       tenantId: profile.data.tenantId,
       name: profile.data.name,
@@ -429,6 +456,8 @@ async function showTenant(formContent, splicedTitle) {
       "Next of Kin Contact": profile.data.kinContact,
       billingPeriods: profile.data.billingPeriods
     };
+    formContent.removeChild(tenLoader)
+
     displayTenantProfile(transformedProfile, formContent)
   } catch (e) {
     console.log('Error displaying tenant:', e);
@@ -481,6 +510,8 @@ function addMiscsFormFields(formContent) {
   submitButton.textContent = "Submit";
 
   submitButton.onclick = async (event) => {
+    const miscsLoader = createLoader()
+    formContent.appendChild(miscsLoader)
     event.preventDefault()
     const formData = {}
     fields.forEach(field => {
@@ -495,10 +526,12 @@ function addMiscsFormFields(formContent) {
         closeForm()
         miscExpenses()
       } else {
+        formContent.removeChild(miscsLoader)
         showToast(response.error)
       }
     } catch (error) {
       console.error(error);
+      formContent.removeChild(miscsLoader)
       showToast(error)
     }
   }

@@ -1,5 +1,5 @@
 import { showCards } from "./showCards.js";
-import { doTotals, formatNumber } from "./getIcon.js";
+import { createLoader, doTotals, formatNumber } from "./getIcon.js";
 import openForm from "./openForm.js";
 import showToast from "./showToast.js";
 import { caller } from "./caller.js";
@@ -7,12 +7,15 @@ import { caller } from "./caller.js";
 export default async function showDashboard() {
   const header = document.createElement("h2");
   header.className = 'dashboard-head moving-text';
-  header.textContent = "Kann Hostel Management";
+  header.textContent = "K Hl Management";
   dashboardContainer.appendChild(header);
 
+  const navLoader = createLoader()
+  dashboardContainer.appendChild(navLoader)
+  
   const navbar = document.createElement("nav");
   navbar.className = "navbar";
-  
+
   /* ...........................................................................20th ..............*/
   const menuItems = [
     { text: "Users", icon: "fas fa-users" },
@@ -22,41 +25,41 @@ export default async function showDashboard() {
     { text: "Billing Periods", icon: "fas fa-calendar" },
     { text: "Log Out", icon: "fas fa-sign-out-alt" },
   ];
-  
+
   if (user.role !== "admin") menuItems.shift();
-  
+
   menuItems.forEach(({ text, icon }) => {
     const menuOption = document.createElement("button");
     menuOption.className = "menu-item";
-  
+
     const iconElement = document.createElement("i");
     iconElement.className = icon;
     menuOption.appendChild(iconElement);
-  
+
     const textElement = document.createElement("span");
     textElement.textContent = text;
     menuOption.appendChild(textElement);
-  
+
     menuOption.onclick = () => openForm(text);
     navbar.appendChild(menuOption);
   });
-  
+
   await showSemesters(navbar);
-  
+  dashboardContainer.removeChild(navLoader)
   dashboardContainer.appendChild(navbar);
-   /* ...........................................................................20th ..............*/
-  
+  /* ...........................................................................20th ..............*/
+
 
   // Create the container for cards
-const cardContainer = document.createElement("div");
-cardContainer.className = "card-container";  // Apply the class for styling
+  const cardContainer = document.createElement("div");
+  cardContainer.className = "card-container";  // Apply the class for styling
 
-// Pass the container to showCards
-await showCards(cardContainer);
+  const cardsLoader = createLoader()
+  dashboardContainer.appendChild(cardsLoader)
+  await showCards(cardContainer);
 
-// Append the container to the body (only once)
-document.body.appendChild(cardContainer);
-
+  dashboardContainer.removeChild(cardsLoader)
+  document.body.appendChild(cardContainer);
 
   const footer = document.createElement("footer");
   footer.textContent = "(c) 2024 Kann Hostel. All Rights Reserved";
@@ -65,6 +68,8 @@ document.body.appendChild(cardContainer);
 
 async function showSemesters(navbar) {
   try {
+    const loader = createLoader()
+    navbar.appendChild(loader)
     const periodNames = await caller('getBillingPeriodNames');
     const semesterDropdown = document.createElement("select");
     semesterDropdown.className = "semester-dropdown";
@@ -112,7 +117,7 @@ async function showSemesters(navbar) {
       await doTotals()
       updateCardNumbers()
     });
-
+    navbar.removeChild(loader)
     navbar.appendChild(semesterDropdown);
   } catch (e) {
     console.log(e);
@@ -130,17 +135,17 @@ function getCurrentBillingPeriodName(semesters) {
   let currentPeriodName = null;
 
   for (let i = 0; i < semesters.length; i++) {
-      const currentSemesterStart = new Date(semesters[i].startingDate);
+    const currentSemesterStart = new Date(semesters[i].startingDate);
 
-      if (currentSemesterStart <= now) {
-          const nextSemester = semesters[i + 1];
-          if (!nextSemester || new Date(nextSemester.startingDate) > now) {
-              currentPeriodName = semesters[i];
-              break;
-          }
-      } else {
-        currentPeriodName = semesters[0]
+    if (currentSemesterStart <= now) {
+      const nextSemester = semesters[i + 1];
+      if (!nextSemester || new Date(nextSemester.startingDate) > now) {
+        currentPeriodName = semesters[i];
+        break;
       }
+    } else {
+      currentPeriodName = semesters[0]
+    }
   }
 
   return currentPeriodName
@@ -153,32 +158,32 @@ export function updateCardNumbers() {
     if (titleDiv && titleDiv.textContent === "Number of Present Tenants") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
-        numberDiv.textContent = formatNumber(Number(window.totals.totalTenants)) 
+        numberDiv.textContent = formatNumber(Number(window.totals.totalTenants))
       }
     } else if (titleDiv && titleDiv.textContent === "Free Space") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
-        numberDiv.textContent = formatNumber(Number(window.totals.totalFreeSpaces)) 
+        numberDiv.textContent = formatNumber(Number(window.totals.totalFreeSpaces))
       }
     } else if (titleDiv && titleDiv.textContent === "Payments for this semester") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
-        numberDiv.textContent = formatNumber(Number(window.totals.totalPayments)) 
+        numberDiv.textContent = formatNumber(Number(window.totals.totalPayments))
       }
     } else if (titleDiv && titleDiv.textContent === "Uncollected Amount this semester") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
-        numberDiv.textContent = formatNumber(Number(window.totals.totalOutstanding)) 
+        numberDiv.textContent = formatNumber(Number(window.totals.totalOutstanding))
       }
     } else if (titleDiv && titleDiv.textContent === "Misc. Expenses for this semester") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
-        numberDiv.textContent = formatNumber(Number(window.totals.totalMisc)) 
+        numberDiv.textContent = formatNumber(Number(window.totals.totalMisc))
       }
     } else if (titleDiv && titleDiv.textContent === "Previous Semester Tenants") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
-        numberDiv.textContent = formatNumber(Number(window.totals.totalPastTenants)) 
+        numberDiv.textContent = formatNumber(Number(window.totals.totalPastTenants))
       }
     }
   }
