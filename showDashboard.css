@@ -114,12 +114,10 @@ body {
     text-transform: capitalize;
 }
 
-/* Dash Card Number - Adjust Font Size */
 .dash-card-number {
-    font-size: 2rem; /* Reduce number size slightly */
+    font-size: 2rem;
     font-weight: bold;
     color: #00796b;
-    animation: pulse 1s infinite alternate; /* Pulse animation */
 }
 
 /* Card Icon Styling */

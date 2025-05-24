@@ -435,8 +435,8 @@ async function addTenantSearch(formContent) {
 }
 
 async function showTenant(formContent, splicedTitle) {
+  const tenLoader = createLoader()
   try {
-    const tenLoader = createLoader()
     formContent.appendChild(tenLoader)
     const profile = await caller('getFullTenantProfile', [splicedTitle[1]])
     if (!profile.success) {
@@ -444,24 +444,12 @@ async function showTenant(formContent, splicedTitle) {
       formContent.removeChild(tenLoader)
       return showDashboard()
     }
-
-    const transformedProfile = {
-      tenantId: profile.data.tenantId,
-      name: profile.data.name,
-      gender: profile.data.gender,
-      Age: profile.data.age,
-      Course: profile.data.course,
-      Contact: profile.data.ownContact,
-      "Next of Kin": profile.data.nextOfKin,
-      "Next of Kin Contact": profile.data.kinContact,
-      billingPeriods: profile.data.billingPeriods
-    };
-    formContent.removeChild(tenLoader)
-
-    displayTenantProfile(transformedProfile, formContent)
+    displayTenantProfile(profile.data, formContent)
   } catch (e) {
     console.log('Error displaying tenant:', e);
     showToast(e)
+  } finally {
+    formContent.removeChild(tenLoader)
   }
 }
 

@@ -1,17 +1,15 @@
 import { showCards } from "./showCards.js";
-import { createLoader, doTotals, formatNumber } from "./getIcon.js";
+import { doTotals, formatNumber, loadWholeScreen } from "./getIcon.js";
 import openForm from "./openForm.js";
 import showToast from "./showToast.js";
 import { caller } from "./caller.js";
 
 export default async function showDashboard() {
+  loadWholeScreen()
   const header = document.createElement("h2");
   header.className = 'dashboard-head moving-text';
   header.textContent = "K Hl Management";
   dashboardContainer.appendChild(header);
-
-  const navLoader = createLoader()
-  dashboardContainer.appendChild(navLoader)
   
   const navbar = document.createElement("nav");
   navbar.className = "navbar";
@@ -45,21 +43,17 @@ export default async function showDashboard() {
   });
 
   await showSemesters(navbar);
-  dashboardContainer.removeChild(navLoader)
   dashboardContainer.appendChild(navbar);
   /* ...........................................................................20th ..............*/
 
-
   // Create the container for cards
   const cardContainer = document.createElement("div");
-  cardContainer.className = "card-container";  // Apply the class for styling
+  cardContainer.className = "card-container"; 
 
-  const cardsLoader = createLoader()
-  dashboardContainer.appendChild(cardsLoader)
   await showCards(cardContainer);
 
-  dashboardContainer.removeChild(cardsLoader)
-  document.body.appendChild(cardContainer);
+  const overl = document.querySelector(".whiteover")
+  if (dashboardContainer.contains(overl)) dashboardContainer.removeChild(overl)
 
   const footer = document.createElement("footer");
   footer.textContent = "(c) 2024 Kann Hostel. All Rights Reserved";
@@ -68,8 +62,6 @@ export default async function showDashboard() {
 
 async function showSemesters(navbar) {
   try {
-    const loader = createLoader()
-    navbar.appendChild(loader)
     const periodNames = await caller('getBillingPeriodNames');
     const semesterDropdown = document.createElement("select");
     semesterDropdown.className = "semester-dropdown";
@@ -117,7 +109,6 @@ async function showSemesters(navbar) {
       await doTotals()
       updateCardNumbers()
     });
-    navbar.removeChild(loader)
     navbar.appendChild(semesterDropdown);
   } catch (e) {
     console.log(e);
@@ -153,6 +144,7 @@ function getCurrentBillingPeriodName(semesters) {
 
 export function updateCardNumbers() {
   const cards = document.querySelectorAll(".dash-card");
+
   for (let card of cards) {
     const titleDiv = card.querySelector(".dash-card-title");
     if (titleDiv && titleDiv.textContent === "Number of Present Tenants") {
@@ -187,4 +179,11 @@ export function updateCardNumbers() {
       }
     }
   }
+
+  document.querySelectorAll('.dash-card-number').forEach(el => {
+    el.style.color = "#00796b"
+  })
+  document.querySelectorAll(".dash-card-icon svg path").forEach(el => {
+    el.setAttribute("fill", "green");
+  })
 }

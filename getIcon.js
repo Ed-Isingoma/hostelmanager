@@ -92,6 +92,12 @@ export function hideTenantsPopUp() {
 }
 
 export async function doTotals() {
+  document.querySelectorAll('.dash-card-number').forEach(el => {
+    el.style.color = "grey"
+  })
+  document.querySelectorAll(".dash-card-icon svg path").forEach(el => {
+    el.setAttribute("fill", "grey");
+  })
   try {
     const tot = await caller('dashboardTotals', [selectedPeriodNameId]);
     if (tot.success) {
@@ -229,7 +235,7 @@ export const loadWholeScreen = () => {
   overlay.style.width = '100%';
   overlay.style.height = '100%';
   overlay.style.background = 'rgba(255, 255, 255, 0.3)';
-  overlay.style.zIndex = '999';
+  overlay.style.zIndex = '98';
   overlay.style.display = 'flex';
   overlay.style.justifyContent = 'center';
   overlay.style.alignItems = 'center';
