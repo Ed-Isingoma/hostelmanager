@@ -1,4 +1,4 @@
-import { createLoader, formatDateRange } from "./getIcon.js";
+import { createLoader, formatDateForInput, formatDateRange } from "./getIcon.js";
 import showToast from "./showToast.js";
 import { caller } from "./caller.js";
 
@@ -102,10 +102,10 @@ export function displayTenantProfile(profile, formContent) {
 
     const gender = tenantDetails.querySelector('select[name="gender"]').value
     const age = parseInt(tenantDetails.querySelector('.age').value) || 0
-    const course = tenantDetails.querySelector('.course').value || null
-    const ownContact = tenantDetails.querySelector('.ownContact').value || null
-    const nextOfKin = tenantDetails.querySelector('.nextOfKin').value || null
-    const kinContact = tenantDetails.querySelector('.kinContact').value || null
+    const course = tenantDetails.querySelector('.course').value.trim() || null
+    const ownContact = tenantDetails.querySelector('.ownContact').value.trim() || null
+    const nextOfKin = tenantDetails.querySelector('.nextOfKin').value.trim() || null
+    const kinContact = tenantDetails.querySelector('.kinContact').value.trim() || null
 
     const payload = {
       gender, age, course, ownContact, nextOfKin, kinContact
@@ -248,11 +248,14 @@ function handleBillingPeriod(period) {
   periodSection.appendChild(roomDatalist);
   periodSection.appendChild(document.createElement("br"))
 
+  const roomLoader = createLoader()
   roomInput.addEventListener('input', async () => {
-    if (roomInput.value.length === 4 || roomInput.value.length === 0) return;  //add this when you know the length
+    const trimmedRoom = roomInput.value.trim()
+    if (trimmedRoom.length === 4 || trimmedRoom.length === 0) return;  //add this when you know the length
     // of a room string, to prevent that extra last search on datalist select of the wanted room
-    if (!roomInput.value) return
-    const rooms = await caller('searchRoomByNamePart', [roomInput.value]);
+    periodSection.insertBefore(roomLoader, roomDatalist.nextSibling)
+    const rooms = await caller('searchRoomByNamePart', [trimmedRoom]);
+    periodSection.removeChild(roomLoader)
     if (rooms.success) {
       const roomDatalist = document.getElementById(`room-datalist-${period.periodId}`)
       roomDatalist.innerHTML = '';
@@ -320,7 +323,7 @@ function handleBillingPeriod(period) {
 
   const startInput = document.createElement("input");
   startInput.type = "date";
-  startInput.value = period.ownStartingDate;
+  startInput.value = formatDateForInput(period.ownStartingDate);
   startInput.id = `start-input-${period.periodId}`
   startInput.disabled = true;
   startInput.style.marginBottom = "10px";
@@ -337,7 +340,7 @@ function handleBillingPeriod(period) {
 
   const endInput = document.createElement("input");
   endInput.type = "date";
-  endInput.value = period.ownEndDate;
+  endInput.value = formatDateForInput(period.ownEndDate);
   endInput.id = `end-input-${period.periodId}`
   endInput.disabled = true;
   endInput.style.marginBottom = "10px";
@@ -354,7 +357,7 @@ function handleBillingPeriod(period) {
   const demandInput = document.createElement("input");
   demandInput.type = "date";
   demandInput.id = `demand-input-${period.periodId}`
-  demandInput.value = period.demandNoticeDate
+  demandInput.value = formatDateForInput(period.demandNoticeDate)
   demandInput.disabled = true;
   demandInput.style.marginBottom = "10px";
 
@@ -367,9 +370,11 @@ function handleBillingPeriod(period) {
   const deleteButton = document.createElement("button");
   deleteButton.textContent = "Delete";
   deleteButton.style.display = "none";
+  deleteButton.style.marginLeft = "8px"
   const savePeriodButton = document.createElement("button");
   savePeriodButton.textContent = "Save";
   savePeriodButton.style.display = "none";
+  savePeriodButton.style.marginRight = "8px"
   const confirmDeleteCheckbox = document.createElement("input");
   confirmDeleteCheckbox.type = "checkbox";
   confirmDeleteCheckbox.style.display = "none";
@@ -391,14 +396,17 @@ function handleBillingPeriod(period) {
   deleteButton.onclick = async (event) => {
     event.preventDefault()
     if (deleteButton.textContent === "Confirm Delete") {
+      const delLoader = createLoader()
       try {
+        periodSection.insertBefore(delLoader, deleteButton.nextSibling)
         const resp = await caller('updateBillingPeriod', [period.periodId, { deleted: true }])
         if (!resp.success) return showToast(resp.error)
         showToast('Billing Period Deleted')
         periodSection.remove()
       } catch (e) {
+        periodSection.removeChild(delLoader)
         return showToast(e)
-      }
+      } //no 'finally' because this periodsection removes itself
     } else {
       deleteButton.style.display = "none";
       confirmDeleteCheckbox.style.display = "inline";
@@ -443,8 +451,9 @@ function handleBillingPeriod(period) {
       ownEndDate: realInputs[5] || null,
       demandNoticeDate: realInputs[6] || null
     }
-
+    const saveLoader = createLoader()
     try {
+      periodSection.insertBefore(saveLoader, deleteButton.nextSibling)
       const response = await caller('updateBillingPeriod', [period.periodId, payload])
       if (!response.success) return showToast(response.error)
 
@@ -452,6 +461,8 @@ function handleBillingPeriod(period) {
       showToast('Billing Period Updated')
     } catch (e) {
       return showToast(e)
+    } finally {
+      periodSection.removeChild(saveLoader)
     }
     editPeriodButton.style.display = "inline";
     savePeriodButton.style.display = "none";
@@ -489,7 +500,7 @@ function handleBillingPeriod(period) {
     label2.textContent = "Date of payment"
     const input2 = document.createElement("input");
     input2.type = "date"
-    input2.value = new Date(transaction.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    input2.value = formatDateForInput(transaction.date)
     input2.disabled = true
 
     transactionDiv.appendChild(label2)

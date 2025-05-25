@@ -243,11 +243,12 @@ async function addTenantFormFields(formContent) {
     const roomerLoader = createLoader()
 
     roomInput.addEventListener('input', async () => {
+      const trimmedRoom = roomInput.value.trim()
       if (formContent.contains(roomerLoader)) formContent.removeChild(roomerLoader)
-      if (roomInput.value.length === 4 || roomInput.value.length === 0) return;  //add this when you know the length of
+      if (trimmedRoom.length === 4 || trimmedRoom.length === 0) return;  //add this when you know the length of
       //  a room string, to prevent that extra last search on datalist select of the wanted room
       formContent.insertBefore(roomerLoader, roomDatalist.nextSibling)
-      const rooms = await caller('searchRoomByNamePart', [roomInput.value])
+      const rooms = await caller('searchRoomByNamePart', [trimmedRoom])
       formContent.removeChild(roomerLoader)
       if (rooms.success) {
         roomDatalist.innerHTML = ''
@@ -308,7 +309,7 @@ async function addTenantFormFields(formContent) {
       const tenantData = {};
       fields.forEach(field => {
         const input = formContent.querySelector(`[name="${field.name}"]`);
-        tenantData[field.name] = field.name === "age" ? parseInt(input.value || 0, 10) : input.value || null;
+        tenantData[field.name] = field.name === "age" ? parseInt(input.value || 0, 10) : input.value.trim() || null;
       });
 
       if (!tenantData.name) {
@@ -391,9 +392,9 @@ async function addTenantSearch(formContent) {
     formContent.appendChild(tenantDatalist);
     const searchLoader = createLoader()
     tenantInput.addEventListener("input", async () => {
-      if (tenantInput.value.split(' (')[1] || !tenantInput.value) return
+      if (tenantInput.value.trim().split(' (')[1] || !tenantInput.value.trim()) return
       formContent.insertBefore(searchLoader, tenantDatalist.nextSibling)
-      const tenants = await caller("searchTenantNameAndId", [tenantInput.value]);
+      const tenants = await caller("searchTenantNameAndId", [tenantInput.value.trim()]);
       //that split is because the option value is intertwined
       if (formContent.contains(searchLoader)) formContent.removeChild(searchLoader)
       if (tenants.success) {
@@ -409,7 +410,7 @@ async function addTenantSearch(formContent) {
 
     tenantInput.addEventListener("keydown", async (e) => {
       if (e.key === "Enter") {
-        const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
+        const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value.trim())
         if (selectedTenantOption) {
           closeForm()
           openForm(`tenant-${selectedTenantOption.dataset.id}-${selectedTenantOption.value.split(' (')[0]}`)
@@ -503,7 +504,7 @@ function addMiscsFormFields(formContent) {
     event.preventDefault()
     const formData = {}
     fields.forEach(field => {
-      formData[field.name] = formContent.querySelector(`input[name=${field.name}]`).value;
+      formData[field.name] = formContent.querySelector(`input[name=${field.name}]`).value.trim();
     });
     const sem = formContent.querySelector(`select[name=billingPeriod]`).value
 

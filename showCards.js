@@ -1,4 +1,4 @@
-import { doTotals, formatDate, formatNumber, getIcon, loadWholeScreen, showTenantsPopUp } from "./getIcon.js";
+import { doTotals, formatNumber, getIcon, loadWholeScreen, showTenantsPopUp } from "./getIcon.js";
 import openForm from "./openForm.js";
 import showDashboard from "./showDashboard.js";
 import showToast from "./showToast.js";
@@ -338,7 +338,7 @@ function displayPayments(moneysData) {
     moneysData.forEach(money => {
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td>${new Date(money.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+        <td>${new Date(money.date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
         <td>${formatNumber(money.amount)}</td>
         <td>${money.tenantName}</td>
         <td>${money.roomName}</td>
@@ -425,9 +425,11 @@ function displayMoneys(moneysData) {
         <td>${formatNumber(money.agreedPrice - money.owingAmount)}</td>
         <td>${formatNumber(money.owingAmount)}</td>
         <td class=${money.demandNoticeDate && new Date(money.demandNoticeDate) == globalNow ?
-           'orangebg': ''}>${formatDate(money.demandNoticeDate) || '<i>unset</i>'}</td>
+           'orangebg': ''}>${money.demandNoticeDate ? new Date(money.demandNoticeDate).toLocaleDateString('en-GB', 
+            { year: 'numeric', month: 'long', day: 'numeric' }) : '<i>unset</i>'}</td>
         <td>${money.paysMonthly || '<i>unset</i>'}</td>
-        <td>${formatDate(money.lastPaymentDate) || '<i>N/A</i>'}</td>
+        <td>${money.lastPaymentDate ? new Date(money.lastPaymentDate).toLocaleDateString('en-GB', 
+          { year: 'numeric', month: 'long', day: 'numeric' }) : '<i>N/A</i>'}</td>
         <td>${formatNumber(money.agreedPrice)}</td>
         <td>${money.ownContact || '<i>unset</i>'}</td>
       `;
@@ -475,7 +477,7 @@ function displayExpenses(expensesData) {
     expensesData.forEach(expense => {
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td>${new Date(expense.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+        <td>${new Date(expense.date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
         <td>${expense.description || '<i>unset</i>'}</td>
         <td>${expense.quantity}</td>
         <td>${formatNumber(expense.amount)}</td>

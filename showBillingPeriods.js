@@ -1,7 +1,7 @@
 import showDashboard from "./showDashboard.js";
 import showToast from "./showToast.js";
 import { caller } from "./caller.js";
-import { createLoader } from "./getIcon.js";
+import { createLoader, formatDateForInput } from "./getIcon.js";
 
 export async function showBillingPeriods() {
   try {
@@ -40,8 +40,8 @@ export async function showBillingPeriods() {
 
         row.innerHTML = `
             <td><input type="text" value="${period.name}" disabled /></td>
-            <td><input type="date" value="${period.startingDate}" disabled /></td>
-            <td><input type="date" value="${period.endDate}" disabled /></td>
+            <td><input type="date" value="${formatDateForInput(period.startingDate)}" disabled /></td>
+            <td><input type="date" value="${formatDateForInput(period.endDate)}" disabled /></td>
             <td><input type="number" value="${period.costSingle}" disabled /></td>
             <td><input type="number" value="${period.costDouble}" disabled /></td>
             <td>
@@ -134,7 +134,7 @@ export async function saveNewRow(row) {
   const inputs = row.querySelectorAll('input');
   console.log('the inputs:', inputs);
   const newData = {
-    name: inputs[0].value,
+    name: inputs[0].value.trim(),
     startingDate: inputs[1].value,
     endDate: inputs[2].value,
     costSingle: parseFloat(inputs[3].value),
@@ -200,7 +200,7 @@ export async function saveRow(periodId, row) {
   const inputs = row.querySelectorAll('input');
 
   const updatedData = {
-    name: inputs[0].value,
+    name: inputs[0].value.trim(),
     startingDate: inputs[1].value,
     endDate: inputs[2].value,
     costSingle: parseFloat(inputs[3].value),

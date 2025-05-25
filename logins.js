@@ -53,9 +53,7 @@ async function showLoginPrompt() {
       try {
         loginButton.parentNode.insertBefore(loginLoader, loginButton.nextSibling)
         const response = await caller('login', [username, password]);
-        // console.log(response)
         if (response.success && response.data.length > 0) {
-          showToast("Login successful");
           loginContainer.remove();
           window.dashboardContainer = document.createElement('div')
           document.body.appendChild(dashboardContainer)
@@ -123,9 +121,9 @@ async function showSignupPrompt() {
   document.body.appendChild(signupContainer);
 
   signupButton.addEventListener("click", async () => {
-    const username = usernameInput.value.trim();
-    const password = passwordInput.value.trim();
-    const confirmPassword = confirmPasswordInput.value.trim();
+    const username = usernameInput.value;
+    const password = passwordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
 
     if (!username || !password || !confirmPassword) {
       showToast("Please fill in all fields.");

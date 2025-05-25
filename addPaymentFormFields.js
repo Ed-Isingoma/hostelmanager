@@ -41,13 +41,14 @@ export async function addPaymentFormFields(formContent) {
 
     const searchLoader = createLoader()
     tenantInput.addEventListener("input", async () => {
-      if (!tenantInput.value) return
-      if (tenantInput.value.split(' (ID')[1]) {
+      const trimmed = tenantInput.value.trim()
+      if (!trimmed) return
+      if (trimmed.split(' (ID')[1]) {
         if (contentArea.contains(billingsLoader)) contentArea.removeChild(billingsLoader)
         return readyToBill()
       }
       contentArea.insertBefore(searchLoader, tenantDatalist.nextSibling)
-      const tenants = await caller("searchTenantNameAndId", [tenantInput.value]);
+      const tenants = await caller("searchTenantNameAndId", [trimmed]);
       //that split is because the option value is intertwined
       if (contentArea.contains(searchLoader)) contentArea.removeChild(searchLoader)
       if (tenants.success) {
@@ -124,6 +125,7 @@ export async function addPaymentFormFields(formContent) {
 
     //these above and below go together if youre shifting them
     const billingDataRefresh = async () => {
+      const trimInput = tenantInput.value.trim()
       contentArea.insertBefore(billingsLoader, subheadingPayForm)
       if (!semesterDropdown.value) return
       contentLowerArea.innerHTML = ''
@@ -142,7 +144,7 @@ export async function addPaymentFormFields(formContent) {
         endDateInput.style.display = "none";
       }
 
-      if (!tenantInput.value) return;
+      if (!trimInput) return;
       if (semesterDropdown.value != 'custom') {
         if (semesterDropdown.options[semesterDropdown.selectedIndex].getAttribute("isperiodid")) {
           chosenBillingPeriod = {
@@ -153,7 +155,7 @@ export async function addPaymentFormFields(formContent) {
           subheadingPayForm.textContent = 'Tenant data for selected billing period'
         } else {
           try {
-            const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
+            const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === trimInput)
             if (!selectedTenantOption) return
             const periodTherein = await caller('getBillingPeriodBeingPaidFor', [selectedTenantOption.dataset.id, semesterDropdown.value])
 
@@ -195,9 +197,10 @@ export async function addPaymentFormFields(formContent) {
       roomInput.value = chosenBillingPeriod['roomName'] || ''
 
       roomInput.addEventListener('input', async () => {
-        if (roomInput.value.length === 4 || roomInput.value.length === 0) return;  //add this when you know the length 
+        const trimRoom = roomInput.value.trim()
+        if (trimRoom.length === 4 || trimRoom.length === 0) return;  //add this when you know the length 
         // of a room string, to prevent that extra last search on datalist select of the wanted room
-        const rooms = await caller('searchRoomByNamePart', [roomInput.value]);
+        const rooms = await caller('searchRoomByNamePart', [trimRoom]);
         if (rooms.success) {
           roomDatalist.innerHTML = '';
           for (let item of rooms.data) {
@@ -250,7 +253,7 @@ export async function addPaymentFormFields(formContent) {
         if (option.getAttribute("isperiodid")) option.remove();
       });
 
-      const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
+      const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value.trim())
       if (!selectedTenantOption) return
 
       const monthliesLoader = createLoader()
@@ -296,7 +299,7 @@ export async function addPaymentFormFields(formContent) {
           const selectedRoomOption = Array.from(formContent.querySelector('#room-datalist').options).find(
             (option) => option.value === formContent.querySelector("input[name='room']").value
           );
-          const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value)
+          const selectedTenantOption = Array.from(tenantDatalist.options).find((option) => option.value === tenantInput.value.trim())
 
           const periodTypeInput = formContent.querySelector("select[name='periodType']").value
           const agreedPriceInput = formContent.querySelector("input[name='agreedPrice']").value
