@@ -10,13 +10,13 @@ async function showCards() {
     { title: "Number of Present Tenants", icon: "people", number: window.totals.totalTenants, func: numOfTenants },
     { title: "Free Space", icon: "spaceship", number: window.totals.totalFreeSpaces, func: showRooms },
     { title: "Payments for this semester", icon: "payment", number: window.totals.totalPayments, func: collectedMoneys },
-    { title: "Uncollected Amount this semester", icon: "balance", number: window.totals.totalOutstanding, func: uncollectedMoneys },
+    { title: "Uncollected For this semester", icon: "balance", number: window.totals.totalOutstanding, func: uncollectedMoneys },
     { title: "Misc. Expenses for this semester", icon: "expenses", number: window.totals.totalMisc, func: miscExpenses },
     { title: "Previous Semester Tenants", icon: "past-tenants", number: window.totals.totalPastTenants, func: olderTenants },
   ];
 
   const cardContainer = document.createElement("div");
-  cardContainer.className = "card-container";  // Updated class name here
+  cardContainer.className = "card-container";  
 
   cardData.forEach(data => {
     const card = document.createElement("div");

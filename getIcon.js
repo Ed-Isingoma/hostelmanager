@@ -4,13 +4,14 @@ import { caller } from "./caller.js";
 
 export function getIcon(iconName) {
   const icons = {
-    people: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="green" d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4zm-1.8 2c-3.31 0-6 2.69-6 6h2c0-2.21 1.79-4 4-4h4c2.21 0 4 1.79 4 4h2c0-3.31-2.69-6-6-6h-4zm7.8-4c0 2.21 1.79 4 4 4s4-1.79 4-4-1.79-4-4-4-4 1.79-4 4z"/></svg>`,
-    spaceship: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="green" d="M12 0l-6 12h4v8l-3 4h8l-3-4v-8h4l-6-12z"/></svg>`,
-    payment: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="green" d="M20 4H4c-1.1 0-2 .9-2 2v4h20V6c0-1.1-.9-2-2-2zm0 10H4c-1.1 0-2 .9-2 2v4h20v-4c0-1.1-.9-2-2-2z"/></svg>`,
-    balance: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="green" d="M12 2l-4 4h3v12h2V6h3l-4-4z"/></svg>`,
-    expenses: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="green" d="M12 3C7.58 3 4 6.58 4 11c0 4.42 3.58 8 8 8s8-3.58 8-8c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>`,
-    "past-tenants": `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="green" d="M12 4c1.66 0 2.99 1.34 2.99 3S13.66 10 12 10s-3-1.34-3-3S10.34 4 12 4zm0 4.5c.83 0 1.5-.67 1.5-1.5S12.83 5.5 12 5.5 10.5 6.17 10.5 7 11.17 8.5 12 8.5zm4 7.5h-8c-2.21 0-4 1.79-4 4h16c0-2.21-1.79-4-4-4z"/></svg>`
+    people: `<i class="fas fa-users" style="color: #2ecc71;"></i>`,
+    spaceship: `<i class="fas fa-rocket" style="color: #2ecc71;"></i>`,
+    payment: `<i class="fas fa-credit-card" style="color: #2ecc71;"></i>`,
+    balance: `<i class="fas fa-balance-scale" style="color: #2ecc71;"></i>`,
+    expenses: `<i class="fas fa-chart-pie" style="color: #2ecc71;"></i>`,
+    "past-tenants": `<i class="fas fa-user-clock" style="color: #2ecc71;"></i>`
   };
+  
   return icons[iconName] || "";
 }
 
@@ -95,8 +96,8 @@ export async function doTotals() {
   document.querySelectorAll('.dash-card-number').forEach(el => {
     el.style.color = "grey"
   })
-  document.querySelectorAll(".dash-card-icon svg path").forEach(el => {
-    el.setAttribute("fill", "grey");
+  document.querySelectorAll(".dash-card-icon i").forEach(el => {
+    el.style.color = "grey"
   })
   try {
     const tot = await caller('dashboardTotals', [selectedPeriodNameId]);

@@ -56,6 +56,7 @@ async function showLoginPrompt() {
         if (response.success && response.data.length > 0) {
           loginContainer.remove();
           window.dashboardContainer = document.createElement('div')
+          dashboardContainer.className = 'arch-container'
           document.body.appendChild(dashboardContainer)
           delete response.data[0].password
           window.user = response.data[0]

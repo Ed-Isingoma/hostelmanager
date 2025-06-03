@@ -36,7 +36,7 @@ body {
 
 /* Only for the login page */
 .login-page {
-  background-image: url('https://images.pexels.com/photos/4907189/pexels-photo-4907189.jpeg');
+  background-image: url('pexels-olly-321.jpg');
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
@@ -79,22 +79,19 @@ body {
 
 .menu-item {
   padding: 10px 15px;
-  background-color: #42a196;
-  color: white;
+  background-color: #fffec3;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.dashboard-head {
-  margin: 0;
-  font-size: 24px;
-  color: #333;
+  color: #1b5e20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .menu-item:hover {
-  background-color: #42a166;
+  background: #e8f5e9;
+  transform: translateX(3px);
 }
 
 .search-field {
@@ -105,16 +102,6 @@ body {
 
 .semester-dropdown {
   padding: 5px;
-}
-
-.navbar {
-  display: flex;
-  gap: 5px;
-  margin: 20px 0;
-  width: 100%;
-  max-width: 800px;
-  justify-content: space-between;
-  flex-wrap: wrap;
 }
 
 .overlay {
@@ -200,7 +187,7 @@ body {
 }
 
 .modal-form button:hover {
-  background-color: #368d7a;
+  background-color: #4fdfac;
 }
 
 .modal-form button:active {
@@ -307,22 +294,6 @@ body {
 }
 
 
-/* dashboard ................ */
-footer {
-  position: flex;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 20px;
-  background-color: #42a196;
-  color: white;
-  font-size: 14px;
-  text-align: center;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-
 /* Container for accounts list */
 .accounts-list {
   display: flex;
@@ -407,6 +378,10 @@ footer {
 .approve-button:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
+}
+
+.approve-button:disabled:hover {
+  background-color: #cccccc;
 }
 
 /* Responsive Design */

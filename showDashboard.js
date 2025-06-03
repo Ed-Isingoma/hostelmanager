@@ -7,8 +7,8 @@ import { caller } from "./caller.js";
 export default async function showDashboard() {
   loadWholeScreen()
   const header = document.createElement("h2");
-  header.className = 'dashboard-head moving-text';
-  header.textContent = "K Hl Management";
+  header.className = 'dashboard-head';
+  header.textContent = "Kann Hostel Management";
   dashboardContainer.appendChild(header);
   
   const navbar = document.createElement("nav");
@@ -25,6 +25,14 @@ export default async function showDashboard() {
   ];
 
   if (user.role !== "admin") menuItems.shift();
+
+  const navExpander = document.createElement('button')
+  navExpander.id = 'nav-expander'
+  navExpander.innerHTML = `<i class="fas fa-bars"></i>`
+  navExpander.onclick = () => {
+    navbar.classList.toggle("expandednav")
+  }
+  navbar.appendChild(navExpander)
 
   menuItems.forEach(({ text, icon }) => {
     const menuOption = document.createElement("button");
@@ -44,13 +52,8 @@ export default async function showDashboard() {
 
   await showSemesters(navbar);
   dashboardContainer.appendChild(navbar);
-  /* ...........................................................................20th ..............*/
 
-  // Create the container for cards
-  const cardContainer = document.createElement("div");
-  cardContainer.className = "card-container"; 
-
-  await showCards(cardContainer);
+  await showCards();
 
   const overl = document.querySelector(".whiteover")
   if (dashboardContainer.contains(overl)) dashboardContainer.removeChild(overl)
@@ -162,7 +165,7 @@ export function updateCardNumbers() {
       if (numberDiv) {
         numberDiv.textContent = formatNumber(Number(window.totals.totalPayments))
       }
-    } else if (titleDiv && titleDiv.textContent === "Uncollected Amount this semester") {
+    } else if (titleDiv && titleDiv.textContent === "Uncollected For this semester") {
       const numberDiv = card.querySelector(".dash-card-number");
       if (numberDiv) {
         numberDiv.textContent = formatNumber(Number(window.totals.totalOutstanding))
@@ -183,7 +186,7 @@ export function updateCardNumbers() {
   document.querySelectorAll('.dash-card-number').forEach(el => {
     el.style.color = "#00796b"
   })
-  document.querySelectorAll(".dash-card-icon svg path").forEach(el => {
-    el.setAttribute("fill", "green");
+  document.querySelectorAll(".dash-card-icon i").forEach(el => {
+    el.style.color = "#2ecc71"
   })
 }
