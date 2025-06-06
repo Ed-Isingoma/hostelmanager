@@ -288,7 +288,7 @@ function handleBillingPeriod(period) {
   periodSection.appendChild(document.createElement("br"))
 
   const priceLabel = document.createElement("label");
-  priceLabel.textContent = "Total Amount Payable: ";
+  priceLabel.textContent = "Full Hostel Fee: ";
   priceLabel.style.marginRight = "10px";
 
   const priceInput = document.createElement("input");

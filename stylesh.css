@@ -27,12 +27,6 @@ body {
   border-radius: 8px;
 }
 
-.content {
-  height: 150vh; /* Simulating vertical scroll with tall content */
-  background: linear-gradient(to bottom, #42a166, #f3f8ff);
-  padding: 20px;
-  color: #333;
-}
 
 /* Only for the login page */
 .login-page {
@@ -79,12 +73,13 @@ body {
 
 .menu-item {
   padding: 10px 15px;
+  display: flex;
   background-color: #fffec3;
   border: none;
+  font-weight: bold;
   border-radius: 8px;
   cursor: pointer;
-  color: #1b5e20;
-  display: flex;
+  color: #42a166;;
   align-items: center;
   gap: 10px;
 }
@@ -92,6 +87,23 @@ body {
 .menu-item:hover {
   background: #e8f5e9;
   transform: translateX(3px);
+}
+
+.table-add-button {
+  background-color: #42a196;;
+  margin-top: 10px;
+  font-weight: bold;
+  border: none;
+  margin-left: 10px;
+  border-radius: 8px;
+  padding: 10px 15px;
+  cursor: pointer;
+  color: white;
+  display: inline-block;
+}
+
+.table-add-button:hover {
+  background-color: #42a166;
 }
 
 .search-field {
@@ -102,6 +114,10 @@ body {
 
 .semester-dropdown {
   padding: 5px;
+}
+
+.navbar .semester-dropdown {
+background-color: #fffec3;
 }
 
 .overlay {
@@ -236,7 +252,7 @@ body {
 
 .login-title, .signup-title {
   font-size: 2em;
-  color: #42a166;
+  color: #42a196;
   margin-bottom: 20px;
   font-family: 'Roboto Flex', sans-serif; 
 }
@@ -276,13 +292,13 @@ body {
 }
 
 .btn:hover {
-  background-color: #42a166; /* Fully opaque on hover */
+  background-color: #42a166;
 }
 
 
 .switch-text {
   margin-top: 20px;
-  color: #42a166;
+  color: #42a196;
   font-size: 0.9em;
   cursor: pointer;
   text-decoration: underline;
@@ -301,7 +317,7 @@ body {
   gap: 1.5rem; /* Increased gap between account items */
   max-width: 600px; /* Restrict width for a compact design */
   margin: 2rem auto; /* Center container with vertical spacing */
-  padding: 1.5rem;
+  padding: 1rem;
   border: 1px solid #ddd;
   border-radius: 12px; /* Softer corner radius */
   background-color: #ffffff; /* Clean white background */
@@ -416,13 +432,13 @@ body {
 }
 
 .add-tenant-submit:hover {
-  background-color: #42a166; /* Slightly darker green for hover */
+  background-color: #42a166;
   transform: translateY(-2px); /* Lift effect on hover */
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
 }
 
 .add-tenant-submit:active {
-  background-color: #42a166; /* Active state color */
+  background-color: #42a166;
   transform: translateY(0); /* Reset lift effect */
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Reduced shadow */
 }
@@ -460,23 +476,10 @@ body {
   overflow-x: auto;
 }
 
-/* Tenant table styling */
-.modal-show-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-.modal-show-table th,
-.modal-show-table td {
+th, td {
   border: 1px solid #ddd;
   padding: 12px;
   text-align: left;
-}
-
-.modal-show-table th {
-  background-color: #f4f4f4;
-  font-weight: bold;
 }
 
 .modal-show-table tr:nth-child(even) {
@@ -495,8 +498,7 @@ body {
   background-color: #42a196;
 }
 
-.modal-show-table th,
-.modal-show-table td {
+.modal-show-table th, .modal-show-table td {
   white-space: nowrap;
 }
 
@@ -505,10 +507,11 @@ body {
   background-color: #42a196;
   color: white;
   border: none;
+  margin-top: 10px;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: normal;
+  display: inline-block;
+  font-weight: bold;
   transition: background-color 0.3s ease;
   margin-left: 50px;
 }
@@ -523,19 +526,19 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 20px; /* Added more padding around the container */
-  background-color: rgba(249, 249, 251, 0.5); /* Increased transparency */
+  margin-top: 20px;
+  padding: 20px;
   border-radius: 4px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  height: 75vh;
-  overflow-y: auto;
+  max-height: calc(100vh - 80px);
+  overflow-y: scroll;
 }
 
 /* Individual Level Box */
 .rooms-level-box {
   border: none;
   padding: 8px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), rgba(241, 244, 249, 0.5)); /* Increased transparency */
+  background:  rgba(211, 227, 253, 0.8); 
   border-radius: 4px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   transition: transform 0.3s ease;
@@ -782,38 +785,27 @@ input[type="submit"]:active {
 /********Table*************/
 /* General table styles */
 table {
-  width: 90%; /* Reduced width to leave margins around */
-  max-width: 1200px; /* Prevent tables from being too wide */
-  margin: 20px auto; /* Center the table and leave margins all around */
+  width: 96%; 
+  margin: auto; 
   border-collapse: collapse;
   font-size: 1em;
-  font-family: Arial, sans-serif;
   text-align: left;
+  overflow-x: scroll;
   background-color: #ffffff;
-  border-radius: 10px !important;
-  overflow: hidden !important; /* Keep border-radius consistent */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
-  border: 1px solid #cccccc !important;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #cccccc;
 }
 
 /* Table headers */
 th {
-  background-color: #42a166 !important; /* Soft green color */
-  color: #ffffff !important; /* White text for better visibility */
-  padding: 12px !important;
-  text-transform: uppercase !important;
-  border: 1px solid #dddddd !important;
-  font-weight: bold !important;
+  background-color: #42a196;
+  color: #ffffff;
+  text-transform: uppercase;
+  border: 1px solid #dddddd;
+  font-weight: bold;
   position: sticky;
   top: 0;
-  z-index: 1; /* Keep header on top */
-}
-
-/* Table rows */
-td {
-  padding: 10px 12px !important;
-  border: 1px solid #dddddd !important;
-  color: #333333 !important; /* Dark gray for better readability */
 }
 
 /* Zebra striping */
@@ -830,45 +822,6 @@ tr:hover {
   background-color: #e3f2f7 !important; /* Light color on hover for better focus */
 }
 
-/* Responsive table */
-@media screen and (max-width: 600px) {
-  table {
-    border: 0 !important;
-    width: 100%; /* Ensure the table takes full width on small screens */
-    margin: 0; /* Remove extra margins on small devices */
-  }
-
-  table thead {
-    display: none !important;
-  }
-
-  table tr {
-    display: block !important;
-    margin-bottom: 10px !important;
-  }
-
-  table td {
-    display: block !important;
-    text-align: right !important;
-    font-size: 0.9em !important;
-    border: 0 !important;
-    border-bottom: 1px solid #ddd !important;
-    position: relative !important;
-    padding-left: 50% !important;
-  }
-
-  table td::before {
-    content: attr(data-label) !important;
-    position: absolute !important;
-    left: 0 !important;
-    width: 50% !important;
-    padding-left: 10px !important;
-    font-weight: bold !important;
-    text-align: left !important;
-    color: #42a166 !important; /* Match the header color */
-  }
-}
-
 /* Scrollbars */
 .table-container {
   overflow-x: auto;
@@ -881,7 +834,7 @@ tr:hover {
 }
 
 .table-container::-webkit-scrollbar-thumb {
-  background-color: #42a166;
+  background-color: #42a196;
   border-radius: 10px;
 }
 
@@ -892,9 +845,9 @@ tr:hover {
 /* Center the heading and style it */
 h3 {
   text-align: center;
-  background-color: #42a166;
+  background-color: #42a196;
   color: white;
-  padding: 15px 20px;
+  padding: 12px 20px;
   border-radius: 8px;
   margin: 20px auto;
   width: fit-content;
@@ -950,6 +903,23 @@ form .form-content select {
     width: 95%; /* Adjust to fit smaller screens */
     top: 5%; /* Add space from the top */
     transform: translate(-50%, 0); /* Center horizontally, not vertically */
+  }
+
+  .modal-show-back {
+    margin-left: 20px;
+  }
+
+  .arch-container > h3 {
+    font-size: 1.2rem;
+    margin: 18px 2px;
+  }
+
+  th, td {
+    padding: 8px;
+  }
+
+  .table-add-button {
+    margin-left: 0;
   }
 
   form .form-content {

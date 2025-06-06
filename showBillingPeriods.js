@@ -1,24 +1,30 @@
 import showDashboard from "./showDashboard.js";
 import showToast from "./showToast.js";
 import { caller } from "./caller.js";
-import { createLoader, formatDateForInput } from "./getIcon.js";
+import { createLoader, formatDateForInput, loadWholeScreen } from "./getIcon.js";
 
 export async function showBillingPeriods() {
   try {
-    window.dashboardContainer.innerHTML = '';
-    const semsLoader = createLoader()
-    dashboardContainer.appendChild(semsLoader)
+    loadWholeScreen()
+    const overl = document.querySelector(".whiteover")
+
     const periodNames = await caller('getBillingPeriodNames');
     if (!periodNames.success) {
-      dashboardContainer.removeChild(semsLoader)
-      showDashboard()
+      dashboardContainer.removeChild(overl)
+      console.log("done removing child")
       return showToast(periodNames.error);
     }
 
+    const tableDiv = document.createElement('div')
+    tableDiv.style.maxHeight = "calc(100vh - 160px)"
+    tableDiv.style.overflowY = "auto"
+
     const table = document.createElement('table');
     table.className = 'modal-show-table';
+    table.style.marginTop = "20px" //specifically for this table
 
     const headerRow = document.createElement('tr');
+    headerRow.style.position = "sticky"
     headerRow.innerHTML = `
     <th>Name</th>
     <th>Starting Date</th>
@@ -81,12 +87,13 @@ export async function showBillingPeriods() {
     };
 
     const addButton = document.createElement("button");
-    addButton.className = "menu-item";
+    addButton.className = "table-add-button";
     addButton.textContent = 'Add Billing Period';
     addButton.onclick = () => addBillingPeriodRow(table);
 
-    dashboardContainer.removeChild(semsLoader)
-    dashboardContainer.appendChild(table);
+    dashboardContainer.innerHTML = ''
+    tableDiv.appendChild(table);
+    dashboardContainer.appendChild(tableDiv)
     dashboardContainer.appendChild(addButton);
     dashboardContainer.appendChild(backButton);
   } catch (e) {

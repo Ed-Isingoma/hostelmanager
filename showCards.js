@@ -243,10 +243,15 @@ function displayTenants(tenantsData) {
   subHeading.textContent = "Tenants for billing period: " + selectedPeriodNameName;
   dashboardContainer.appendChild(subHeading);
 
+  const tableDiv = document.createElement('div')
+  tableDiv.style.maxHeight = "calc(100vh - 160px)"
+  tableDiv.style.overflowY = "auto"
+
   const table = document.createElement('table');
   table.className = 'modal-show-table';
 
   const headerRow = document.createElement('tr');
+  headerRow.style.position = "sticky"
   headerRow.innerHTML = `
     <th>Name</th>
     <th>Gender</th>
@@ -301,11 +306,12 @@ function displayTenants(tenantsData) {
   };
 
   const addButton = document.createElement("button");
-  addButton.className = "menu-item";
+  addButton.className = "table-add-button";
   addButton.textContent = 'Add New Tenant';
   addButton.onclick = () => openForm('Add New Tenant')
 
-  dashboardContainer.appendChild(table);
+  tableDiv.appendChild(table);
+  dashboardContainer.appendChild(tableDiv)
   dashboardContainer.appendChild(addButton);
   dashboardContainer.appendChild(backButton);
 }
@@ -317,10 +323,15 @@ function displayPayments(moneysData) {
   subHeading.textContent = "Payments made for " + selectedPeriodNameName;
   dashboardContainer.appendChild(subHeading);
 
+  const tableDiv = document.createElement('div')
+  tableDiv.style.maxHeight = "calc(100vh - 160px)"
+  tableDiv.style.overflowY = "auto"
+
   const table = document.createElement('table');
   table.className = 'modal-show-table';
 
   const headerRow = document.createElement('tr');
+  headerRow.style.position = "sticky"
   headerRow.innerHTML = `
     <th>Date</th>
     <th>Amount Paid</th> 
@@ -352,7 +363,7 @@ function displayPayments(moneysData) {
   }
 
   const addButton = document.createElement("button");
-  addButton.className = "menu-item";
+  addButton.className = "table-add-button";
   addButton.textContent = 'Add New Payment';
   addButton.onclick = () => {
     openForm('Record Money Received')
@@ -366,7 +377,8 @@ function displayPayments(moneysData) {
     showDashboard()
   };
 
-  dashboardContainer.appendChild(table);
+  tableDiv.appendChild(table);
+  dashboardContainer.appendChild(tableDiv)
   dashboardContainer.appendChild(addButton)
   dashboardContainer.appendChild(backButton);
 }
@@ -377,20 +389,25 @@ function displayMoneys(moneysData) {
   const subHeading = document.createElement("h3");
   subHeading.textContent = "Uncollected Amounts In " + selectedPeriodNameName;
   dashboardContainer.appendChild(subHeading);
+  
+  const tableDiv = document.createElement('div')
+  tableDiv.style.maxHeight = "calc(100vh - 160px)"
+  tableDiv.style.overflowY = "auto"
 
   const table = document.createElement('table');
   table.className = 'modal-show-table';
 
   const headerRow = document.createElement('tr');
+  headerRow.style.position = "sticky"
   headerRow.innerHTML = `
     <th>Name</th> 
     <th>Room</th>
     <th>Amount Paid</th>    
     <th>Amount Due</th>
-    <th>Demand Notice date</th>
+    <th>To Be Reminded On</th>
     <th>Pays Monthly</th>
-    <th>Latest Payment date</th>   
-    <th>Total Amount Payable</th>
+    <th>Last Paid On</th>   
+    <th>Full Hostel Fee</th>
     <th>Contact</th> 
   `;
   table.appendChild(headerRow);
@@ -446,7 +463,8 @@ function displayMoneys(moneysData) {
     showDashboard()
   };
 
-  dashboardContainer.appendChild(table);
+  tableDiv.appendChild(table)
+  dashboardContainer.appendChild(tableDiv);
   dashboardContainer.appendChild(backButton);
 }
 
@@ -457,10 +475,15 @@ function displayExpenses(expensesData) {
   subHeading.textContent = "Misc. Expenses for period: " + selectedPeriodNameName;
   dashboardContainer.appendChild(subHeading);
 
+  const tableDiv = document.createElement('div')
+  tableDiv.style.maxHeight = "calc(100vh - 160px)"
+  tableDiv.style.overflowY = "auto"
+
   const table = document.createElement('table');
   table.className = 'modal-show-table';
 
   const headerRow = document.createElement('tr');
+  headerRow.style.position = "sticky"
   headerRow.innerHTML = `
     <th>Payment Date</th>
     <th>Description</th>
@@ -496,13 +519,14 @@ function displayExpenses(expensesData) {
   };
 
   const addButton = document.createElement("button");
-  addButton.className = "menu-item";
+  addButton.className = "table-add-button";
   addButton.textContent = 'Add Misc. Expense';
   addButton.onclick = () => {
     openForm('Add Misc. Expense')
   }
 
-  dashboardContainer.appendChild(table);
+  tableDiv.appendChild(table);
+  dashboardContainer.appendChild(tableDiv)
   dashboardContainer.appendChild(addButton);
   dashboardContainer.appendChild(backButton);
 }
@@ -514,10 +538,15 @@ function displayOlders(oldersData) {
   subHeading.textContent = `Tenants who already left in ${selectedPeriodNameName} or the semester before`
   dashboardContainer.appendChild(subHeading);
 
+  const tableDiv = document.createElement('div')
+  tableDiv.style.maxHeight = "calc(100vh - 160px)"
+  tableDiv.style.overflowY = "auto"
+
   const table = document.createElement('table');
   table.className = 'modal-show-table';
 
   const headerRow = document.createElement('tr');
+  headerRow.style.position = "sticky"
   headerRow.innerHTML = `
     <th>Name</th>
     <th>Gender</th>
@@ -558,7 +587,8 @@ function displayOlders(oldersData) {
     showDashboard()
   };
 
-  dashboardContainer.appendChild(table);
+  tableDiv.appendChild(table);
+  dashboardContainer.appendChild(tableDiv)
   dashboardContainer.appendChild(backButton);
 }
 
