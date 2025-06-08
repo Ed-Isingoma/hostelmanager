@@ -139,7 +139,7 @@ background-color: #fffec3;
   background: rgba(255, 255, 255, 0.9); /* Slight transparency added to the background */
   padding: 30px;
   box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
-  z-index: 99;
+  z-index: 19;
   width: 85%;
   max-width: 500px;
   border-radius: 12px;
@@ -604,28 +604,21 @@ th, td {
 /* Occupancy Box */
 .rooms-occupancy-box {
   width: 25px;
-  height: 25px;
-  border-radius: 50%;
+  height: 45px;
+  border-radius: 10px;
   background-color: rgba(224, 224, 224, 0.5); /* Increased transparency */
   border: 2px solid #ccc;
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-/* Occupied Rooms */
 .rooms-occupancy-box.occupied {
   background-color: rgba(76, 175, 80, 0.5); /* Increased transparency for green */
   border-color: rgba(56, 142, 60, 0.5); /* Darker green */
 }
 
-/* Empty Rooms */
 .rooms-occupancy-box.empty {
   background-color: rgba(255, 204, 188, 0.5); /* Increased transparency for red */
   border-color: rgba(211, 47, 47, 0.5); /* Darker red */
-}
-
-/* Occupancy Hover Effect */
-.rooms-occupancy-box:hover {
-  transform: scale(1.05);
 }
 
 /* Responsive Design */
@@ -641,8 +634,8 @@ th, td {
   }
   
   .rooms-occupancy-box {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 38px;
   }
 }
 
@@ -652,26 +645,37 @@ th, td {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(167, 167, 167, 0.507);
-  z-index: 99;
+  background-color: #42a196aa;
+  z-index: 19;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+.tenants-popup-container {
+  padding: 15px;
+  border-radius: 8px;
+  background-color: white;
+}
+
+.tenants-popup-title {
+  text-align: center;
+}
+
 .tenants-popup-title {
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .tenant-box {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 5px;
-  border: 1px solid #ddd;
-  background-color: rgba(249, 249, 249, 0.5); /* Increased transparency */
+  padding: 4px;
+  margin: 2px;
+  border-radius: 2px;
+  border: 2px solid #a6a6a6;
+  background-color: white;
 }
 
 /* ........................ TODO .................*/
@@ -686,7 +690,7 @@ input[type="tel"],
 textarea,
 select {
   width: 100%;
-  padding: 12px; /* Slightly more padding for better clickability */
+  padding: 12px;
   margin: 10px 0;
   border: 1px solid #ccc; /* Neutral border color */
   border-radius: 8px; /* Softer corners for modern look */
@@ -697,8 +701,8 @@ select {
   font-weight: normal; /* Ensure text is not bold */
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-  -webkit-appearance: none;
-  -moz-appearance: textfield;
+  /* -webkit-appearance: none;
+  -moz-appearance: textfield; */
 }
 
 /* Focus effect */
@@ -857,23 +861,6 @@ h3 {
 }
 
 
-
-/* POPUP */
-.popup {
-  position: fixed;
-  top: 50%; /* Center vertically */
-  left: 50%; /* Center horizontally */
-  transform: translate(-50%, -50%); /* Offset by 50% of its width and height */
-  max-height: 90%; /* Prevent overflow if the content is too large */
-  overflow-y: auto; /* Add scrolling if the content exceeds the viewport height */
-  z-index: 99; /* Ensure it appears above other elements */
-  background-color: #f9f9f9; /* Adjust background to match input fields */
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 80%; /* Adjust width as needed */
-  box-sizing: border-box;
-}
 
 form .form-content {
   background-color: #ffffff; /* Match the input fields' color scheme */

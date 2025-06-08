@@ -39,19 +39,19 @@ export function showTenantsPopUp(tenants, roomName) {
 
     const tenantName = document.createElement('div');
     tenantName.classList.add('tenant-name');
-    tenantName.innerHTML = `Name: ${tenant.name}`;
+    tenantName.innerHTML = `Name: <b>${tenant.name}</b>`;
 
     const owingAmount = document.createElement('div');
     owingAmount.classList.add('tenant-owing-amount');
-    owingAmount.innerHTML = `Owing: UGX ${tenant.owingAmount}`;
+    owingAmount.innerHTML = `Owing: <b>UGX ${formatNumber(tenant.owingAmount)}</b>`;
 
     const gender = document.createElement('div');
     gender.classList.add('tenant-gender');
-    gender.innerHTML = `Gender: ${tenant.gender}`;
+    gender.innerHTML = `Gender: <b>${tenant.gender.charAt(0).toUpperCase() + tenant.gender.slice(1)}</b>`;
 
     const paysMonthly = document.createElement('div')
     paysMonthly.classList.add('tenant-pays-monthly')
-    paysMonthly.innerHTML = `Pays Monthly: ${tenant.paysMonthly}`
+    paysMonthly.innerHTML = `Pays Monthly: <b>${tenant.paysMonthly}</b>`
 
     tenantBox.appendChild(tenantName);
     tenantBox.appendChild(owingAmount);
@@ -64,12 +64,12 @@ export function showTenantsPopUp(tenants, roomName) {
   if (tenants.length ==0) {
     const tenantBox = document.createElement('div')
     tenantBox.classList.add('tenant-box')
-    tenantBox.innerHTML = "No tenants here for selected semester"
+    tenantBox.innerHTML = "<i>No tenants present for current semester</i>"
     popUpContainer.appendChild(tenantBox)
   }
 
   const addTenantButton = document.createElement('button');
-  addTenantButton.classList.add('add-tenant-button');
+  addTenantButton.classList.add('table-add-button');
   addTenantButton.textContent = 'Add Tenant';
   addTenantButton.addEventListener('click', (event) => {
     event.preventDefault()
@@ -78,10 +78,7 @@ export function showTenantsPopUp(tenants, roomName) {
     openForm('Add New Tenant')
   });
   popUpContainer.appendChild(addTenantButton);
-  // Append the popup container to the overlay
   overlay.appendChild(popUpContainer);
-
-  // Append the overlay to the dashboard container
   dashboardContainer.appendChild(overlay);
 }
 
@@ -236,7 +233,7 @@ export const loadWholeScreen = () => {
   overlay.style.width = '100%';
   overlay.style.height = '100%';
   overlay.style.background = 'rgba(255, 255, 255, 0.3)';
-  overlay.style.zIndex = '98';
+  overlay.style.zIndex = '18';
   overlay.style.display = 'flex';
   overlay.style.justifyContent = 'center';
   overlay.style.alignItems = 'center';

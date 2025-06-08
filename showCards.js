@@ -203,6 +203,7 @@ function displayRooms(levelsData) {
         occupancyContainer.appendChild(occupancyBox);
       }
       occupancyContainer.addEventListener("click", async () => {
+        loadWholeScreen()
         try {
           const tenants = await caller('getTenantsAndOwingAmtByRoom', [room.roomId, selectedPeriodNameId]);
           if (tenants.success) {
@@ -213,6 +214,9 @@ function displayRooms(levelsData) {
         } catch (e) {
           console.log(e);
           showToast(e);
+        } finally {
+          const overl = document.querySelector(".whiteover")
+          if (dashboardContainer.contains(overl)) dashboardContainer.removeChild(overl)
         }
       }); 
 

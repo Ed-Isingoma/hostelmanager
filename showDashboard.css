@@ -59,8 +59,7 @@ body {
     width: calc(100% - 240px);
     max-width: 900px;
     box-sizing: border-box;
-    /* max-height: calc(100vh - 95px - 50px);
-    overflow-y: auto;  */
+    /* max-height: calc(100vh - 95px - 50px);*/
     position: relative;
     top: 100px;
     border-radius: 12px;
