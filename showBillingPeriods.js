@@ -45,23 +45,13 @@ export async function showBillingPeriods() {
         const row = document.createElement('tr');
 
         row.innerHTML = `
-            <td><input type="text" value="${period.name}" disabled /></td>
-            <td><input type="date" value="${formatDateForInput(period.startingDate)}" disabled /></td>
-            <td><input type="date" value="${formatDateForInput(period.endDate)}" disabled /></td>
-            <td><input type="number" value="${period.costSingle}" disabled /></td>
-            <td><input type="number" value="${period.costDouble}" disabled /></td>
-            <td>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
-                    style="cursor: pointer;" class="edit-icon">
-                    <path d="M3 17.25V21h3.75l11.03-11.03-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
-                </svg>
-            </td>
-            <td>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
-                    style="cursor: pointer;" class="delete-icon">
-                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z" fill="currentColor"/>
-                </svg>
-            </td>
+            <td><input type="text" value="${period.name}"disabled class="plain-input" /></td>
+            <td><input type="date" value="${formatDateForInput(period.startingDate)}"disabled class="plain-input" /></td>
+            <td><input type="date" value="${formatDateForInput(period.endDate)}"disabled class="plain-input" /></td>
+            <td><input type="number" value="${period.costSingle}"disabled class="plain-input" /></td>
+            <td><input type="number" value="${period.costDouble}"disabled class="plain-input" /></td>
+            <td><i class="fas fa-edit edit-icon" style="cursor: pointer;"></i></td>
+            <td><i class="fas fa-trash delete-icon" style="cursor: pointer;"></i></td>
         `;
         table.appendChild(row);
 
@@ -110,18 +100,8 @@ export async function addBillingPeriodRow(table) {
     <td><input type="date" placeholder="Enter end name" /></td>
     <td><input type="number" placeholder="Enter amount" /></td>
     <td><input type="number" placeholder="Enter amount" /></td>
-    <td>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
-            style="cursor: pointer;" class="edit-icon">
-            <path d="M21 7H3v12h18V7zm-1 10H4v-8h16v8zm-8-3v3h2v-3h3l-4-4-4 4h3z" fill="currentColor"/>
-        </svg>
-    </td>
-    <td>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
-            style="cursor: pointer;" class="delete-icon">
-            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z" fill="currentColor"/>
-        </svg>
-    </td>
+    <td><i class="fas fa-save edit-icon" style="cursor: pointer;" class="edit-icon"></i></td>
+    <td><i class="fas fa-trash delete-icon" style="cursor: pointer;"></i></td>
   `;
   table.appendChild(row);
 
@@ -153,13 +133,14 @@ export async function saveNewRow(row) {
     if (saving.success) {
       showToast('Billing period created');
 
-      inputs.forEach(input => input.disabled = true);
+      inputs.forEach(input => {
+        input.disabled = true
+        input.classlist.add('plain-input')
+      });
 
       const editIcon = row.querySelector('.edit-icon');
       if (editIcon) {
-        editIcon.innerHTML = `
-          <path d="M3 17.25V21h3.75l11.03-11.03-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
-        `;
+        editIcon.className = 'fas fa-edit edit-icon';
 
         editIcon.onclick = () => toggleEdit(saving.data, editIcon);
       } else {
@@ -182,11 +163,8 @@ export function toggleEdit(periodId, editIcon) {
   inputs.forEach(input => input.disabled = !input.disabled);
 
   if (!inputs[0].disabled) {
-    // Change icon to save mode
-    editIcon.innerHTML = `
-      <path d="M21 7H3v12h18V7zm-1 10H4v-8h16v8zm-8-3v3h2v-3h3l-4-4-4 4h3z" fill="currentColor"/>
-    `;
-    // Set the onclick directly to call saveRow
+    editIcon.className = 'fas fa-save edit-icon';
+
     editIcon.onclick = async () => {
       const editLoader = createLoader()
       row.parentNode.parentNode.insertBefore(editLoader, row.parentNode.nextSibling)
@@ -194,10 +172,8 @@ export function toggleEdit(periodId, editIcon) {
       row.parentNode.parentNode.removeChild(editLoader)
     }
   } else {
-    // Revert to edit icon
-    editIcon.innerHTML = `
-      <path d="M3 17.25V21h3.75l11.03-11.03-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
-    `;
+    editIcon.className = 'fas fa-edit edit-icon';
+
     // Reset onclick to call toggleEdit for the next click
     editIcon.onclick = () => toggleEdit(periodId, editIcon);
   }
@@ -223,9 +199,8 @@ export async function saveRow(periodId, row) {
 
       const editIcon = row.querySelector('.edit-icon');
       if (editIcon) {
-        editIcon.innerHTML = `
-      <path d="M3 17.25V21h3.75l11.03-11.03-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
-    `;
+        editIcon.className = 'fas fa-edit edit-icon';
+
         editIcon.onclick = () => toggleEdit(periodId, editIcon);
       } else {
         console.error('Edit icon not found in the row');

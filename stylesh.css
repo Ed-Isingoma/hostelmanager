@@ -621,7 +621,16 @@ th, td {
   border-color: rgba(211, 47, 47, 0.5); /* Darker red */
 }
 
-/* Responsive Design */
+.plain-input:disabled {
+  background-color: white;
+  color: black;
+  margin: 0;
+  border: none;
+  opacity: 1;
+  cursor: text;
+}
+
+
 @media screen and (max-width: 768px) {
   .rooms-levels-container {
     padding: 10px;

@@ -113,7 +113,7 @@ body {
 
 /* Hover Effect with Gradient */
 .dash-card:hover {
-    transform: translateY(-15px) scale(1.05); /* Zoom on hover */
+    transform: translateY(-10px) scale(1.05); /* Zoom on hover */
     box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.15);
     background: linear-gradient(180deg, #ffffff, #42a196d7);
 }
