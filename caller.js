@@ -67,6 +67,7 @@ function convertKeysToCamelCase(array) {
 
 export async function caller(funcName, params = []) {
   const endpoint = import.meta.env.VITE_API_ENDPOINT;
+  // const endpoint = "http://localhost:3000/call"
 
   const response = await fetch(endpoint, {
     method: 'POST',

@@ -8,7 +8,7 @@ export default async function showDashboard() {
   loadWholeScreen()
   const header = document.createElement("h2");
   header.className = 'dashboard-head';
-  header.textContent = "Kann Hostel Management";
+  header.textContent = "KYZ Hostel Management";
   dashboardContainer.appendChild(header);
   
   const navbar = document.createElement("nav");
@@ -59,7 +59,7 @@ export default async function showDashboard() {
   if (dashboardContainer.contains(overl)) dashboardContainer.removeChild(overl)
 
   const footer = document.createElement("footer");
-  footer.textContent = "(c) 2024 Kann Hostel. All Rights Reserved";
+  footer.textContent = "(c) 2024 KYZ Hostel. All Rights Reserved";
   dashboardContainer.appendChild(footer);
 }
 
